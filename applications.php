@@ -92,16 +92,10 @@ $applications = $stmt->fetchAll();
                         <td style="max-width: 250px; overflow-wrap: break-word;" title="Purpose: <?php echo htmlspecialchars(isset($app['purpose']) ? $app['purpose'] : 'N/A'); ?> | Desc: <?php echo htmlspecialchars($app['description']); ?> | Address: <?php echo htmlspecialchars(isset($app['permanent_address']) ? $app['permanent_address'] : 'N/A'); ?> | Testimonial: <?php echo empty($app['testimonial_checked']) ? 'No' : 'Yes'; ?>">
                             <strong>Purpose:</strong> <?php echo htmlspecialchars(isset($app['purpose']) ? $app['purpose'] : 'N/A'); ?><br>
                             <strong>Desc:</strong> <?php echo htmlspecialchars($app['description']); ?><br>
-                            <strong>Testimonial:</strong> <?php echo empty($app['testimonial_checked']) ? '<span style="color:red">No</span>' : '<span style="color:green">Yes</span>'; ?>
+                            <strong>Testimonial:</strong> <?php echo empty($app['testimonial_checked']) ? 'No' : 'Yes'; ?>
                         </td>
                         <td>
-                            <?php if ($app['isApproved'] === 'approved'): ?>
-                                <span style="color: green; font-weight: bold;">Approved</span>
-                            <?php elseif ($app['isApproved'] === 'rejected'): ?>
-                                <span style="color: red; font-weight: bold;">Rejected</span>
-                            <?php else: ?>
-                                <span style="color: orange; font-weight: bold;">Pending</span>
-                            <?php endif; ?>
+                            <?php echo ucfirst($app['isApproved']); ?>
                         </td>
                         <td style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <?php if ($app['isApproved'] === 'pending'): ?>

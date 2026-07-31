@@ -156,11 +156,7 @@ if ($isStudent) {
                                         <td style="padding: 0.5rem; border-bottom: 1px solid #ddd;"><?php echo htmlspecialchars($app['title']); ?></td>
                                         <td style="padding: 0.5rem; border-bottom: 1px solid #ddd;"><?php echo htmlspecialchars(isset($app['category']) ? $app['category'] : 'N/A'); ?></td>
                                         <td style="padding: 0.5rem; border-bottom: 1px solid #ddd;">
-                                            <?php 
-                                            if ($app['isApproved'] === 'pending') echo '<span style="color: #b8860b;">Pending</span>';
-                                            elseif ($app['isApproved'] === 'approved') echo '<span style="color: green;">Approved</span>';
-                                            else echo '<span style="color: #8B0000;">Rejected</span>';
-                                            ?>
+                                            <?php echo ucfirst($app['isApproved']); ?>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>
@@ -182,9 +178,9 @@ if ($isStudent) {
                 <h2>Available Scholarships</h2>
                 <p>We offer several scholarship programmes for eligible students. Login or register to apply.</p>
                 <ul class="scholarship-list">
-                    <li><strong>Merit Based — Academic Excellence Award:</strong> For students with a GPA of 3.5 or above. Covers tuition fees for one academic year.</li>
-                    <li><strong>Need Based — Financial Assistance Grant:</strong> For students from low-income families. Requires proof of household income and a Grama Niladhari testimonial.</li>
-                    <li><strong>Sports — Sports Achievement Scholarship:</strong> For students who have represented the university or national teams in sports.</li>
+                    <li><strong>Merit Based : Academic Excellence Award:</strong> For students with a GPA of 3.5 or above. Covers tuition fees for one academic year.</li>
+                    <li><strong>Need Based : Financial Assistance Grant:</strong> For students from low-income families. Requires proof of household income and a Grama Niladhari testimonial.</li>
+                    <li><strong>Sports : Sports Achievement Scholarship:</strong> For students who have represented the university or national teams in sports.</li>
                 </ul>
                 <a href="login.php" class="btn btn-primary" style="width: auto;">Login to Apply</a>
                 <a href="signup.php" class="btn btn-primary" style="width: auto; background-color: #8C5D63; margin-left: 0.5rem;">Register Now</a>

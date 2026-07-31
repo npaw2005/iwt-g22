@@ -1,298 +1,123 @@
-/* Vanilla CSS Styling */
-:root {
-    --primary-color: #1A0000;
-    --secondary-color: #3D0C11;
-    --accent-color: #6B2226;
-    --mid-color: #8C5D63;
-    --light-color: #C9897A;
-    --bg-color: #f5f0ef;
-    --text-color: #242424;
-    --white: #FFFFFF;
-}
-
+/* Minimalistic, humanized style */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-color);
+    font-family: Arial, sans-serif;
+    background-color: #ffffff;
+    color: #000000;
     margin: 0;
-    padding: 0;
-    line-height: 1.6;
+    padding: 10px;
 }
 
-/* Navbar */
+/* Emulating frameset look with simple borders */
 .navbar {
-    background-color: var(--primary-color);
-    color: var(--white);
-    padding: 0.75rem 2rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    border: 2px solid #000000;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f0f0f0;
 }
 
 .navbar-brand {
-    font-size: 1.2rem;
+    font-size: 1.2em;
     font-weight: bold;
-    color: var(--white);
 }
 
 .nav-links {
-    list-style: none;
-    display: flex;
-    margin: 0;
+    list-style-type: none;
     padding: 0;
+    margin: 10px 0 0 0;
 }
 
 .nav-links li {
-    margin-left: 1.5rem;
+    display: inline;
+    margin-right: 15px;
 }
 
 .nav-links a {
-    color: var(--white);
-    text-decoration: none;
-}
-
-.nav-links a:hover {
+    color: #0000ee;
     text-decoration: underline;
 }
 
-.hidden {
-    display: none;
+.container, .auth-container, .content-page, .table-container {
+    border: 2px solid #000000;
+    padding: 15px;
+    margin-bottom: 15px;
 }
 
-/* Container */
-.container {
-    max-width: 1100px;
-    margin: 1.5rem auto;
-    padding: 0 1rem;
-}
-
-/* Auth Container */
-.auth-container {
-    max-width: 400px;
-    margin: 8vh auto;
-    background: var(--white);
-    padding: 2rem;
-    border: 1px solid #ccc;
-}
-
-.auth-container h2 {
-    text-align: center;
+h1, h2, h3 {
     margin-top: 0;
-    color: var(--secondary-color);
+    border-bottom: 1px solid #000000;
+    padding-bottom: 5px;
 }
 
 /* Forms */
 .form-group {
-    margin-bottom: 1.2rem;
+    margin-bottom: 10px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 0.3rem;
-    font-weight: 600;
-    color: var(--secondary-color);
+    margin-bottom: 5px;
 }
 
-.form-group input,
-.form-group select,
-.form-group textarea {
+.form-group input, .form-group select, .form-group textarea {
     width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #aaa;
+    border: 1px solid #000000;
+    padding: 5px;
     box-sizing: border-box;
-    font-size: 1rem;
 }
 
 /* Buttons */
-.btn {
-    display: inline-block;
-    padding: 0.5rem 1.2rem;
-    border: none;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 600;
-    text-align: center;
+.btn, .btn-primary, .btn-danger {
+    border: 1px solid #000000;
+    background-color: #e0e0e0;
+    color: #000000;
+    padding: 5px 10px;
     text-decoration: none;
-    background-color: var(--accent-color);
-    color: var(--white);
-}
-
-.btn:hover {
-    background-color: var(--secondary-color);
-}
-
-.btn-primary {
-    background-color: var(--accent-color);
-    color: var(--white);
-    width: 100%;
-}
-
-.btn-primary:hover {
-    background-color: var(--secondary-color);
-}
-
-.btn-danger {
-    background-color: #8B0000;
-    color: var(--white);
-}
-
-.btn-danger:hover {
-    background-color: #5a0000;
+    display: inline-block;
+    cursor: pointer;
 }
 
 /* Alerts */
 .alert {
-    padding: 0.75rem 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ccc;
-}
-
-.alert-error {
-    background-color: #fce4e4;
-    color: #cc0033;
-    border-color: #fcc2c3;
-}
-
-/* Page heading bar */
-.dashboard-header {
-    background: var(--secondary-color);
-    color: var(--white);
-    padding: 1rem 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.dashboard-header h1 {
-    margin: 0;
-    font-size: 1.4rem;
-    color: var(--white);
-}
-
-.dashboard-header p {
-    margin: 0.25rem 0 0;
-    font-size: 0.9rem;
-    color: var(--light-color);
-}
-
-/* Stats summary table */
-.stats-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 1.5rem;
-    background: var(--white);
-    border: 1px solid #ccc;
-}
-
-.stats-table thead tr {
-    background-color: var(--secondary-color);
-}
-
-.stats-table th {
-    color: var(--white);
-    padding: 0.6rem 1rem;
-    text-align: center;
-    font-weight: 600;
-    border: none;
-}
-
-.stats-table td {
-    background-color: var(--white);
-    text-align: center;
-    padding: 1rem;
-    font-size: 1.6rem;
-    font-weight: bold;
-    color: var(--primary-color);
-    border-right: 1px solid #eee;
+    border: 1px solid #000000;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #ffffcc;
 }
 
 /* Tables */
-.table-container {
-    background: var(--white);
-    padding: 1rem;
-    border: 1px solid #ccc;
-    overflow-x: auto;
-    margin-bottom: 1.5rem;
-}
-
-.table-container h2 {
-    margin-top: 0;
-    color: var(--secondary-color);
-    border-bottom: 1px solid var(--mid-color);
-    padding-bottom: 0.4rem;
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
+    margin-bottom: 15px;
 }
 
-table th,
-table td {
-    padding: 0.6rem 0.8rem;
+table th, table td {
+    border: 1px solid #000000;
+    padding: 8px;
     text-align: left;
-    border-bottom: 1px solid #ddd;
 }
 
 table th {
-    background-color: var(--primary-color);
-    color: var(--white);
+    background-color: #f0f0f0;
 }
 
-table tbody tr:hover {
-    background-color: #f5eeee;
-}
-
-/* Content section */
-.content-page {
-    background: var(--white);
-    padding: 1.5rem;
-    border: 1px solid #ccc;
-    margin-bottom: 1.5rem;
-}
-
-.content-page h2 {
-    color: var(--secondary-color);
-    border-bottom: 1px solid var(--mid-color);
-    padding-bottom: 0.4rem;
-    margin-top: 0;
-}
-
-/* Scholarship list on guest page */
-.scholarship-list {
-    margin: 0.5rem 0 1rem;
-    padding-left: 1rem;
-}
-
-.scholarship-list li {
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid #ddd;
-}
-
-.scholarship-list li strong {
-    color: var(--secondary-color);
-}
-
-/* Feature list */
-.feature-list {
-    list-style: none;
-    padding: 0;
-}
-
-.feature-list li {
-    margin-bottom: 0.75rem;
-    padding: 0.75rem;
-    border-left: 3px solid var(--accent-color);
-    background: #fdf5f4;
-}
-
-.feature-list h3 {
-    margin: 0 0 0.25rem 0;
-    color: var(--secondary-color);
-    font-size: 1rem;
-}
-
-.feature-list p {
+/* Lists */
+.scholarship-list, .feature-list {
     margin: 0;
-    color: #555;
-    font-size: 0.9rem;
+    padding-left: 20px;
+}
+
+.scholarship-list li, .feature-list li {
+    margin-bottom: 10px;
+}
+
+.dashboard-header {
+    border: 2px solid #000000;
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #f0f0f0;
+}
+
+.hidden {
+    display: none;
 }

@@ -106,9 +106,6 @@ if ($action === 'list') {
         .form-group input, .form-group select { width: 100%; padding: 0.5rem; }
         .btn-edit  { background: #6B2226; color: white; padding: 0.3rem 0.7rem; font-size: 0.85rem; }
         .btn-sm    { padding: 0.3rem 0.7rem; font-size: 0.85rem; }
-        .status-pending  { color: #b8860b; }
-        .status-approved { color: green; font-weight: bold; }
-        .status-rejected { color: red; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -259,15 +256,7 @@ if ($action === 'list') {
                             <td><?php echo htmlspecialchars($app['username']); ?></td>
                             <td><?php echo htmlspecialchars($app['title']); ?></td>
                             <td><?php echo htmlspecialchars(isset($app['category']) ? $app['category'] : 'N/A'); ?></td>
-                            <td>
-                                <?php if ($app['isApproved'] === 'approved'): ?>
-                                    <span class="status-approved">Approved</span>
-                                <?php elseif ($app['isApproved'] === 'rejected'): ?>
-                                    <span class="status-rejected">Rejected</span>
-                                <?php else: ?>
-                                    <span class="status-pending">Pending</span>
-                                <?php endif; ?>
-                            </td>
+                            <td><?php echo ucfirst($app['isApproved']); ?></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
