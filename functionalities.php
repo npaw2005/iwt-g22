@@ -70,9 +70,9 @@ $isStudent = $role === 'student';
 
             <h2>Scholarship Categories</h2>
             <ul>
-                <li><strong>Merit Based</strong> — For students with outstanding academic performance (GPA 3.5+).</li>
-                <li><strong>Need Based</strong> — For students from low-income households. Testimonial required.</li>
-                <li><strong>Sports</strong> — For students who have represented the university or national teams.</li>
+                <li><strong>Merit Based</strong> : For students with outstanding academic performance (GPA 3.5+).</li>
+                <li><strong>Need Based</strong> : For students from low-income households. Testimonial required.</li>
+                <li><strong>Sports</strong> : For students who have represented the university or national teams.</li>
             </ul>
 
             <h2>Application Process</h2>
