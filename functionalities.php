@@ -12,7 +12,7 @@ $isStudent = $role === 'student';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Functionalities - Scholarship Management System</title>
-    <link rel="stylesheet" href="css/style.css?v=2">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <nav class="navbar">
@@ -41,8 +41,8 @@ $isStudent = $role === 'student';
         </div>
 
         <div class="content-page">
-            <h2>What this system does</h2>
-            <p>The Scholarship Management System allows students to apply for scholarships online and enables authorised staff to review and process those applications.</p>
+            <h2>About This System</h2>
+            <p>The Scholarship Management System allows students to apply for scholarships online. Authorised staff can review and process those applications.</p>
 
             <h2>User Roles</h2>
             <table>
@@ -70,9 +70,9 @@ $isStudent = $role === 'student';
 
             <h2>Scholarship Categories</h2>
             <ul>
-                <li><strong>Merit Based</strong> : For students with outstanding academic performance (GPA 3.5+).</li>
-                <li><strong>Need Based</strong> : For students from low-income households. Testimonial required.</li>
-                <li><strong>Sports</strong> : For students who have represented the university or national teams.</li>
+                <li><strong>Merit Based:</strong> For students with outstanding academic performance (GPA 3.5 or above).</li>
+                <li><strong>Need Based:</strong> For students from low-income households. Grama Niladhari testimonial required.</li>
+                <li><strong>Sports:</strong> For students who have represented the university or national teams in sports.</li>
             </ul>
 
             <h2>Application Process</h2>
@@ -82,7 +82,7 @@ $isStudent = $role === 'student';
                 <li>Select the appropriate scholarship category using the radio buttons.</li>
                 <li>Fill in all required personal and academic details including GPA, NIC, and contact information.</li>
                 <li>Check the testimonial declaration checkbox and submit.</li>
-                <li>Track the status of your application (Pending / Approved / Rejected) on your Home dashboard.</li>
+                <li>Track the status of your application (Pending / Approved / Rejected) on your Home page.</li>
             </ol>
         </div>
     </div>

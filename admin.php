@@ -2,8 +2,7 @@
 session_start();
 require_once 'config/db.php';
 
-// Server-side authorization block
-if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin', 'registrar'])) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: home.php");
     exit();
 }
@@ -12,17 +11,17 @@ $message = '';
 $action = isset($_GET['action']) ? $_GET['action'] : 'list';
 $editUser = null;
 
-// Handle form submissions (Add / Edit)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $postAction = isset($_POST['action']) ? $_POST['action'] : '';
+    $postAction = $_POST['action'];
+
     if ($postAction === 'add') {
         $username = trim($_POST['username']);
         $password = trim($_POST['password']);
         $email = trim($_POST['email']);
         $role = $_POST['role'];
-        
+
         $stmt = $conn->prepare("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)");
-        if($stmt->execute([$username, $password, $email, $role])) {
+        if ($stmt->execute([$username, $password, $email, $role])) {
             $message = "User added successfully.";
         }
     } elseif ($postAction === 'edit') {
@@ -30,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username = trim($_POST['username']);
         $email = trim($_POST['email']);
         $role = $_POST['role'];
-        
+
         if (!empty($_POST['password'])) {
             $stmt = $conn->prepare("UPDATE users SET username=?, password=?, email=?, role=? WHERE id=?");
             $stmt->execute([$username, trim($_POST['password']), $email, $role, $id]);
@@ -39,16 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$username, $email, $role, $id]);
         }
         $message = "User updated successfully.";
-        $action = 'list'; // go back to list
+        $action = 'list';
     }
 }
 
-// Handle GET actions (Delete / Edit)
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     if ($action === 'delete') {
-        $id = isset($_GET['id']) ? $_GET['id'] : null;
+        $id = $_GET['id'];
         if ($id) {
-            // Prevent deleting self or admins
             $check = $conn->prepare("SELECT role FROM users WHERE id = ?");
             $check->execute([$id]);
             $u = $check->fetch();
@@ -61,37 +58,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         }
         $action = 'list';
     } elseif ($action === 'edit') {
-        $id = isset($_GET['id']) ? $_GET['id'] : null;
+        $id = $_GET['id'];
         $stmt = $conn->prepare("SELECT * FROM users WHERE id = ?");
         $stmt->execute([$id]);
         $editUser = $stmt->fetch();
-    } elseif (in_array($action, ['approve', 'reject'])) {
-        $id = isset($_GET['id']) ? $_GET['id'] : null;
-        if ($id) {
-            $status = $action === 'approve' ? 'approved' : 'rejected';
-            $conn->prepare("UPDATE scholarships SET isApproved = ? WHERE id = ?")->execute([$status, $id]);
-            $message = "Application " . $status . " successfully.";
-        }
-        $action = 'list';
     }
 }
 
-// Fetch metrics and users for 'list'
 $users = [];
-$stats = ['total_users' => 0, 'students' => 0, 'admins' => 0];
+$applications = [];
+$stats = ['total_users' => 0, 'students' => 0, 'staff' => 0];
 
 if ($action === 'list') {
     $stmt = $conn->query("SELECT id, username, email, role, created_at FROM users ORDER BY id DESC");
     $users = $stmt->fetchAll();
-    
+
     $stats['total_users'] = count($users);
     foreach ($users as $u) {
         if ($u['role'] === 'student') $stats['students']++;
-        if (in_array($u['role'], ['admin', 'registrar'])) $stats['admins']++;
+        if (in_array($u['role'], ['admin', 'registrar'])) $stats['staff']++;
     }
 
-    $stmtApps = $conn->query("SELECT s.*, u.username FROM scholarships s JOIN users u ON s.user_id = u.id ORDER BY s.id DESC");
-    $applications = $stmtApps->fetchAll();
+    $stmt2 = $conn->query("SELECT s.*, u.username FROM scholarships s JOIN users u ON s.user_id = u.id ORDER BY s.id DESC");
+    $applications = $stmt2->fetchAll();
 }
 ?>
 <!DOCTYPE html>
@@ -99,14 +88,8 @@ if ($action === 'list') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Scholarship Management System</title>
-    <link rel="stylesheet" href="css/style.css?v=2">
-    <style>
-        .form-group { margin-bottom: 1rem; }
-        .form-group input, .form-group select { width: 100%; padding: 0.5rem; }
-        .btn-edit  { background: #6B2226; color: white; padding: 0.3rem 0.7rem; font-size: 0.85rem; }
-        .btn-sm    { padding: 0.3rem 0.7rem; font-size: 0.85rem; }
-    </style>
+    <title>Admin Panel - Scholarship Management System</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <nav class="navbar">
@@ -121,17 +104,17 @@ if ($action === 'list') {
     </nav>
 
     <div class="container">
-        <div class="dashboard-header" style="padding: 1.5rem;">
-            <h1 style="margin-bottom: 0;">System Administration</h1>
+        <div class="dashboard-header">
+            <h1>Admin Panel</h1>
         </div>
 
         <?php if ($message): ?>
-            <div class="alert" style="background:#d4edda; color:#155724; border:1px solid #c3e6cb; margin-bottom: 1rem;"><?php echo htmlspecialchars($message); ?></div>
+            <div class="alert"><?php echo htmlspecialchars($message); ?></div>
         <?php endif; ?>
 
         <?php if ($action === 'edit' && $editUser): ?>
             <div class="content-page">
-                <h2>Edit User Details (Select View)</h2>
+                <h2>Edit User</h2>
                 <form action="admin.php" method="POST">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="id" value="<?php echo $editUser['id']; ?>">
@@ -150,33 +133,36 @@ if ($action === 'list') {
                     <div class="form-group">
                         <label>Role</label>
                         <select name="role">
-                            <option value="student" <?php if($editUser['role']=='student') echo 'selected'; ?>>Student</option>
-                            <option value="admin" <?php if($editUser['role']=='admin') echo 'selected'; ?>>Admin</option>
-                            <option value="registrar" <?php if($editUser['role']=='registrar') echo 'selected'; ?>>Registrar</option>
+                            <option value="student" <?php if ($editUser['role'] === 'student') echo 'selected'; ?>>Student</option>
+                            <option value="admin" <?php if ($editUser['role'] === 'admin') echo 'selected'; ?>>Admin</option>
+                            <option value="registrar" <?php if ($editUser['role'] === 'registrar') echo 'selected'; ?>>Registrar</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Update User</button>
                     <a href="admin.php" class="btn btn-danger">Cancel</a>
                 </form>
             </div>
-        <?php else: ?>
 
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th>Total Users</th>
-                        <th>Registered Students</th>
-                        <th>Admin / Registrar Accounts</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><?php echo $stats['total_users']; ?></td>
-                        <td><?php echo $stats['students']; ?></td>
-                        <td><?php echo $stats['admins']; ?></td>
-                    </tr>
-                </tbody>
-            </table>
+        <?php else: ?>
+            <div class="table-container">
+                <h2>System Statistics</h2>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>Total Users</th>
+                            <th>Students</th>
+                            <th>Admin / Registrar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><?php echo $stats['total_users']; ?></td>
+                            <td><?php echo $stats['students']; ?></td>
+                            <td><?php echo $stats['staff']; ?></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <div class="table-container">
                 <h2>User Management</h2>
@@ -198,9 +184,9 @@ if ($action === 'list') {
                             <td><?php echo htmlspecialchars($u['email'] ? $u['email'] : 'N/A'); ?></td>
                             <td><?php echo ucfirst($u['role']); ?></td>
                             <td>
-                                <a href="admin.php?action=edit&id=<?php echo $u['id']; ?>" class="btn btn-edit">Edit</a>
+                                <a href="admin.php?action=edit&id=<?php echo $u['id']; ?>" class="btn">Edit</a>
                                 <?php if ($u['role'] !== 'admin'): ?>
-                                    <a href="admin.php?action=delete&id=<?php echo $u['id']; ?>" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">Delete</a>
+                                    <a href="admin.php?action=delete&id=<?php echo $u['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -229,16 +215,16 @@ if ($action === 'list') {
                         <label>Role</label>
                         <select name="role">
                             <option value="student">Student</option>
-                            <option value="admin">Admin</option>
                             <option value="registrar">Registrar</option>
+                            <option value="admin">Admin</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">Add User</button>
                 </form>
             </div>
-            
+
             <div class="table-container">
-                <h2>Scholarship Applications</h2>
+                <h2>Scholarship Applications (Overview)</h2>
                 <table>
                     <thead>
                         <tr>
@@ -255,10 +241,13 @@ if ($action === 'list') {
                             <td><?php echo $app['id']; ?></td>
                             <td><?php echo htmlspecialchars($app['username']); ?></td>
                             <td><?php echo htmlspecialchars($app['title']); ?></td>
-                            <td><?php echo htmlspecialchars(isset($app['category']) ? $app['category'] : 'N/A'); ?></td>
+                            <td><?php echo htmlspecialchars($app['category']); ?></td>
                             <td><?php echo ucfirst($app['isApproved']); ?></td>
                         </tr>
                         <?php endforeach; ?>
+                        <?php if (empty($applications)): ?>
+                        <tr><td colspan="5">No applications yet.</td></tr>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>

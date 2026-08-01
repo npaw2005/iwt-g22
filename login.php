@@ -10,8 +10,8 @@ if (isset($_SESSION['user_id'])) {
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim(isset($_POST['username']) ? $_POST['username'] : '');
-    $password = trim(isset($_POST['password']) ? $_POST['password'] : '');
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
 
     if (empty($username) || empty($password)) {
         $error = 'Please enter both username and password.';
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Scholarship Management System</title>
-    <link rel="stylesheet" href="css/style.css?v=2">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="auth-container">
@@ -46,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if ($error): ?>
             <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
         <?php endif; ?>
-        
         <form action="login.php" method="POST">
             <div class="form-group">
                 <label for="username">Username</label>
@@ -56,11 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit" class="btn btn-primary" style="margin-bottom: 1rem;">Login</button>
-            <div style="display: flex; gap: 1rem;">
-                <a href="signup.php" class="btn" style="flex: 1; background: #6B2226; color: white;">Sign Up</a>
-                <a href="home.php" class="btn" style="flex: 1; background: #8C5D63; color: white;">Guest View</a>
-            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+            <a href="signup.php" class="btn">Sign Up</a>
+            <a href="home.php" class="btn">Guest View</a>
         </form>
     </div>
 </body>

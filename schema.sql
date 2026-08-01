@@ -29,8 +29,7 @@ CREATE TABLE IF NOT EXISTS scholarships (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Pre-populate default admin user and ordinary user
-INSERT INTO users (username, password, role, email) VALUES 
+INSERT INTO users (username, password, role, email) VALUES
 ('admin', 'admin123', 'admin', 'admin@example.com'),
 ('ucsc', 'ucsc', 'student', 'student@example.com'),
 ('registrar', 'registrar123', 'registrar', 'registrar@example.com');
