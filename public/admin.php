@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/db.php';
+require_once '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     header("Location: home.php");
@@ -82,28 +82,10 @@ if ($action === 'list') {
     $stmt2 = $conn->query("SELECT s.*, u.username FROM scholarships s INNER JOIN users u ON s.user_id = u.id ORDER BY s.id DESC");
     $applications = $stmt2->fetchAll();
 }
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Scholarship Management System</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <nav class="navbar">
-        <div class="navbar-brand">Scholarship System</div>
-        <ul class="nav-links">
-            <li><a href="home.php">Home</a></li>
-            <li><a href="functionalities.php">Functionalities</a></li>
-            <li><a href="help.php">Help</a></li>
-            <li><a href="admin.php">Admin Panel</a></li>
-            <li><a href="logout.php">Logout</a></li>
-        </ul>
-    <div class="navbar-clear"></div>
-    </nav>
 
+$pageTitle = 'Admin Panel - Scholarship Management System';
+require_once '../includes/header.php';
+?>
     <div class="container">
         <div class="dashboard-header">
             <h1>Admin Panel</h1>
@@ -287,5 +269,4 @@ if ($action === 'list') {
             return true;
         }
     </script>
-</body>
-</html>
+<?php require_once '../includes/footer.php'; ?>

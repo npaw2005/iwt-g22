@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/db.php';
+require_once '../config/db.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'registrar') {
     header("Location: home.php");
@@ -24,33 +24,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $stmt = $conn->query("SELECT s.*, u.username, u.email FROM scholarships s INNER JOIN users u ON s.user_id = u.id ORDER BY s.id DESC");
 $applications = $stmt->fetchAll();
+
+$pageTitle = 'Manage Applications - Scholarship Management System';
+require_once '../includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Applications - Scholarship Management System</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
     <?php if ($actionDone): ?>
     <script type="text/javascript">
         alert("Application has been <?php echo $actionDone; ?>.");
     </script>
     <?php endif; ?>
-
-    <nav class="navbar">
-        <div class="navbar-brand">Scholarship System</div>
-        <ul class="nav-links">
-            <li><a href="home.php">Home</a></li>
-            <li><a href="functionalities.php">Functionalities</a></li>
-            <li><a href="applications.php">Manage Applications</a></li>
-            <li><a href="help.php">Help</a></li>
-            <li><a href="logout.php">Logout</a></li>
-        </ul>
-    <div class="navbar-clear"></div>
-    </nav>
 
     <div class="container">
         <div class="dashboard-header">
@@ -113,5 +95,4 @@ $applications = $stmt->fetchAll();
             </table>
         </div>
     </div>
-</body>
-</html>
+<?php require_once '../includes/footer.php'; ?>
