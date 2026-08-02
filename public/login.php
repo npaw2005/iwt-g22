@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once 'config/db.php';
+require_once '../config/db.php';
 
 if (isset($_SESSION['user_id'])) {
     header("Location: home.php");
@@ -31,16 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+$pageTitle = 'Login - Scholarship Management System';
+require_once '../includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Scholarship Management System</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
     <div class="auth-container">
         <h2>System Login</h2>
         <?php if ($error): ?>
@@ -78,5 +72,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             return true;
         }
     </script>
-</body>
-</html>
+<?php require_once '../includes/footer.php'; ?>
