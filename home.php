@@ -65,6 +65,7 @@ if ($isStudent) {
                 <li><a href="login.php">Login</a></li>
             <?php endif; ?>
         </ul>
+    <div class="navbar-clear"></div>
     </nav>
 
     <div class="container">
@@ -80,61 +81,64 @@ if ($isStudent) {
 
         <?php if ($isLoggedIn): ?>
             <?php if ($message): ?>
-                <div class="alert"><?php echo htmlspecialchars($message); ?></div>
+            <script type="text/javascript">alert("<?php echo addslashes($message); ?>");</script>
             <?php endif; ?>
 
             <?php if ($isStudent): ?>
                 <div class="content-page">
                     <h2>Apply for Scholarship</h2>
-                    <form action="home.php" method="POST">
+                    <form action="home.php" method="POST" onsubmit="return checkApplication()">
                         <input type="hidden" name="apply" value="1">
                         <div class="form-group">
                             <label>Scholarship Title</label>
-                            <input type="text" name="title" required>
+                            <input type="text" id="appTitle" name="title">
                         </div>
                         <div class="form-group">
                             <label>Category</label><br>
-                            <input type="radio" name="category" value="Merit Based" required> Merit Based &nbsp;
-                            <input type="radio" name="category" value="Need Based"> Need Based &nbsp;
-                            <input type="radio" name="category" value="Sports"> Sports
+                            <input type="radio" name="category" value="Merit Based" id="catMerit"> <label for="catMerit" style="display:inline; font-weight:normal;">Merit Based</label> &nbsp;
+                            <input type="radio" name="category" value="Need Based" id="catNeed"> <label for="catNeed" style="display:inline; font-weight:normal;">Need Based</label> &nbsp;
+                            <input type="radio" name="category" value="Sports" id="catSports"> <label for="catSports" style="display:inline; font-weight:normal;">Sports</label>
+                            <br><small id="catError" style="color:red; display:none;">Please select a category.</small>
                         </div>
                         <div class="form-group">
                             <label>Parents' Annual Income (Rs.)</label>
-                            <input type="number" step="0.01" name="parents_income" required>
+                            <input type="number" step="0.01" id="appIncome" name="parents_income">
                         </div>
                         <div class="form-group">
                             <label>Parents' Occupation</label>
-                            <input type="text" name="parents_occupation" required>
+                            <input type="text" id="appOccupation" name="parents_occupation">
                         </div>
                         <div class="form-group">
                             <label>Purpose of Request</label>
-                            <input type="text" name="purpose" required>
+                            <input type="text" id="appPurpose" name="purpose">
                         </div>
                         <div class="form-group">
-                            <label>Current GPA (0.00 - 4.00)</label>
-                            <input type="number" step="0.01" min="0" max="4.0" name="gpa" required>
+                            <label>Current <abbr title="Grade Point Average">GPA</abbr> (0.00 - 4.00)</label>
+                            <input type="number" step="0.01" min="0" max="4.0" id="appGpa" name="gpa" onchange="validateGpa()">
+                            <small id="gpaError" style="color:red; display:none;">GPA must be between 0.00 and 4.00.</small>
                         </div>
                         <div class="form-group">
                             <label>Permanent Address</label>
-                            <textarea name="permanent_address" required rows="2"></textarea>
+                            <textarea name="permanent_address" id="appAddress" rows="2"></textarea>
                         </div>
                         <div class="form-group">
-                            <label>NIC Number</label>
-                            <input type="text" name="nic" required>
+                            <label><abbr title="National Identity Card">NIC</abbr> Number</label>
+                            <input type="text" id="appNic" name="nic">
                         </div>
                         <div class="form-group">
                             <label>Contact Number</label>
-                            <input type="text" name="contact_numbers" required>
+                            <input type="text" id="appContact" name="contact_numbers">
                         </div>
                         <div class="form-group">
                             <label>Additional Description</label>
-                            <textarea name="description" required rows="4"></textarea>
+                            <textarea name="description" id="appDesc" rows="4"></textarea>
                         </div>
                         <div class="form-group">
                             <label>
-                                <input type="checkbox" name="testimonial_checked" required>
+                                <input type="checkbox" id="appTestimonial" name="testimonial_checked">
                                 I confirm that I have a testimonial from a Grama Niladhari or authorized personnel.
                             </label>
+                            <br><small id="testimonialError" style="color:red; display:none;">You must confirm the testimonial.</small>
                         </div>
                         <button type="submit" class="btn btn-primary">Submit Application</button>
                     </form>
@@ -143,6 +147,7 @@ if ($isStudent) {
                 <div class="table-container">
                     <h2>Your Applications</h2>
                     <table>
+                        <caption>Your submitted scholarship applications</caption>
                         <thead>
                             <tr>
                                 <th>Title</th>
@@ -155,7 +160,7 @@ if ($isStudent) {
                             <tr>
                                 <td><?php echo htmlspecialchars($app['title']); ?></td>
                                 <td><?php echo htmlspecialchars($app['category']); ?></td>
-                                <td><?php echo ucfirst($app['isApproved']); ?></td>
+                                <td><em><?php echo ucfirst($app['isApproved']); ?></em></td>
                             </tr>
                             <?php endforeach; ?>
                             <?php if (count($applications) === 0): ?>
@@ -177,7 +182,7 @@ if ($isStudent) {
                 <h2>Available Scholarships</h2>
                 <p>We offer the following scholarship programmes for eligible students:</p>
                 <ul class="scholarship-list">
-                    <li><strong>Merit Based - Academic Excellence Award:</strong> For students with a GPA of 3.5 or above.</li>
+                    <li><strong>Merit Based - Academic Excellence Award:</strong> For students with a <abbr title="Grade Point Average">GPA</abbr> of 3.5 or above.</li>
                     <li><strong>Need Based - Financial Assistance Grant:</strong> For students from low-income families. Requires a Grama Niladhari testimonial.</li>
                     <li><strong>Sports - Sports Achievement Scholarship:</strong> For students who have represented the university or national teams.</li>
                 </ul>
@@ -186,5 +191,56 @@ if ($isStudent) {
             </div>
         <?php endif; ?>
     </div>
+
+    <script type="text/javascript">
+        function validateGpa() {
+            var gpa = parseFloat(document.getElementById('appGpa').value);
+            var gpaError = document.getElementById('gpaError');
+            if (isNaN(gpa) || gpa < 0 || gpa > 4.0) {
+                gpaError.style.display = 'block';
+            } else {
+                gpaError.style.display = 'none';
+            }
+        }
+
+        function checkApplication() {
+            var valid = true;
+
+            if (document.getElementById('appTitle').value == '') {
+                alert('Please enter a scholarship title.');
+                return false;
+            }
+
+            var category = document.querySelector('input[name="category"]:checked');
+            if (category == null) {
+                document.getElementById('catError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('catError').style.display = 'none';
+            }
+
+            var gpa = parseFloat(document.getElementById('appGpa').value);
+            if (isNaN(gpa) || gpa < 0 || gpa > 4.0) {
+                document.getElementById('gpaError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('gpaError').style.display = 'none';
+            }
+
+            if (document.getElementById('appNic').value == '') {
+                alert('Please enter your NIC number.');
+                return false;
+            }
+
+            if (!document.getElementById('appTestimonial').checked) {
+                document.getElementById('testimonialError').style.display = 'block';
+                valid = false;
+            } else {
+                document.getElementById('testimonialError').style.display = 'none';
+            }
+
+            return valid;
+        }
+    </script>
 </body>
 </html>

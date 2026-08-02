@@ -101,6 +101,7 @@ if ($action === 'list') {
             <li><a href="admin.php">Admin Panel</a></li>
             <li><a href="logout.php">Logout</a></li>
         </ul>
+    <div class="navbar-clear"></div>
     </nav>
 
     <div class="container">
@@ -109,30 +110,30 @@ if ($action === 'list') {
         </div>
 
         <?php if ($message): ?>
-            <div class="alert"><?php echo htmlspecialchars($message); ?></div>
+        <script type="text/javascript">alert("<?php echo addslashes($message); ?>");</script>
         <?php endif; ?>
 
         <?php if ($action === 'edit' && $editUser): ?>
             <div class="content-page">
                 <h2>Edit User</h2>
-                <form action="admin.php" method="POST">
+                <form action="admin.php" method="POST" onsubmit="return checkEditUser()">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="id" value="<?php echo $editUser['id']; ?>">
                     <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" name="username" value="<?php echo htmlspecialchars($editUser['username']); ?>" required>
+                        <label for="editUsername">Username</label>
+                        <input type="text" id="editUsername" name="username" value="<?php echo htmlspecialchars($editUser['username']); ?>">
                     </div>
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" value="<?php echo htmlspecialchars($editUser['email']); ?>">
+                        <label for="editEmail">Email</label>
+                        <input type="email" id="editEmail" name="email" value="<?php echo htmlspecialchars($editUser['email']); ?>">
                     </div>
                     <div class="form-group">
-                        <label>Password (leave blank to keep current)</label>
-                        <input type="password" name="password">
+                        <label for="editPassword">Password <em>(leave blank to keep current)</em></label>
+                        <input type="password" id="editPassword" name="password">
                     </div>
                     <div class="form-group">
-                        <label>Role</label>
-                        <select name="role">
+                        <label for="editRole">Role</label>
+                        <select id="editRole" name="role">
                             <option value="student" <?php if ($editUser['role'] === 'student') echo 'selected'; ?>>Student</option>
                             <option value="admin" <?php if ($editUser['role'] === 'admin') echo 'selected'; ?>>Admin</option>
                             <option value="registrar" <?php if ($editUser['role'] === 'registrar') echo 'selected'; ?>>Registrar</option>
@@ -167,6 +168,7 @@ if ($action === 'list') {
             <div class="table-container">
                 <h2>User Management</h2>
                 <table>
+                    <caption>Registered system users</caption>
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -180,13 +182,13 @@ if ($action === 'list') {
                         <?php foreach ($users as $u): ?>
                         <tr>
                             <td><?php echo $u['id']; ?></td>
-                            <td><?php echo htmlspecialchars($u['username']); ?></td>
+                            <td><strong><?php echo htmlspecialchars($u['username']); ?></strong></td>
                             <td><?php echo htmlspecialchars($u['email'] ? $u['email'] : 'N/A'); ?></td>
                             <td><?php echo ucfirst($u['role']); ?></td>
                             <td>
                                 <a href="admin.php?action=edit&id=<?php echo $u['id']; ?>" class="btn">Edit</a>
                                 <?php if ($u['role'] !== 'admin'): ?>
-                                    <a href="admin.php?action=delete&id=<?php echo $u['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?');">Delete</a>
+                                    <a href="admin.php?action=delete&id=<?php echo $u['id']; ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -197,23 +199,23 @@ if ($action === 'list') {
 
             <div class="content-page">
                 <h2>Add New User</h2>
-                <form action="admin.php" method="POST">
+                <form action="admin.php" method="POST" onsubmit="return checkAddUser()">
                     <input type="hidden" name="action" value="add">
                     <div class="form-group">
-                        <label>Username</label>
-                        <input type="text" name="username" required>
+                        <label for="newUsername">Username</label>
+                        <input type="text" id="newUsername" name="username">
                     </div>
                     <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" required>
+                        <label for="newEmail">Email</label>
+                        <input type="email" id="newEmail" name="email">
                     </div>
                     <div class="form-group">
-                        <label>Password</label>
-                        <input type="password" name="password" required>
+                        <label for="newPassword">Password</label>
+                        <input type="password" id="newPassword" name="password">
                     </div>
                     <div class="form-group">
-                        <label>Role</label>
-                        <select name="role">
+                        <label for="newRole">Role</label>
+                        <select id="newRole" name="role">
                             <option value="student">Student</option>
                             <option value="registrar">Registrar</option>
                             <option value="admin">Admin</option>
@@ -224,8 +226,9 @@ if ($action === 'list') {
             </div>
 
             <div class="table-container">
-                <h2>Scholarship Applications (Overview)</h2>
+                <h2>Scholarship Applications <em>(Overview)</em></h2>
                 <table>
+                    <caption>Read-only summary of all applications</caption>
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -253,5 +256,36 @@ if ($action === 'list') {
             </div>
         <?php endif; ?>
     </div>
+
+    <script type="text/javascript">
+        function checkAddUser() {
+            var username = document.getElementById('newUsername').value;
+            var email = document.getElementById('newEmail').value;
+            var password = document.getElementById('newPassword').value;
+
+            if (username == '') {
+                alert('Please enter a username.');
+                return false;
+            }
+            if (email == '') {
+                alert('Please enter an email.');
+                return false;
+            }
+            if (password == '') {
+                alert('Please enter a password.');
+                return false;
+            }
+            return true;
+        }
+
+        function checkEditUser() {
+            var username = document.getElementById('editUsername').value;
+            if (username == '') {
+                alert('Username cannot be empty.');
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>

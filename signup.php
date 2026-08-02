@@ -45,12 +45,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="auth-container">
         <h2>Student Registration</h2>
         <?php if ($error): ?>
-            <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
+        <script type="text/javascript">alert("<?php echo addslashes($error); ?>");</script>
         <?php endif; ?>
         <?php if ($success): ?>
-            <div class="alert"><?php echo htmlspecialchars($success); ?></div>
+        <script type="text/javascript">alert("<?php echo addslashes($success); ?>");</script>
         <?php endif; ?>
-        <form id="signupForm" action="signup.php" method="POST">
+        <form id="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username">
@@ -63,12 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password">
+                <input type="password" id="password" name="password" onchange="checkPasswordMatch()">
                 <small id="passError" style="color:red; display:none;">Password must be at least 6 characters.</small>
             </div>
             <div class="form-group">
                 <label for="confirm_password">Confirm Password</label>
-                <input type="password" id="confirm_password">
+                <input type="password" id="confirm_password" onchange="checkPasswordMatch()">
                 <small id="confirmError" style="color:red; display:none;">Passwords do not match.</small>
             </div>
             <button type="submit" class="btn btn-primary">Create Account</button>
@@ -76,23 +76,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </form>
     </div>
 
-    <script>
-        document.getElementById('signupForm').addEventListener('submit', function(e) {
-            var valid = true;
-
-            var user = document.getElementById('username').value.trim();
-            var email = document.getElementById('email').value.trim();
+    <script type="text/javascript">
+        function checkPasswordMatch() {
             var pass = document.getElementById('password').value;
             var confirm = document.getElementById('confirm_password').value;
+            if (confirm != '' && pass != confirm) {
+                document.getElementById('confirmError').style.display = 'block';
+            } else {
+                document.getElementById('confirmError').style.display = 'none';
+            }
+        }
 
-            if (user === '') {
+        function checkForm() {
+            var valid = true;
+            var user = document.getElementById('username').value;
+            var email = document.getElementById('email').value;
+            var pass = document.getElementById('password').value;
+            var confirm = document.getElementById('confirm_password').value;
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (user == '') {
                 document.getElementById('userError').style.display = 'block';
                 valid = false;
             } else {
                 document.getElementById('userError').style.display = 'none';
             }
 
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
                 document.getElementById('emailError').style.display = 'block';
                 valid = false;
@@ -107,17 +116,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 document.getElementById('passError').style.display = 'none';
             }
 
-            if (pass !== confirm || confirm === '') {
+            if (pass != confirm || confirm == '') {
                 document.getElementById('confirmError').style.display = 'block';
                 valid = false;
             } else {
                 document.getElementById('confirmError').style.display = 'none';
             }
 
-            if (!valid) {
-                e.preventDefault();
-            }
-        });
+            return valid;
+        }
     </script>
 </body>
 </html>

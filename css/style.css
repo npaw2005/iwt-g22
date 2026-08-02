@@ -7,38 +7,60 @@ body {
 }
 
 .navbar {
-    border: 2px solid;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #f0f0f082;
+    border-bottom: 2px solid #000000;
+    background-color: purple;
+    overflow: hidden;
 }
 
 .navbar-brand {
-    font-size: 1.2em;
+    float: left;
+    font-size: 1.1em;
     font-weight: bold;
+    color: white;
+    padding: 0.3em 0.8em;
+    border-right: 1px solid white;
 }
 
 .nav-links {
-    list-style-type: none;
+    float: left;
+    width: auto;
     padding: 0;
-    margin: 10px 0 0 0;
+    margin: 0;
+    list-style-type: none;
 }
 
 .nav-links li {
     display: inline;
-    margin-right: 15px;
 }
 
 .nav-links a {
-    color: #0000ee;
+    float: left;
     text-decoration: none;
-    font-weight: bold;
+    color: white;
+    background-color: purple;
+    padding: 0.3em 0.8em;
+    border-right: 1px solid white;
 }
 
-.container, .auth-container, .content-page, .table-container {
+.nav-links a:hover {
+    background-color: #ff3300;
+}
+
+.navbar-clear {
+    clear: both;
+}
+
+.container, .content-page, .table-container {
     border: 2px solid #000000;
     padding: 15px;
     margin-bottom: 15px;
+}
+
+.auth-container {
+    border: 2px solid #000000;
+    padding: 15px;
+    margin-bottom: 15px;
+    max-width: 400px;
 }
 
 h1, h2, h3 {
@@ -53,10 +75,30 @@ h1, h2, h3 {
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
+    font-weight: bold;
 }
 
-.form-group input, .form-group select, .form-group textarea {
+input[type="text"],
+input[type="password"],
+input[type="email"],
+input[type="number"] {
+    width: 100%;
+    border: 1px solid #000000;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus,
+input[type="email"]:focus,
+input[type="number"]:focus {
+    background-color: #ffffcc;
+    outline: 1px solid #000000;
+}
+
+.form-group select,
+.form-group textarea {
     width: 100%;
     border: 1px solid #000000;
     padding: 5px;
@@ -71,37 +113,43 @@ h1, h2, h3 {
     text-decoration: none;
     display: inline-block;
     cursor: pointer;
+    margin-right: 4px;
+}
+
+.btn:hover {
+    background-color: #cccccc;
 }
 
 .btn-primary {
+    border: 1px solid #000000;
     background-color: #336699;
     color: #ffffff;
-    border: 1px solid #000000;
     padding: 5px 10px;
     text-decoration: none;
     display: inline-block;
     cursor: pointer;
+    margin-right: 4px;
+}
+
+.btn-primary:hover {
+    background-color: #224477;
+    color: #ffffff;
 }
 
 .btn-danger {
+    border: 1px solid #000000;
     background-color: #cc0000;
     color: #ffffff;
-    border: 1px solid #000000;
     padding: 5px 10px;
     text-decoration: none;
     display: inline-block;
     cursor: pointer;
+    margin-right: 4px;
 }
 
-.alert {
-    border: 1px solid #000000;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #ffffcc;
-}
-
-.alert-error {
-    background-color: #ffcccc;
+.btn-danger:hover {
+    background-color: #990000;
+    color: #ffffff;
 }
 
 table {
@@ -118,15 +166,19 @@ table th, table td {
 
 table th {
     background-color: #f0f0f0;
+    font-weight: bold;
 }
 
-.scholarship-list, .feature-list {
-    margin: 0;
-    padding-left: 20px;
+tbody tr:nth-child(even) {
+    background-color: #f8f8f8;
+}
+
+tbody tr:hover {
+    background-color: #eeeeee;
 }
 
 .scholarship-list li, .feature-list li {
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .dashboard-header {
@@ -138,11 +190,10 @@ table th {
 
 .stats-table {
     width: auto;
-    margin-bottom: 15px;
 }
 
 .stats-table td {
     text-align: center;
-    font-size: 1.2em;
+    font-size: 1.3em;
     font-weight: bold;
 }

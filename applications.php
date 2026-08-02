@@ -7,7 +7,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'registrar') {
     exit();
 }
 
-$message = '';
+$actionDone = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $status = ($action === 'approve') ? 'approved' : 'rejected';
         $stmt = $conn->prepare("UPDATE scholarships SET isApproved = ? WHERE id = ?");
         if ($stmt->execute([$status, $app_id])) {
-            $message = "Application has been " . $status . ".";
+            $actionDone = $status;
         }
     }
 }
@@ -34,6 +34,12 @@ $applications = $stmt->fetchAll();
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <?php if ($actionDone): ?>
+    <script type="text/javascript">
+        alert("Application has been <?php echo $actionDone; ?>.");
+    </script>
+    <?php endif; ?>
+
     <nav class="navbar">
         <div class="navbar-brand">Scholarship System</div>
         <ul class="nav-links">
@@ -43,6 +49,7 @@ $applications = $stmt->fetchAll();
             <li><a href="help.php">Help</a></li>
             <li><a href="logout.php">Logout</a></li>
         </ul>
+    <div class="navbar-clear"></div>
     </nav>
 
     <div class="container">
@@ -50,20 +57,17 @@ $applications = $stmt->fetchAll();
             <h1>Scholarship Applications</h1>
         </div>
 
-        <?php if ($message): ?>
-            <div class="alert"><?php echo htmlspecialchars($message); ?></div>
-        <?php endif; ?>
-
         <div class="table-container">
             <table>
+                <caption><strong>All Submitted Scholarship Applications</strong></caption>
                 <thead>
                     <tr>
                         <th>ID</th>
                         <th>Applicant</th>
                         <th>Title</th>
                         <th>Category</th>
-                        <th>GPA</th>
-                        <th>Income (Rs.)</th>
+                        <th><abbr title="Grade Point Average">GPA</abbr></th>
+                        <th>Income (<abbr title="Sri Lankan Rupees">Rs.</abbr>)</th>
                         <th>Purpose</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -74,9 +78,9 @@ $applications = $stmt->fetchAll();
                     <tr>
                         <td><?php echo $app['id']; ?></td>
                         <td>
-                            <?php echo htmlspecialchars($app['username']); ?><br>
+                            <strong><?php echo htmlspecialchars($app['username']); ?></strong><br>
                             <small><?php echo htmlspecialchars($app['email']); ?></small><br>
-                            <small>NIC: <?php echo htmlspecialchars($app['nic']); ?></small>
+                            <small><abbr title="National Identity Card">NIC</abbr>: <?php echo htmlspecialchars($app['nic']); ?></small>
                         </td>
                         <td><?php echo htmlspecialchars($app['title']); ?></td>
                         <td><?php echo htmlspecialchars($app['category']); ?></td>
@@ -89,15 +93,15 @@ $applications = $stmt->fetchAll();
                                 <form action="applications.php" method="POST" style="display:inline;">
                                     <input type="hidden" name="action" value="approve">
                                     <input type="hidden" name="app_id" value="<?php echo $app['id']; ?>">
-                                    <button type="submit" class="btn btn-primary">Approve</button>
+                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Approve this application?')">Approve</button>
                                 </form>
                                 <form action="applications.php" method="POST" style="display:inline;">
                                     <input type="hidden" name="action" value="reject">
                                     <input type="hidden" name="app_id" value="<?php echo $app['id']; ?>">
-                                    <button type="submit" class="btn btn-danger">Reject</button>
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Reject this application?')">Reject</button>
                                 </form>
                             <?php else: ?>
-                                -
+                                <em><?php echo ucfirst($app['isApproved']); ?></em>
                             <?php endif; ?>
                         </td>
                     </tr>

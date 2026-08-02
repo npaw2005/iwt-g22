@@ -33,6 +33,7 @@ $isStudent = $role === 'student';
                 <li><a href="login.php">Login</a></li>
             <?php endif; ?>
         </ul>
+    <div class="navbar-clear"></div>
     </nav>
 
     <div class="container">
@@ -42,10 +43,11 @@ $isStudent = $role === 'student';
 
         <div class="content-page">
             <h2>About This System</h2>
-            <p>The Scholarship Management System allows students to apply for scholarships online. Authorised staff can review and process those applications.</p>
+            <p>The <abbr title="Scholarship Management System">SMS</abbr> allows students to apply for scholarships online. Authorised staff can review and process those applications.</p>
 
             <h2>User Roles</h2>
             <table>
+                <caption>Summary of user roles and access</caption>
                 <thead>
                     <tr>
                         <th>Role</th>
@@ -69,20 +71,23 @@ $isStudent = $role === 'student';
             </table>
 
             <h2>Scholarship Categories</h2>
-            <ul>
-                <li><strong>Merit Based:</strong> For students with outstanding academic performance (GPA 3.5 or above).</li>
-                <li><strong>Need Based:</strong> For students from low-income households. Grama Niladhari testimonial required.</li>
-                <li><strong>Sports:</strong> For students who have represented the university or national teams in sports.</li>
-            </ul>
+            <dl>
+                <dt><strong>Merit Based</strong></dt>
+                <dd>For students with outstanding academic performance (<abbr title="Grade Point Average">GPA</abbr> 3.5 or above).</dd>
+                <dt><strong>Need Based</strong></dt>
+                <dd>For students from low-income households. Grama Niladhari testimonial required.</dd>
+                <dt><strong>Sports</strong></dt>
+                <dd>For students who have represented the university or national teams in sports.</dd>
+            </dl>
 
             <h2>Application Process</h2>
             <ol>
                 <li>Register for an account or log in as a student.</li>
                 <li>Go to the Home page and fill in the scholarship application form.</li>
                 <li>Select the appropriate scholarship category using the radio buttons.</li>
-                <li>Fill in all required personal and academic details including GPA, NIC, and contact information.</li>
+                <li>Fill in all required personal and academic details including <abbr title="Grade Point Average">GPA</abbr>, <abbr title="National Identity Card">NIC</abbr>, and contact information.</li>
                 <li>Check the testimonial declaration checkbox and submit.</li>
-                <li>Track the status of your application (Pending / Approved / Rejected) on your Home page.</li>
+                <li>Track the status of your application (<em>Pending</em> / <em>Approved</em> / <em>Rejected</em>) on your Home page.</li>
             </ol>
         </div>
     </div>

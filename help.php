@@ -32,6 +32,7 @@ $isRegistrar = $role === 'registrar';
                 <li><a href="login.php">Login</a></li>
             <?php endif; ?>
         </ul>
+    <div class="navbar-clear"></div>
     </nav>
 
     <div class="container">
@@ -44,8 +45,8 @@ $isRegistrar = $role === 'registrar';
             <ul>
                 <li><strong>Register:</strong> Click <em>Sign Up</em> on the login page and fill in your username, email, and password.</li>
                 <li><strong>Login:</strong> Enter your username and password on the login page. Use <em>Guest View</em> to browse without an account.</li>
-                <li><strong>Apply for a Scholarship:</strong> After logging in, go to the Home page and fill in the application form. Select a category, enter your GPA, NIC, parents' details, permanent address, and contact number. Check the testimonial box and submit.</li>
-                <li><strong>Track Status:</strong> Your submitted applications are listed on your Home page. Status shows as Pending, Approved, or Rejected.</li>
+                <li><strong>Apply for a Scholarship:</strong> After logging in, go to the Home page and fill in the application form. Select a category, enter your <abbr title="Grade Point Average">GPA</abbr>, <abbr title="National Identity Card">NIC</abbr>, parents' details, permanent address, and contact number. Check the testimonial box and submit.</li>
+                <li><strong>Track Status:</strong> Your submitted applications are listed on your Home page. Status shows as <em>Pending</em>, <em>Approved</em>, or <em>Rejected</em>.</li>
                 <li><strong>Logout:</strong> Click Logout in the navigation bar to end your session.</li>
             </ul>
 
@@ -55,7 +56,7 @@ $isRegistrar = $role === 'registrar';
             <ul>
                 <li><strong>Login:</strong> Use your registrar credentials to log in.</li>
                 <li><strong>Review Applications:</strong> Click <em>Manage Applications</em> in the navigation bar to view all submitted applications.</li>
-                <li><strong>Approve or Reject:</strong> Click the Approve or Reject button next to any pending application. The status updates immediately.</li>
+                <li><strong>Approve or Reject:</strong> Click the Approve or Reject button next to any pending application. A confirmation dialog will appear, followed by a browser notification of the result.</li>
             </ul>
 
             <hr>
@@ -66,7 +67,7 @@ $isRegistrar = $role === 'registrar';
                 <li><strong>Admin Panel:</strong> Click <em>Admin Panel</em> in the navigation bar to access user management.</li>
                 <li><strong>Add User:</strong> Use the Add New User form to create Student, Registrar, or Admin accounts.</li>
                 <li><strong>Edit User:</strong> Click Edit next to any user to update their details.</li>
-                <li><strong>Delete User:</strong> Click Delete to remove a non-admin user.</li>
+                <li><strong>Delete User:</strong> Click Delete to remove a non-admin user. A confirmation dialog will appear.</li>
                 <li><strong>Application Summary:</strong> The Scholarship Applications table shows a read-only overview of all submissions.</li>
             </ul>
 
@@ -74,6 +75,7 @@ $isRegistrar = $role === 'registrar';
 
             <h2>Default Accounts</h2>
             <table>
+                <caption>Pre-configured login accounts</caption>
                 <thead>
                     <tr>
                         <th>Role</th>
@@ -99,6 +101,10 @@ $isRegistrar = $role === 'registrar';
                     </tr>
                 </tbody>
             </table>
+
+            <address>
+                For technical support, contact the system administrator.
+            </address>
         </div>
     </div>
 </body>

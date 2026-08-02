@@ -44,21 +44,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="auth-container">
         <h2>System Login</h2>
         <?php if ($error): ?>
-            <div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div>
+        <script type="text/javascript">alert("<?php echo addslashes($error); ?>");</script>
         <?php endif; ?>
-        <form action="login.php" method="POST">
+        <form action="login.php" method="POST" onsubmit="return checkLogin()">
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
+                <input type="text" id="username" name="username">
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
+                <input type="password" id="password" name="password">
             </div>
+            <input type="hidden" id="loginErrorHolder" value="">
             <button type="submit" class="btn btn-primary">Login</button>
             <a href="signup.php" class="btn">Sign Up</a>
             <a href="home.php" class="btn">Guest View</a>
         </form>
     </div>
+
+    <script type="text/javascript">
+        function checkLogin() {
+            var username = document.getElementById('username').value;
+            var password = document.getElementById('password').value;
+
+            if (username == '') {
+                alert('Please enter your username.');
+                return false;
+            }
+            if (password == '') {
+                alert('Please enter your password.');
+                return false;
+            }
+            return true;
+        }
+    </script>
 </body>
 </html>
