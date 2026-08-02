@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$stmt = $conn->query("SELECT s.*, u.username, u.email FROM scholarships s JOIN users u ON s.user_id = u.id ORDER BY s.id DESC");
+$stmt = $conn->query("SELECT s.*, u.username, u.email FROM scholarships s INNER JOIN users u ON s.user_id = u.id ORDER BY s.id DESC");
 $applications = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>

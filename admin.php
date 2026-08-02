@@ -79,7 +79,7 @@ if ($action === 'list') {
         if (in_array($u['role'], ['admin', 'registrar'])) $stats['staff']++;
     }
 
-    $stmt2 = $conn->query("SELECT s.*, u.username FROM scholarships s JOIN users u ON s.user_id = u.id ORDER BY s.id DESC");
+    $stmt2 = $conn->query("SELECT s.*, u.username FROM scholarships s INNER JOIN users u ON s.user_id = u.id ORDER BY s.id DESC");
     $applications = $stmt2->fetchAll();
 }
 ?>
