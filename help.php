@@ -71,35 +71,7 @@ $isStudent = $role === 'student';
                 <li><strong>Application Summary:</strong> The Scholarship Applications table at the bottom of the Admin Panel shows a read-only overview of all submitted applications.</li>
             </ul>
 
-            <hr>
 
-            <h2>Default Accounts</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Role</th>
-                        <th>Username</th>
-                        <th>Password</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Admin</td>
-                        <td><code>admin</code></td>
-                        <td><code>admin123</code></td>
-                    </tr>
-                    <tr>
-                        <td>Registrar</td>
-                        <td><code>registrar</code></td>
-                        <td><code>registrar123</code></td>
-                    </tr>
-                    <tr>
-                        <td>Student</td>
-                        <td><code>ucsc</code></td>
-                        <td><code>ucsc</code></td>
-                    </tr>
-                </tbody>
-            </table>
         </div>
     </div>
 </body>
