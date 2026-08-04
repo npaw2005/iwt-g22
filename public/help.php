@@ -39,36 +39,7 @@ require_once '../includes/header.php';
                 <li><strong>Application Summary:</strong> The Scholarship Applications table shows a read-only overview of all submissions.</li>
             </ul>
 
-            <hr>
 
-            <h2>Default Accounts</h2>
-            <table>
-                <caption>Pre-configured login accounts</caption>
-                <thead>
-                    <tr>
-                        <th>Role</th>
-                        <th>Username</th>
-                        <th>Password</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Admin</td>
-                        <td><code>admin</code></td>
-                        <td><code>admin</code></td>
-                    </tr>
-                    <tr>
-                        <td>Registrar</td>
-                        <td><code>registrar</code></td>
-                        <td><code>registrar</code></td>
-                    </tr>
-                    <tr>
-                        <td>Student</td>
-                        <td><code>ucsc</code></td>
-                        <td><code>ucsc</code></td>
-                    </tr>
-                </tbody>
-            </table>
 
             <address>
                 For technical support, contact the system administrator.
