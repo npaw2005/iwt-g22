@@ -81,6 +81,9 @@ if ($action === 'list') {
 
     $stmt2 = $conn->query("SELECT ss.*, u.username, sch.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id INNER JOIN scholarships sch ON ss.scholarship_id = sch.id ORDER BY ss.applied_at DESC");
     $applications = $stmt2->fetchAll();
+
+    $stats['scholarships'] = $conn->query("SELECT COUNT(*) FROM scholarships")->fetchColumn();
+    $stats['applications'] = count($applications);
 }
 
 $pageTitle = 'Admin Panel - Scholarship Management System';
@@ -128,13 +131,15 @@ require_once '../includes/header.php';
 
         <?php else: ?>
             <div class="table-container">
-                <h2>System Statistics</h2>
+                <h2>System Report</h2>
                 <table class="stats-table">
                     <thead>
                         <tr>
                             <th>Total Users</th>
                             <th>Students</th>
                             <th>Admin / Registrar</th>
+                            <th>Scholarships</th>
+                            <th>Applications</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -142,6 +147,8 @@ require_once '../includes/header.php';
                             <td><?php echo $stats['total_users']; ?></td>
                             <td><?php echo $stats['students']; ?></td>
                             <td><?php echo $stats['staff']; ?></td>
+                            <td><?php echo $stats['scholarships']; ?></td>
+                            <td><?php echo $stats['applications']; ?></td>
                         </tr>
                     </tbody>
                 </table>

@@ -104,6 +104,14 @@ input[type="number"]:focus {
     box-sizing: border-box;
 }
 
+.btn, .btn-primary, .btn-danger {
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: normal;
+    vertical-align: middle;
+}
+
 .btn {
     border: 1px solid #000000;
     background-color: #e0e0e0;
