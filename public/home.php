@@ -88,7 +88,7 @@ require_once '../includes/header.php';
                             <p><strong>Deadline:</strong> <?php echo htmlspecialchars($selectedScholarship['deadline']); ?></p>
                         <?php endif; ?>
                         <hr>
-                        <form action="home.php" method="POST" onsubmit="return checkApplication()">
+                        <form name="appForm" action="home.php" method="POST" onsubmit="return checkApplication()">
                             <input type="hidden" name="apply" value="1">
                             <input type="hidden" name="scholarship_id" value="<?php echo $selectedScholarship['id']; ?>">
                             <div class="form-group">
@@ -106,7 +106,6 @@ require_once '../includes/header.php';
                             <div class="form-group">
                                 <label>Current <abbr title="Grade Point Average">GPA</abbr> (0.00 - 4.00)</label>
                                 <input type="number" step="0.01" min="0" max="4.0" id="appGpa" name="gpa">
-                                <small id="gpaError" style="color:red; display:none;">GPA must be between 0.00 and 4.00.</small>
                             </div>
                             <div class="form-group">
                                 <label>Permanent Address</label>
@@ -129,7 +128,6 @@ require_once '../includes/header.php';
                                     <input type="checkbox" id="appTestimonial" name="testimonial_checked">
                                     I confirm that I have a testimonial from a Grama Niladhari or authorized personnel.
                                 </label>
-                                <br><small id="testimonialError" style="color:red; display:none;">You must confirm the testimonial.</small>
                             </div>
                             <button type="submit" class="btn btn-primary">Submit Application</button>
                             <a href="home.php" class="btn">Back to Scholarships</a>
@@ -238,29 +236,23 @@ require_once '../includes/header.php';
 
     <script type="text/javascript">
         function checkApplication() {
-            var valid = true;
-
-            var gpa = parseFloat(document.getElementById('appGpa').value);
+            var gpa = parseFloat(document.appForm.gpa.value);
             if (isNaN(gpa) || gpa < 0 || gpa > 4.0) {
-                document.getElementById('gpaError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('gpaError').style.display = 'none';
-            }
-
-            if (document.getElementById('appNic').value == '') {
-                alert('Please enter your NIC number.');
+                alert("GPA must be between 0.00 and 4.00.");
                 return false;
             }
 
-            if (!document.getElementById('appTestimonial').checked) {
-                document.getElementById('testimonialError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('testimonialError').style.display = 'none';
+            if (document.appForm.nic.value == "") {
+                alert("Please enter your NIC number.");
+                return false;
             }
 
-            return valid;
+            if (document.appForm.testimonial_checked.checked == false) {
+                alert("You must confirm the testimonial.");
+                return false;
+            }
+
+            return true;
         }
     </script>
 <?php require_once '../includes/footer.php'; ?>

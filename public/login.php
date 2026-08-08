@@ -40,7 +40,7 @@ require_once '../includes/header.php';
         <?php if ($error): ?>
         <script type="text/javascript">alert("<?php echo addslashes($error); ?>");</script>
         <?php endif; ?>
-        <form action="login.php" method="POST" onsubmit="return checkLogin()">
+        <form name="loginForm" action="login.php" method="POST" onsubmit="return checkLogin()">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username">
@@ -58,15 +58,15 @@ require_once '../includes/header.php';
 
     <script type="text/javascript">
         function checkLogin() {
-            var username = document.getElementById('username').value;
-            var password = document.getElementById('password').value;
+            var username = document.loginForm.username.value;
+            var password = document.loginForm.password.value;
 
-            if (username == '') {
-                alert('Please enter your username.');
+            if (username == "") {
+                alert("Please enter your username.");
                 return false;
             }
-            if (password == '') {
-                alert('Please enter your password.');
+            if (password == "") {
+                alert("Please enter your password.");
                 return false;
             }
             return true;

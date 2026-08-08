@@ -44,26 +44,22 @@ require_once '../includes/header.php';
         <?php if ($success): ?>
         <script type="text/javascript">alert("<?php echo addslashes($success); ?>");</script>
         <?php endif; ?>
-        <form id="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()">
+        <form name="signupForm" id="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username">
-                <small id="userError" style="color:red; display:none;">Username is required.</small>
             </div>
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email">
-                <small id="emailError" style="color:red; display:none;">Valid email is required.</small>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" onchange="checkPasswordMatch()">
-                <small id="passError" style="color:red; display:none;">Password must be at least 6 characters.</small>
+                <input type="password" id="password" name="password">
             </div>
             <div class="form-group">
                 <label for="confirm_password">Confirm Password</label>
-                <input type="password" id="confirm_password" onchange="checkPasswordMatch()">
-                <small id="confirmError" style="color:red; display:none;">Passwords do not match.</small>
+                <input type="password" id="confirm_password" name="confirm_password">
             </div>
             <button type="submit" class="btn btn-primary">Create Account</button>
             <a href="login.php" class="btn">Back to Login</a>
@@ -71,53 +67,33 @@ require_once '../includes/header.php';
     </div>
 
     <script type="text/javascript">
-        function checkPasswordMatch() {
-            var pass = document.getElementById('password').value;
-            var confirm = document.getElementById('confirm_password').value;
-            if (confirm != '' && pass != confirm) {
-                document.getElementById('confirmError').style.display = 'block';
-            } else {
-                document.getElementById('confirmError').style.display = 'none';
-            }
-        }
-
         function checkForm() {
-            var valid = true;
-            var user = document.getElementById('username').value;
-            var email = document.getElementById('email').value;
-            var pass = document.getElementById('password').value;
-            var confirm = document.getElementById('confirm_password').value;
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            var user = document.signupForm.username.value;
+            var email = document.signupForm.email.value;
+            var pass = document.signupForm.password.value;
+            var confirm = document.signupForm.confirm_password.value;
 
-            if (user == '') {
-                document.getElementById('userError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('userError').style.display = 'none';
+            if (user == "") {
+                alert("Username is required.");
+                return false;
             }
 
-            if (!emailRegex.test(email)) {
-                document.getElementById('emailError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('emailError').style.display = 'none';
+            if (email == "") {
+                alert("Valid email is required.");
+                return false;
             }
 
             if (pass.length < 6) {
-                document.getElementById('passError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('passError').style.display = 'none';
+                alert("Password must be at least 6 characters.");
+                return false;
             }
 
-            if (pass != confirm || confirm == '') {
-                document.getElementById('confirmError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('confirmError').style.display = 'none';
+            if (pass != confirm || confirm == "") {
+                alert("Passwords do not match.");
+                return false;
             }
 
-            return valid;
+            return true;
         }
     </script>
 <?php require_once '../includes/footer.php'; ?>
