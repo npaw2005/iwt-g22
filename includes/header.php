@@ -20,7 +20,7 @@ $isStudent = $role === 'student';
             <li><a href="home.php">Home</a></li>
             <li><a href="functionalities.php">Functionalities</a></li>
             <?php if ($isRegistrar): ?>
-                <li><a href="applications.php">Manage Applications</a></li>
+                <li><a href="applications.php">Registrar Panel</a></li>
             <?php endif; ?>
             <li><a href="help.php">Help</a></li>
             <?php if ($isAdmin): ?>

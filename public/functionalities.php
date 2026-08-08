@@ -10,7 +10,7 @@ require_once '../includes/header.php';
 
         <div class="content-page">
             <h2>About This System</h2>
-            <p>The <abbr title="Scholarship Management System">SMS</abbr> allows students to apply for scholarships online. Authorised staff can review and process those applications.</p>
+            <p>The Scholarship Management System allows students to apply for scholarships online. The Registrar manages available scholarships and reviews applications. The Admin manages user accounts.</p>
 
             <h2>User Roles</h2>
             <table>
@@ -24,11 +24,11 @@ require_once '../includes/header.php';
                 <tbody>
                     <tr>
                         <td><strong>Student</strong></td>
-                        <td>Register, login, submit scholarship applications, view application status.</td>
+                        <td>Register, login, browse available scholarships, apply for a scholarship, view application status.</td>
                     </tr>
                     <tr>
                         <td><strong>Registrar</strong></td>
-                        <td>Login, view all submitted applications, approve or reject applications.</td>
+                        <td>Login, add or remove scholarships, view all student applications, approve or reject applications.</td>
                     </tr>
                     <tr>
                         <td><strong>Admin</strong></td>
@@ -37,22 +37,12 @@ require_once '../includes/header.php';
                 </tbody>
             </table>
 
-            <h2>Scholarship Categories</h2>
-            <dl>
-                <dt><strong>Merit Based</strong></dt>
-                <dd>For students with outstanding academic performance (<abbr title="Grade Point Average">GPA</abbr> 3.5 or above).</dd>
-                <dt><strong>Need Based</strong></dt>
-                <dd>For students from low-income households. Grama Niladhari testimonial required.</dd>
-                <dt><strong>Sports</strong></dt>
-                <dd>For students who have represented the university or national teams in sports.</dd>
-            </dl>
-
             <h2>Application Process</h2>
             <ol>
                 <li>Register for an account or log in as a student.</li>
-                <li>Go to the Home page and fill in the scholarship application form.</li>
-                <li>Select the appropriate scholarship category using the radio buttons.</li>
-                <li>Fill in all required personal and academic details including <abbr title="Grade Point Average">GPA</abbr>, <abbr title="National Identity Card">NIC</abbr>, and contact information.</li>
+                <li>Browse the available scholarships listed on the Home page.</li>
+                <li>Click the <em>Apply</em> button next to the scholarship you want.</li>
+                <li>Fill in the application form with your personal and academic details.</li>
                 <li>Check the testimonial declaration checkbox and submit.</li>
                 <li>Track the status of your application (<em>Pending</em> / <em>Approved</em> / <em>Rejected</em>) on your Home page.</li>
             </ol>

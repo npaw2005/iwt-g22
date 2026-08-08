@@ -9,31 +9,52 @@ $isRegistrar = $isLoggedIn && $_SESSION['role'] === 'registrar';
 $isStudent = $isLoggedIn && $_SESSION['role'] === 'student';
 
 $message = '';
+$selectedScholarship = null;
 
+// If student clicked Apply on a specific scholarship
+if ($isStudent && isset($_GET['sid'])) {
+    $stmt = $conn->prepare("SELECT * FROM scholarships WHERE id = ?");
+    $stmt->execute([$_GET['sid']]);
+    $selectedScholarship = $stmt->fetch();
+}
+
+// Handle form submission
 if ($isStudent && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply'])) {
-    $title = trim($_POST['title']);
-    $category = $_POST['category'];
-    $parents_income = $_POST['parents_income'];
-    $parents_occupation = trim($_POST['parents_occupation']);
+    $scholarshipId = $_POST['scholarship_id'];
+    $parentsIncome = $_POST['parents_income'];
+    $parentsOccupation = trim($_POST['parents_occupation']);
     $purpose = trim($_POST['purpose']);
     $gpa = $_POST['gpa'];
-    $permanent_address = trim($_POST['permanent_address']);
+    $permanentAddress = trim($_POST['permanent_address']);
     $nic = trim($_POST['nic']);
-    $contact_numbers = trim($_POST['contact_numbers']);
+    $contactNumbers = trim($_POST['contact_numbers']);
     $description = trim($_POST['description']);
-    $testimonial_checked = isset($_POST['testimonial_checked']) ? 1 : 0;
+    $testimonialChecked = isset($_POST['testimonial_checked']) ? 1 : 0;
 
-    $stmt = $conn->prepare("INSERT INTO scholarships (user_id, title, category, parents_income, parents_occupation, purpose, gpa, permanent_address, nic, contact_numbers, description, testimonial_checked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    if ($stmt->execute([$_SESSION['user_id'], $title, $category, $parents_income, $parents_occupation, $purpose, $gpa, $permanent_address, $nic, $contact_numbers, $description, $testimonial_checked])) {
-        $message = "Application submitted successfully.";
+    // Check if already applied
+    $check = $conn->prepare("SELECT COUNT(*) FROM student_scholarships WHERE student_id = ? AND scholarship_id = ?");
+    $check->execute([$_SESSION['user_id'], $scholarshipId]);
+    $alreadyApplied = $check->fetchColumn();
+
+    if ($alreadyApplied > 0) {
+        $message = 'You have already applied for this scholarship.';
     } else {
-        $message = "Failed to submit application.";
+        $stmt = $conn->prepare("INSERT INTO student_scholarships (student_id, scholarship_id, parents_income, parents_occupation, purpose, gpa, permanent_address, nic, contact_numbers, description, testimonial_checked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        if ($stmt->execute([$_SESSION['user_id'], $scholarshipId, $parentsIncome, $parentsOccupation, $purpose, $gpa, $permanentAddress, $nic, $contactNumbers, $description, $testimonialChecked])) {
+            $message = 'Application submitted successfully.';
+        } else {
+            $message = 'Failed to submit application.';
+        }
     }
 }
 
+// Fetch all scholarships for listing
+$allScholarships = $conn->query("SELECT * FROM scholarships ORDER BY id ASC")->fetchAll();
+
+// Fetch student's applications
 $applications = [];
 if ($isStudent) {
-    $stmt = $conn->prepare("SELECT * FROM scholarships WHERE user_id = ? ORDER BY id DESC");
+    $stmt = $conn->prepare("SELECT ss.*, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN scholarships s ON ss.scholarship_id = s.id WHERE ss.student_id = ? ORDER BY ss.applied_at DESC");
     $stmt->execute([$_SESSION['user_id']]);
     $applications = $stmt->fetchAll();
 }
@@ -58,86 +79,117 @@ require_once '../includes/header.php';
             <?php endif; ?>
 
             <?php if ($isStudent): ?>
-                <div class="content-page">
-                    <h2>Apply for Scholarship</h2>
-                    <form action="home.php" method="POST" onsubmit="return checkApplication()">
-                        <input type="hidden" name="apply" value="1">
-                        <div class="form-group">
-                            <label>Scholarship Title</label>
-                            <input type="text" id="appTitle" name="title">
-                        </div>
-                        <div class="form-group">
-                            <label>Category</label><br>
-                            <input type="radio" name="category" value="Merit Based" id="catMerit"> <label for="catMerit" style="display:inline; font-weight:normal;">Merit Based</label> &nbsp;
-                            <input type="radio" name="category" value="Need Based" id="catNeed"> <label for="catNeed" style="display:inline; font-weight:normal;">Need Based</label> &nbsp;
-                            <input type="radio" name="category" value="Sports" id="catSports"> <label for="catSports" style="display:inline; font-weight:normal;">Sports</label>
-                            <br><small id="catError" style="color:red; display:none;">Please select a category.</small>
-                        </div>
-                        <div class="form-group">
-                            <label>Parents' Annual Income (Rs.)</label>
-                            <input type="number" step="0.01" id="appIncome" name="parents_income">
-                        </div>
-                        <div class="form-group">
-                            <label>Parents' Occupation</label>
-                            <input type="text" id="appOccupation" name="parents_occupation">
-                        </div>
-                        <div class="form-group">
-                            <label>Purpose of Request</label>
-                            <input type="text" id="appPurpose" name="purpose">
-                        </div>
-                        <div class="form-group">
-                            <label>Current <abbr title="Grade Point Average">GPA</abbr> (0.00 - 4.00)</label>
-                            <input type="number" step="0.01" min="0" max="4.0" id="appGpa" name="gpa" onchange="validateGpa()">
-                            <small id="gpaError" style="color:red; display:none;">GPA must be between 0.00 and 4.00.</small>
-                        </div>
-                        <div class="form-group">
-                            <label>Permanent Address</label>
-                            <textarea name="permanent_address" id="appAddress" rows="2"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label><abbr title="National Identity Card">NIC</abbr> Number</label>
-                            <input type="text" id="appNic" name="nic">
-                        </div>
-                        <div class="form-group">
-                            <label>Contact Number</label>
-                            <input type="text" id="appContact" name="contact_numbers">
-                        </div>
-                        <div class="form-group">
-                            <label>Additional Description</label>
-                            <textarea name="description" id="appDesc" rows="4"></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="appTestimonial" name="testimonial_checked">
-                                I confirm that I have a testimonial from a Grama Niladhari or authorized personnel.
-                            </label>
-                            <br><small id="testimonialError" style="color:red; display:none;">You must confirm the testimonial.</small>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit Application</button>
-                    </form>
-                </div>
+                <?php if ($selectedScholarship): ?>
+                    <!-- APPLICATION FORM for a specific scholarship -->
+                    <div class="content-page">
+                        <h2>Apply for: <?php echo htmlspecialchars($selectedScholarship['name']); ?></h2>
+                        <p><?php echo htmlspecialchars($selectedScholarship['description']); ?></p>
+                        <?php if ($selectedScholarship['deadline']): ?>
+                            <p><strong>Deadline:</strong> <?php echo htmlspecialchars($selectedScholarship['deadline']); ?></p>
+                        <?php endif; ?>
+                        <hr>
+                        <form action="home.php" method="POST" onsubmit="return checkApplication()">
+                            <input type="hidden" name="apply" value="1">
+                            <input type="hidden" name="scholarship_id" value="<?php echo $selectedScholarship['id']; ?>">
+                            <div class="form-group">
+                                <label>Parents' Annual Income (Rs.)</label>
+                                <input type="number" step="0.01" id="appIncome" name="parents_income">
+                            </div>
+                            <div class="form-group">
+                                <label>Parents' Occupation</label>
+                                <input type="text" id="appOccupation" name="parents_occupation">
+                            </div>
+                            <div class="form-group">
+                                <label>Purpose of Request</label>
+                                <input type="text" id="appPurpose" name="purpose">
+                            </div>
+                            <div class="form-group">
+                                <label>Current <abbr title="Grade Point Average">GPA</abbr> (0.00 - 4.00)</label>
+                                <input type="number" step="0.01" min="0" max="4.0" id="appGpa" name="gpa">
+                                <small id="gpaError" style="color:red; display:none;">GPA must be between 0.00 and 4.00.</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Permanent Address</label>
+                                <textarea name="permanent_address" id="appAddress" rows="2"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label><abbr title="National Identity Card">NIC</abbr> Number</label>
+                                <input type="text" id="appNic" name="nic">
+                            </div>
+                            <div class="form-group">
+                                <label>Contact Number</label>
+                                <input type="text" id="appContact" name="contact_numbers">
+                            </div>
+                            <div class="form-group">
+                                <label>Additional Description</label>
+                                <textarea name="description" id="appDesc" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" id="appTestimonial" name="testimonial_checked">
+                                    I confirm that I have a testimonial from a Grama Niladhari or authorized personnel.
+                                </label>
+                                <br><small id="testimonialError" style="color:red; display:none;">You must confirm the testimonial.</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Application</button>
+                            <a href="home.php" class="btn">Back to Scholarships</a>
+                        </form>
+                    </div>
+                <?php else: ?>
+                    <!-- LIST OF AVAILABLE SCHOLARSHIPS -->
+                    <div class="content-page">
+                        <h2>Available Scholarships</h2>
+                        <?php if (empty($allScholarships)): ?>
+                            <p>No scholarships are currently available.</p>
+                        <?php else: ?>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Scholarship</th>
+                                        <th>Description</th>
+                                        <th>Deadline</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($allScholarships as $sch): ?>
+                                    <tr>
+                                        <td><strong><?php echo htmlspecialchars($sch['name']); ?></strong></td>
+                                        <td><?php echo htmlspecialchars($sch['description']); ?></td>
+                                        <td><?php echo htmlspecialchars($sch['deadline']); ?></td>
+                                        <td><a href="home.php?sid=<?php echo $sch['id']; ?>" class="btn btn-primary">Apply</a></td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
 
+                <!-- YOUR APPLICATIONS TABLE -->
                 <div class="table-container">
                     <h2>Your Applications</h2>
                     <table>
                         <caption>Your submitted scholarship applications</caption>
                         <thead>
                             <tr>
-                                <th>Title</th>
-                                <th>Category</th>
+                                <th>Scholarship</th>
+                                <th>GPA</th>
                                 <th>Status</th>
+                                <th>Applied On</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($applications as $app): ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($app['title']); ?></td>
-                                <td><?php echo htmlspecialchars($app['category']); ?></td>
-                                <td><em><?php echo ucfirst($app['isApproved']); ?></em></td>
+                                <td><?php echo htmlspecialchars($app['scholarship_name']); ?></td>
+                                <td><?php echo htmlspecialchars($app['gpa']); ?></td>
+                                <td><em><?php echo ucfirst($app['status']); ?></em></td>
+                                <td><?php echo htmlspecialchars($app['applied_at']); ?></td>
                             </tr>
                             <?php endforeach; ?>
                             <?php if (count($applications) === 0): ?>
-                            <tr><td colspan="3">No applications yet.</td></tr>
+                            <tr><td colspan="4">No applications yet.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -151,14 +203,33 @@ require_once '../includes/header.php';
             <?php endif; ?>
 
         <?php else: ?>
+            <!-- GUEST VIEW -->
             <div class="content-page">
                 <h2>Available Scholarships</h2>
-                <p>We offer the following scholarship programmes for eligible students:</p>
-                <ul class="scholarship-list">
-                    <li><strong>Merit Based - Academic Excellence Award:</strong> For students with a <abbr title="Grade Point Average">GPA</abbr> of 3.5 or above.</li>
-                    <li><strong>Need Based - Financial Assistance Grant:</strong> For students from low-income families. Requires a Grama Niladhari testimonial.</li>
-                    <li><strong>Sports - Sports Achievement Scholarship:</strong> For students who have represented the university or national teams.</li>
-                </ul>
+                <?php if (empty($allScholarships)): ?>
+                    <p>No scholarships are currently available. Please check back later.</p>
+                <?php else: ?>
+                    <p>We offer the following scholarship programmes for eligible students:</p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Scholarship</th>
+                                <th>Description</th>
+                                <th>Deadline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($allScholarships as $sch): ?>
+                            <tr>
+                                <td><strong><?php echo htmlspecialchars($sch['name']); ?></strong></td>
+                                <td><?php echo htmlspecialchars($sch['description']); ?></td>
+                                <td><?php echo htmlspecialchars($sch['deadline']); ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php endif; ?>
+                <br>
                 <a href="login.php" class="btn btn-primary">Login to Apply</a>
                 <a href="signup.php" class="btn">Register Now</a>
             </div>
@@ -166,31 +237,8 @@ require_once '../includes/header.php';
     </div>
 
     <script type="text/javascript">
-        function validateGpa() {
-            var gpa = parseFloat(document.getElementById('appGpa').value);
-            var gpaError = document.getElementById('gpaError');
-            if (isNaN(gpa) || gpa < 0 || gpa > 4.0) {
-                gpaError.style.display = 'block';
-            } else {
-                gpaError.style.display = 'none';
-            }
-        }
-
         function checkApplication() {
             var valid = true;
-
-            if (document.getElementById('appTitle').value == '') {
-                alert('Please enter a scholarship title.');
-                return false;
-            }
-
-            var category = document.querySelector('input[name="category"]:checked');
-            if (category == null) {
-                document.getElementById('catError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('catError').style.display = 'none';
-            }
 
             var gpa = parseFloat(document.getElementById('appGpa').value);
             if (isNaN(gpa) || gpa < 0 || gpa > 4.0) {
