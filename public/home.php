@@ -87,6 +87,7 @@ require_once '../includes/header.php';
                         <?php if ($selectedScholarship['deadline']): ?>
                             <p><strong>Deadline:</strong> <?php echo htmlspecialchars($selectedScholarship['deadline']); ?></p>
                         <?php endif; ?>
+                        <hr>
                         <form name="appForm" action="home.php" method="POST" onsubmit="return checkApplication()">
                             <input type="hidden" name="apply" value="1">
                             <input type="hidden" name="scholarship_id" value="<?php echo $selectedScholarship['id']; ?>">

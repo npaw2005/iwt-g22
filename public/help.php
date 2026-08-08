@@ -19,8 +19,7 @@ require_once '../includes/header.php';
                 <li><strong>Logout:</strong> Click Logout in the navigation bar to end your session.</li>
             </ul>
 
-            <br>
-            <br>
+            <hr>
 
             <h2>For Registrars</h2>
             <ul>
@@ -30,8 +29,7 @@ require_once '../includes/header.php';
                 <li><strong>Approve or Reject:</strong> Click the Approve or Reject button next to any pending application.</li>
             </ul>
 
-            <br>
-            <br>
+            <hr>
 
             <h2>For Administrators</h2>
             <ul>
