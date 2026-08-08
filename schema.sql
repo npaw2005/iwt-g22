@@ -38,9 +38,9 @@ CREATE TABLE IF NOT EXISTS student_scholarships (
 );
 
 INSERT INTO users (username, password, role, email) VALUES
-('admin', 'admin123', 'admin', 'admin@example.com'),
+('admin', 'admin', 'admin', 'admin@example.com'),
 ('ucsc', 'ucsc', 'student', 'student@example.com'),
-('registrar', 'registrar123', 'registrar', 'registrar@example.com');
+('registrar', 'registrar', 'registrar', 'registrar@example.com');
 
 INSERT INTO scholarships (name, description, deadline) VALUES
 ('Academic Excellence Award', 'For students with a GPA of 3.5 or above. Covers tuition fees for one academic year.', '2026-12-31'),
