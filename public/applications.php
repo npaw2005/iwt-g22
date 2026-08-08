@@ -58,7 +58,7 @@ require_once '../includes/header.php';
 
         <div class="content-page">
             <h2>Add New Scholarship</h2>
-            <form action="applications.php" method="POST">
+            <form name="addScholarshipForm" action="applications.php" method="POST" onsubmit="return validateDeadline()">
                 <input type="hidden" name="action" value="add_scholarship">
                 <div class="form-group">
                     <label for="schName">Scholarship Name</label>
@@ -167,4 +167,23 @@ require_once '../includes/header.php';
             </table>
         </div>
     </div>
+
+    <script type="text/javascript">
+        function validateDeadline() {
+            var deadlineStr = document.addScholarshipForm.deadline.value;
+            if (deadlineStr != "") {
+                var parts = deadlineStr.split("-");
+                // Parse date parts to avoid UTC/local time zone issues
+                var selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (selectedDate < today) {
+                    alert("The deadline cannot be set in the past.");
+                    return false;
+                }
+            }
+            return true;
+        }
+    </script>
 <?php require_once '../includes/footer.php'; ?>
