@@ -41,10 +41,10 @@ CREATE TABLE IF NOT EXISTS student_scholarships (
     FOREIGN KEY (scholarship_id) REFERENCES scholarships(id) ON DELETE CASCADE
 );
 
-INSERT INTO users (username, password, role, email) VALUES
-('admin', 'admin', 'admin', 'admin@example.com'),
-('ucsc', 'ucsc', 'student', 'student@example.com'),
-('registrar', 'registrar', 'registrar', 'registrar@example.com');
+INSERT INTO users (username, password, role, email, full_name, name_with_initials, dob, gender) VALUES
+('admin', 'admin', 'admin', 'admin@example.com', NULL, NULL, NULL, NULL),
+('ucsc', 'ucsc', 'student', 'student@example.com', 'UCSC Student', 'U. Student', '2000-01-01', 'Male'),
+('registrar', 'registrar', 'registrar', 'registrar@example.com', NULL, NULL, NULL, NULL);
 
 INSERT INTO scholarships (name, description, deadline) VALUES
 ('Academic Excellence Award', 'For students with a GPA of 3.5 or above. Covers tuition fees for one academic year.', '2026-12-31'),
