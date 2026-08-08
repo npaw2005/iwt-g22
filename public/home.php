@@ -53,10 +53,15 @@ $allScholarships = $conn->query("SELECT * FROM scholarships ORDER BY id ASC")->f
 
 // Fetch student's applications
 $applications = [];
+$userProfile = [];
 if ($isStudent) {
     $stmt = $conn->prepare("SELECT ss.*, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN scholarships s ON ss.scholarship_id = s.id WHERE ss.student_id = ? ORDER BY ss.applied_at DESC");
     $stmt->execute([$_SESSION['user_id']]);
     $applications = $stmt->fetchAll();
+
+    $profStmt = $conn->prepare("SELECT full_name, name_with_initials, dob, gender FROM users WHERE id = ?");
+    $profStmt->execute([$_SESSION['user_id']]);
+    $userProfile = $profStmt->fetch();
 }
 
 $pageTitle = 'Home - Scholarship Management System';
@@ -91,6 +96,23 @@ require_once '../includes/header.php';
                         <form name="appForm" action="home.php" method="POST" onsubmit="return checkApplication()">
                             <input type="hidden" name="apply" value="1">
                             <input type="hidden" name="scholarship_id" value="<?php echo $selectedScholarship['id']; ?>">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" name="full_name_display" value="<?php echo htmlspecialchars($userProfile['full_name']); ?>" class="input-readonly" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Name with Initials</label>
+                                <input type="text" name="initials_display" value="<?php echo htmlspecialchars($userProfile['name_with_initials']); ?>" class="input-readonly" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Date of Birth</label>
+                                <input type="text" name="dob_display" value="<?php echo htmlspecialchars($userProfile['dob']); ?>" class="input-readonly" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label>Gender</label>
+                                <input type="text" name="gender_display" value="<?php echo htmlspecialchars($userProfile['gender']); ?>" class="input-readonly" readonly>
+                            </div>
+                            <hr>
                             <div class="form-group">
                                 <label>Parents' Annual Income (Rs.)</label>
                                 <input type="number" step="0.01" id="appIncome" name="parents_income">
@@ -242,9 +264,21 @@ require_once '../includes/header.php';
                 return false;
             }
 
-            if (document.appForm.nic.value == "") {
+            var nic = document.appForm.nic.value;
+            if (nic == "") {
                 alert("Please enter your NIC number.");
                 return false;
+            }
+            if (nic.length != 12) {
+                alert("NIC number must be exactly 12 digits (new Sri Lanka NIC format).");
+                return false;
+            }
+            var i;
+            for (i = 0; i < nic.length; i++) {
+                if (nic.charAt(i) < "0" || nic.charAt(i) > "9") {
+                    alert("NIC number must contain digits only.");
+                    return false;
+                }
             }
 
             if (document.appForm.testimonial_checked.checked == false) {

@@ -204,3 +204,8 @@ tbody tr:hover {
     font-size: 1.3em;
     font-weight: bold;
 }
+
+.input-readonly {
+    background-color: #e8e8e8;
+    color: #555555;
+}

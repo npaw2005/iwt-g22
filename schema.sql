@@ -7,6 +7,10 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'student',
     email VARCHAR(100),
+    full_name VARCHAR(150),
+    name_with_initials VARCHAR(100),
+    dob DATE,
+    gender VARCHAR(10),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
