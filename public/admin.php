@@ -79,8 +79,11 @@ if ($action === 'list') {
         if (in_array($u['role'], ['admin', 'registrar'])) $stats['staff']++;
     }
 
-    $stmt2 = $conn->query("SELECT s.*, u.username FROM scholarships s INNER JOIN users u ON s.user_id = u.id ORDER BY s.id DESC");
+    $stmt2 = $conn->query("SELECT ss.*, u.username, sch.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id INNER JOIN scholarships sch ON ss.scholarship_id = sch.id ORDER BY ss.applied_at DESC");
     $applications = $stmt2->fetchAll();
+
+    $stats['scholarships'] = $conn->query("SELECT COUNT(*) FROM scholarships")->fetchColumn();
+    $stats['applications'] = count($applications);
 }
 
 $pageTitle = 'Admin Panel - Scholarship Management System';
@@ -98,7 +101,7 @@ require_once '../includes/header.php';
         <?php if ($action === 'edit' && $editUser): ?>
             <div class="content-page">
                 <h2>Edit User</h2>
-                <form action="admin.php" method="POST" onsubmit="return checkEditUser()">
+                <form action="admin.php" method="POST" name="editUserForm" onsubmit="return checkEditUser()">
                     <input type="hidden" name="action" value="edit">
                     <input type="hidden" name="id" value="<?php echo $editUser['id']; ?>">
                     <div class="form-group">
@@ -128,13 +131,15 @@ require_once '../includes/header.php';
 
         <?php else: ?>
             <div class="table-container">
-                <h2>System Statistics</h2>
+                <h2>System Report</h2>
                 <table class="stats-table">
                     <thead>
                         <tr>
                             <th>Total Users</th>
                             <th>Students</th>
                             <th>Admin / Registrar</th>
+                            <th>Scholarships</th>
+                            <th>Applications</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -142,6 +147,8 @@ require_once '../includes/header.php';
                             <td><?php echo $stats['total_users']; ?></td>
                             <td><?php echo $stats['students']; ?></td>
                             <td><?php echo $stats['staff']; ?></td>
+                            <td><?php echo $stats['scholarships']; ?></td>
+                            <td><?php echo $stats['applications']; ?></td>
                         </tr>
                     </tbody>
                 </table>
@@ -181,7 +188,7 @@ require_once '../includes/header.php';
 
             <div class="content-page">
                 <h2>Add New User</h2>
-                <form action="admin.php" method="POST" onsubmit="return checkAddUser()">
+                <form action="admin.php" method="POST" name="addUserForm" onsubmit="return checkAddUser()">
                     <input type="hidden" name="action" value="add">
                     <div class="form-group">
                         <label for="newUsername">Username</label>
@@ -213,25 +220,23 @@ require_once '../includes/header.php';
                     <caption>Read-only summary of all applications</caption>
                     <thead>
                         <tr>
-                            <th>ID</th>
                             <th>Applicant</th>
-                            <th>Title</th>
-                            <th>Category</th>
+                            <th>Scholarship</th>
+                            <th>GPA</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($applications as $app): ?>
                         <tr>
-                            <td><?php echo $app['id']; ?></td>
                             <td><?php echo htmlspecialchars($app['username']); ?></td>
-                            <td><?php echo htmlspecialchars($app['title']); ?></td>
-                            <td><?php echo htmlspecialchars($app['category']); ?></td>
-                            <td><?php echo ucfirst($app['isApproved']); ?></td>
+                            <td><?php echo htmlspecialchars($app['scholarship_name']); ?></td>
+                            <td><?php echo htmlspecialchars($app['gpa']); ?></td>
+                            <td><?php echo ucfirst($app['status']); ?></td>
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($applications)): ?>
-                        <tr><td colspan="5">No applications yet.</td></tr>
+                        <tr><td colspan="4">No applications yet.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -241,29 +246,29 @@ require_once '../includes/header.php';
 
     <script type="text/javascript">
         function checkAddUser() {
-            var username = document.getElementById('newUsername').value;
-            var email = document.getElementById('newEmail').value;
-            var password = document.getElementById('newPassword').value;
+            var username = document.addUserForm.username.value;
+            var email = document.addUserForm.email.value;
+            var password = document.addUserForm.password.value;
 
-            if (username == '') {
-                alert('Please enter a username.');
+            if (username == "") {
+                alert("Please enter a username.");
                 return false;
             }
-            if (email == '') {
-                alert('Please enter an email.');
+            if (email == "") {
+                alert("Please enter an email.");
                 return false;
             }
-            if (password == '') {
-                alert('Please enter a password.');
+            if (password == "") {
+                alert("Please enter a password.");
                 return false;
             }
             return true;
         }
 
         function checkEditUser() {
-            var username = document.getElementById('editUsername').value;
-            if (username == '') {
-                alert('Username cannot be empty.');
+            var username = document.editUserForm.username.value;
+            if (username == "") {
+                alert("Username cannot be empty.");
                 return false;
             }
             return true;

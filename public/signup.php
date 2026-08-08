@@ -11,11 +11,15 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username']);
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+    $username        = trim($_POST['username']);
+    $email           = trim($_POST['email']);
+    $password        = trim($_POST['password']);
+    $fullName        = trim($_POST['full_name']);
+    $nameInitials    = trim($_POST['name_with_initials']);
+    $dob             = $_POST['dob'];
+    $gender          = $_POST['gender'];
 
-    if (empty($username) || empty($password) || empty($email)) {
+    if (empty($username) || empty($password) || empty($email) || empty($fullName) || empty($nameInitials) || empty($dob) || empty($gender)) {
         $error = 'All fields are required.';
     } else {
         $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
@@ -23,8 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->fetch()) {
             $error = 'Username is already taken.';
         } else {
-            $stmt = $conn->prepare("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, 'student')");
-            if ($stmt->execute([$username, $password, $email])) {
+            $stmt = $conn->prepare("INSERT INTO users (username, password, email, role, full_name, name_with_initials, dob, gender) VALUES (?, ?, ?, 'student', ?, ?, ?, ?)");
+            if ($stmt->execute([$username, $password, $email, $fullName, $nameInitials, $dob, $gender])) {
                 $success = 'Registration successful! You can now log in.';
             } else {
                 $error = 'Database error occurred.';
@@ -44,26 +48,43 @@ require_once '../includes/header.php';
         <?php if ($success): ?>
         <script type="text/javascript">alert("<?php echo addslashes($success); ?>");</script>
         <?php endif; ?>
-        <form id="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()">
+        <form name="signupForm" id="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()">
+            <div class="form-group">
+                <label for="full_name">Full Name</label>
+                <input type="text" id="full_name" name="full_name">
+            </div>
+            <div class="form-group">
+                <label for="name_with_initials">Name with Initials</label>
+                <input type="text" id="name_with_initials" name="name_with_initials">
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of Birth</label>
+                <input type="date" id="dob" name="dob">
+            </div>
+            <div class="form-group">
+                <label for="gender">Gender</label>
+                <select id="gender" name="gender">
+                    <option value="">-- Select --</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username">
-                <small id="userError" style="color:red; display:none;">Username is required.</small>
             </div>
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email">
-                <small id="emailError" style="color:red; display:none;">Valid email is required.</small>
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" onchange="checkPasswordMatch()">
-                <small id="passError" style="color:red; display:none;">Password must be at least 6 characters.</small>
+                <input type="password" id="password" name="password">
             </div>
             <div class="form-group">
                 <label for="confirm_password">Confirm Password</label>
-                <input type="password" id="confirm_password" onchange="checkPasswordMatch()">
-                <small id="confirmError" style="color:red; display:none;">Passwords do not match.</small>
+                <input type="password" id="confirm_password" name="confirm_password">
             </div>
             <button type="submit" class="btn btn-primary">Create Account</button>
             <a href="login.php" class="btn">Back to Login</a>
@@ -71,53 +92,49 @@ require_once '../includes/header.php';
     </div>
 
     <script type="text/javascript">
-        function checkPasswordMatch() {
-            var pass = document.getElementById('password').value;
-            var confirm = document.getElementById('confirm_password').value;
-            if (confirm != '' && pass != confirm) {
-                document.getElementById('confirmError').style.display = 'block';
-            } else {
-                document.getElementById('confirmError').style.display = 'none';
-            }
-        }
-
         function checkForm() {
-            var valid = true;
-            var user = document.getElementById('username').value;
-            var email = document.getElementById('email').value;
-            var pass = document.getElementById('password').value;
-            var confirm = document.getElementById('confirm_password').value;
-            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            var fullName   = document.signupForm.full_name.value;
+            var initials   = document.signupForm.name_with_initials.value;
+            var dob        = document.signupForm.dob.value;
+            var gender     = document.signupForm.gender.value;
+            var user       = document.signupForm.username.value;
+            var email      = document.signupForm.email.value;
+            var pass       = document.signupForm.password.value;
+            var confirm    = document.signupForm.confirm_password.value;
 
-            if (user == '') {
-                document.getElementById('userError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('userError').style.display = 'none';
+            if (fullName == "") {
+                alert("Full name is required.");
+                return false;
             }
-
-            if (!emailRegex.test(email)) {
-                document.getElementById('emailError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('emailError').style.display = 'none';
+            if (initials == "") {
+                alert("Name with initials is required.");
+                return false;
             }
-
+            if (dob == "") {
+                alert("Date of birth is required.");
+                return false;
+            }
+            if (gender == "") {
+                alert("Please select a gender.");
+                return false;
+            }
+            if (user == "") {
+                alert("Username is required.");
+                return false;
+            }
+            if (email == "") {
+                alert("Valid email is required.");
+                return false;
+            }
             if (pass.length < 6) {
-                document.getElementById('passError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('passError').style.display = 'none';
+                alert("Password must be at least 6 characters.");
+                return false;
             }
-
-            if (pass != confirm || confirm == '') {
-                document.getElementById('confirmError').style.display = 'block';
-                valid = false;
-            } else {
-                document.getElementById('confirmError').style.display = 'none';
+            if (pass != confirm || confirm == "") {
+                alert("Passwords do not match.");
+                return false;
             }
-
-            return valid;
+            return true;
         }
     </script>
 <?php require_once '../includes/footer.php'; ?>

@@ -58,13 +58,13 @@ body {
 .auth-container {
     border: 2px solid #000000;
     padding: 15px;
-    margin-bottom: 15px;
+    margin: 40px auto 15px auto;
     max-width: 400px;
 }
 
 h1, h2, h3 {
     margin-top: 0;
-    border-bottom: 1px solid #000000;
+    margin-bottom: 10px;
     padding-bottom: 5px;
 }
 
@@ -102,6 +102,14 @@ input[type="number"]:focus {
     border: 1px solid #000000;
     padding: 5px;
     box-sizing: border-box;
+}
+
+.btn, .btn-primary, .btn-danger {
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: normal;
+    vertical-align: middle;
 }
 
 .btn {
@@ -195,4 +203,9 @@ tbody tr:hover {
     text-align: center;
     font-size: 1.3em;
     font-weight: bold;
+}
+
+.input-readonly {
+    background-color: #e8e8e8;
+    color: #555555;
 }
