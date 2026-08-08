@@ -64,8 +64,8 @@ body {
 
 h1, h2, h3 {
     margin-top: 0;
-    margin-bottom: 0;
-    padding-bottom: 0;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
 }
 
 .form-group {
