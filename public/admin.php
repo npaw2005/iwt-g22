@@ -79,7 +79,7 @@ if ($action === 'list') {
         if (in_array($u['role'], ['admin', 'registrar'])) $stats['staff']++;
     }
 
-    $stmt2 = $conn->query("SELECT ss.*, u.username, sch.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id INNER JOIN scholarships sch ON ss.scholarship_id = sch.id ORDER BY ss.applied_at DESC");
+    $stmt2 = $conn->query("SELECT ss.*, u.username, u.email, u.full_name, u.name_with_initials, u.dob, u.gender, sch.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id INNER JOIN scholarships sch ON ss.scholarship_id = sch.id ORDER BY ss.applied_at DESC");
     $applications = $stmt2->fetchAll();
 
     $stats['scholarships'] = $conn->query("SELECT COUNT(*) FROM scholarships")->fetchColumn();
@@ -220,23 +220,40 @@ require_once '../includes/header.php';
                     <caption>Read-only summary of all applications</caption>
                     <thead>
                         <tr>
-                            <th>Applicant</th>
+                            <th>Applicant Details</th>
                             <th>Scholarship</th>
-                            <th>GPA</th>
+                            <th>Academic & Income</th>
+                            <th>Contact & Address</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($applications as $app): ?>
                         <tr>
-                            <td><?php echo htmlspecialchars($app['username']); ?></td>
-                            <td><?php echo htmlspecialchars($app['scholarship_name']); ?></td>
-                            <td><?php echo htmlspecialchars($app['gpa']); ?></td>
+                            <td>
+                                <strong><?php echo htmlspecialchars($app['username']); ?></strong> (<?php echo htmlspecialchars($app['gender']); ?>)<br>
+                                <small><?php echo htmlspecialchars($app['full_name']); ?></small><br>
+                                <small>DOB: <?php echo htmlspecialchars($app['dob']); ?> | NIC: <?php echo htmlspecialchars($app['nic']); ?></small>
+                            </td>
+                            <td>
+                                <strong><?php echo htmlspecialchars($app['scholarship_name']); ?></strong><br>
+                                <small>Purpose: <?php echo htmlspecialchars($app['purpose']); ?></small>
+                            </td>
+                            <td>
+                                <small>GPA: <?php echo htmlspecialchars($app['gpa']); ?></small><br>
+                                <small>Income: Rs.<?php echo htmlspecialchars($app['parents_income']); ?></small><br>
+                                <small>Parent Occ.: <?php echo htmlspecialchars($app['parents_occupation']); ?></small>
+                            </td>
+                            <td>
+                                <small>Email: <?php echo htmlspecialchars($app['email']); ?></small><br>
+                                <small>Phone: <?php echo htmlspecialchars($app['contact_numbers']); ?></small><br>
+                                <small>Address: <?php echo htmlspecialchars($app['permanent_address']); ?></small>
+                            </td>
                             <td><?php echo ucfirst($app['status']); ?></td>
                         </tr>
                         <?php endforeach; ?>
                         <?php if (empty($applications)): ?>
-                        <tr><td colspan="4">No applications yet.</td></tr>
+                        <tr><td colspan="5">No applications yet.</td></tr>
                         <?php endif; ?>
                     </tbody>
                 </table>

@@ -113,6 +113,16 @@ require_once '../includes/header.php';
             if (dob == "") {
                 alert("Date of birth is required.");
                 return false;
+            } else {
+                var parts = dob.split("-");
+                var dobDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                if (dobDate > today) {
+                    alert("Date of birth cannot be in the future.");
+                    return false;
+                }
             }
             if (gender == "") {
                 alert("Please select a gender.");

@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $scholarships = $conn->query("SELECT * FROM scholarships ORDER BY id DESC")->fetchAll();
 
 // Fetch all student applications
-$stmt = $conn->query("SELECT ss.*, u.username, u.email, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id INNER JOIN scholarships s ON ss.scholarship_id = s.id ORDER BY ss.applied_at DESC");
+$stmt = $conn->query("SELECT ss.*, u.username, u.email, u.full_name, u.name_with_initials, u.dob, u.gender, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id INNER JOIN scholarships s ON ss.scholarship_id = s.id ORDER BY ss.applied_at DESC");
 $applications = $stmt->fetchAll();
 
 $pageTitle = 'Manage Applications - Scholarship Management System';
@@ -118,11 +118,8 @@ require_once '../includes/header.php';
                 <caption>All submitted scholarship applications</caption>
                 <thead>
                     <tr>
-                        <th>Applicant</th>
-                        <th>Scholarship</th>
-                        <th><abbr title="Grade Point Average">GPA</abbr></th>
-                        <th>Income (Rs.)</th>
-                        <th>Purpose</th>
+                        <th>Applicant Info</th>
+                        <th>Application Details</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -131,14 +128,17 @@ require_once '../includes/header.php';
                     <?php foreach ($applications as $app): ?>
                     <tr>
                         <td>
-                            <strong><?php echo htmlspecialchars($app['username']); ?></strong><br>
-                            <small><?php echo htmlspecialchars($app['email']); ?></small><br>
-                            <small><abbr title="National Identity Card">NIC</abbr>: <?php echo htmlspecialchars($app['nic']); ?></small>
+                            <strong><?php echo htmlspecialchars($app['username']); ?></strong> (<?php echo htmlspecialchars($app['gender']); ?>)<br>
+                            <small><?php echo htmlspecialchars($app['full_name']); ?></small><br>
+                            <small>DOB: <?php echo htmlspecialchars($app['dob']); ?> | NIC: <?php echo htmlspecialchars($app['nic']); ?></small><br>
+                            <small>Email: <?php echo htmlspecialchars($app['email']); ?> | Phone: <?php echo htmlspecialchars($app['contact_numbers']); ?></small>
                         </td>
-                        <td><?php echo htmlspecialchars($app['scholarship_name']); ?></td>
-                        <td><?php echo htmlspecialchars($app['gpa']); ?></td>
-                        <td><?php echo htmlspecialchars($app['parents_income']); ?></td>
-                        <td><?php echo htmlspecialchars($app['purpose']); ?></td>
+                        <td>
+                            <strong><?php echo htmlspecialchars($app['scholarship_name']); ?></strong><br>
+                            <small>GPA: <?php echo htmlspecialchars($app['gpa']); ?> | Income: Rs.<?php echo htmlspecialchars($app['parents_income']); ?></small><br>
+                            <small>Purpose: <?php echo htmlspecialchars($app['purpose']); ?></small><br>
+                            <small>Address: <?php echo htmlspecialchars($app['permanent_address']); ?></small>
+                        </td>
                         <td><?php echo ucfirst($app['status']); ?></td>
                         <td>
                             <?php if ($app['status'] === 'pending'): ?>
@@ -161,7 +161,7 @@ require_once '../includes/header.php';
                     </tr>
                     <?php endforeach; ?>
                     <?php if (empty($applications)): ?>
-                        <tr><td colspan="7">No applications submitted yet.</td></tr>
+                        <tr><td colspan="4">No applications submitted yet.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
