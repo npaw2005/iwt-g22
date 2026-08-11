@@ -19,6 +19,7 @@ if ($isStudent && isset($_GET['sid'])) {
 }
 
 // Handle form submission
+if ($isStudent && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply'])) {
     $scholarshipId = $_POST['scholarship_id'];
     $parentsIncome = $_POST['parents_income'];
     $parentsOccupation = trim($_POST['parents_occupation']);
