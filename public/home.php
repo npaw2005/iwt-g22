@@ -19,7 +19,6 @@ if ($isStudent && isset($_GET['sid'])) {
 }
 
 // Handle form submission
-if ($isStudent && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply'])) {
     $scholarshipId = $_POST['scholarship_id'];
     $parentsIncome = $_POST['parents_income'];
     $parentsOccupation = trim($_POST['parents_occupation']);
@@ -45,11 +44,11 @@ if ($isStudent && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply']
         $message = 'You have already applied for this scholarship.';
     } else {
         // Upsert into students table
-        $stmtStudent = $conn->prepare("INSERT INTO students (user_id, full_name, name_with_initials, dob, gender) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE full_name=?, name_with_initials=?, dob=?, gender=?");
-        $stmtStudent->execute([$_SESSION['user_id'], $fullName, $nameInitials, $dob, $gender, $fullName, $nameInitials, $dob, $gender]);
+        $stmtStudent = $conn->prepare("INSERT INTO students (user_id, full_name, name_with_initials, dob, gender, parents_income, parents_occupation, gpa, permanent_address, nic, contact_numbers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE full_name=?, name_with_initials=?, dob=?, gender=?, parents_income=?, parents_occupation=?, gpa=?, permanent_address=?, nic=?, contact_numbers=?");
+        $stmtStudent->execute([$_SESSION['user_id'], $fullName, $nameInitials, $dob, $gender, $parentsIncome, $parentsOccupation, $gpa, $permanentAddress, $nic, $contactNumbers, $fullName, $nameInitials, $dob, $gender, $parentsIncome, $parentsOccupation, $gpa, $permanentAddress, $nic, $contactNumbers]);
 
-        $stmt = $conn->prepare("INSERT INTO student_scholarships (student_id, scholarship_id, parents_income, parents_occupation, purpose, gpa, permanent_address, nic, contact_numbers, description, testimonial_checked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        if ($stmt->execute([$_SESSION['user_id'], $scholarshipId, $parentsIncome, $parentsOccupation, $purpose, $gpa, $permanentAddress, $nic, $contactNumbers, $description, $testimonialChecked])) {
+        $stmt = $conn->prepare("INSERT INTO student_scholarships (student_id, scholarship_id, purpose, description, testimonial_checked) VALUES (?, ?, ?, ?, ?)");
+        if ($stmt->execute([$_SESSION['user_id'], $scholarshipId, $purpose, $description, $testimonialChecked])) {
             $message = 'Application submitted successfully.';
         } else {
             $message = 'Failed to submit application.';
@@ -68,11 +67,15 @@ if ($isStudent) {
     $stmt->execute([$_SESSION['user_id']]);
     $applications = $stmt->fetchAll();
 
-    $profStmt = $conn->prepare("SELECT full_name, name_with_initials, dob, gender FROM students WHERE user_id = ?");
+    $profStmt = $conn->prepare("SELECT full_name, name_with_initials, dob, gender, parents_income, parents_occupation, gpa, permanent_address, nic, contact_numbers FROM students WHERE user_id = ?");
     $profStmt->execute([$_SESSION['user_id']]);
     $userProfile = $profStmt->fetch();
     if (!$userProfile) {
-        $userProfile = ['full_name' => '', 'name_with_initials' => '', 'dob' => '', 'gender' => ''];
+        $userProfile = [
+            'full_name' => '', 'name_with_initials' => '', 'dob' => '', 'gender' => '',
+            'parents_income' => '', 'parents_occupation' => '', 'gpa' => '', 'permanent_address' => '',
+            'nic' => '', 'contact_numbers' => ''
+        ];
     }
 }
 
@@ -108,68 +111,83 @@ require_once '../includes/header.php';
                         <form name="appForm" action="home.php" method="POST" onsubmit="return checkApplication()">
                             <input type="hidden" name="apply" value="1">
                             <input type="hidden" name="scholarship_id" value="<?php echo $selectedScholarship['id']; ?>">
-                            <div class="form-group">
-                                <label>Full Name</label>
-                                <input type="text" name="full_name" value="<?php echo htmlspecialchars($userProfile['full_name']); ?>" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Name with Initials</label>
-                                <input type="text" name="name_with_initials" value="<?php echo htmlspecialchars($userProfile['name_with_initials']); ?>" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Date of Birth</label>
-                                <input type="date" name="dob" value="<?php echo htmlspecialchars($userProfile['dob']); ?>" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Gender</label>
-                                <select name="gender" required>
-                                    <option value="">-- Select --</option>
-                                    <option value="Male" <?php if($userProfile['gender'] === 'Male') echo 'selected'; ?>>Male</option>
-                                    <option value="Female" <?php if($userProfile['gender'] === 'Female') echo 'selected'; ?>>Female</option>
-                                    <option value="Other" <?php if($userProfile['gender'] === 'Other') echo 'selected'; ?>>Other</option>
-                                </select>
-                            </div>
-                            <hr>
-                            <div class="form-group">
-                                <label>Parents' Annual Income (Rs.)</label>
-                                <input type="number" step="0.01" id="appIncome" name="parents_income">
-                            </div>
-                            <div class="form-group">
-                                <label>Parents' Occupation</label>
-                                <input type="text" id="appOccupation" name="parents_occupation">
-                            </div>
-                            <div class="form-group">
-                                <label>Purpose of Request</label>
-                                <input type="text" id="appPurpose" name="purpose">
-                            </div>
-                            <div class="form-group">
-                                <label>Current <abbr title="Grade Point Average">GPA</abbr> (0.00 - 4.00)</label>
-                                <input type="number" step="0.01" min="0" max="4.0" id="appGpa" name="gpa">
-                            </div>
-                            <div class="form-group">
-                                <label>Permanent Address</label>
-                                <textarea name="permanent_address" id="appAddress" rows="2"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label><abbr title="National Identity Card">NIC</abbr> Number</label>
-                                <input type="text" id="appNic" name="nic">
-                            </div>
-                            <div class="form-group">
-                                <label>Contact Number</label>
-                                <input type="text" id="appContact" name="contact_numbers">
-                            </div>
-                            <div class="form-group">
-                                <label>Additional Description</label>
-                                <textarea name="description" id="appDesc" rows="3"></textarea>
-                            </div>
-                            <div class="form-group">
-                                <label>
-                                    <input type="checkbox" id="appTestimonial" name="testimonial_checked">
-                                    I confirm that I have a testimonial from a Grama Niladhari or authorized personnel.
-                                </label>
-                            </div>
+
+                            <fieldset>
+                                <legend>Personal Information</legend>
+                                <div class="form-group">
+                                    <label>Username</label>
+                                    <input type="text" name="username_display" value="<?php echo htmlspecialchars($username); ?>" class="input-readonly" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Full Name</label>
+                                    <input type="text" name="full_name" value="<?php echo htmlspecialchars($userProfile['full_name']); ?>" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Name with Initials</label>
+                                    <input type="text" name="name_with_initials" value="<?php echo htmlspecialchars($userProfile['name_with_initials']); ?>" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Date of Birth</label>
+                                    <input type="date" name="dob" value="<?php echo htmlspecialchars($userProfile['dob']); ?>" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Gender</label>
+                                    <select name="gender" required>
+                                        <option value="">-- Select --</option>
+                                        <option value="Male" <?php if($userProfile['gender'] === 'Male') echo 'selected'; ?>>Male</option>
+                                        <option value="Female" <?php if($userProfile['gender'] === 'Female') echo 'selected'; ?>>Female</option>
+                                        <option value="Other" <?php if($userProfile['gender'] === 'Other') echo 'selected'; ?>>Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Permanent Address</label>
+                                    <textarea name="permanent_address" id="appAddress" rows="2"><?php echo htmlspecialchars($userProfile['permanent_address']); ?></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label><abbr title="National Identity Card">NIC</abbr> Number</label>
+                                    <input type="text" id="appNic" name="nic" value="<?php echo htmlspecialchars($userProfile['nic']); ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label>Contact Number</label>
+                                    <input type="text" id="appContact" name="contact_numbers" value="<?php echo htmlspecialchars($userProfile['contact_numbers']); ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label>Parents' Annual Income (Rs.)</label>
+                                    <input type="number" step="0.01" id="appIncome" name="parents_income" value="<?php echo htmlspecialchars($userProfile['parents_income']); ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label>Parents' Occupation</label>
+                                    <input type="text" id="appOccupation" name="parents_occupation" value="<?php echo htmlspecialchars($userProfile['parents_occupation']); ?>">
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend>Academic Information</legend>
+                                <div class="form-group">
+                                    <label>Current <abbr title="Grade Point Average">GPA</abbr> (0.00 - 4.00)</label>
+                                    <input type="number" step="0.01" min="0" max="4.0" id="appGpa" name="gpa" value="<?php echo htmlspecialchars($userProfile['gpa']); ?>">
+                                </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend>Additional Information</legend>
+                                <div class="form-group">
+                                    <label>Purpose of Request</label>
+                                    <input type="text" id="appPurpose" name="purpose">
+                                </div>
+                                <div class="form-group">
+                                    <label>Additional Description</label>
+                                    <textarea name="description" id="appDesc" rows="3"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>
+                                        <input type="checkbox" id="appTestimonial" name="testimonial_checked">
+                                        I confirm that I have a testimonial from a Grama Niladhari or authorized personnel.
+                                    </label>
+                                </div>
+                            </fieldset>
                             <button type="submit" class="btn btn-primary">Submit Application</button>
-                            <a href="home.php" class="btn">Back to Scholarships</a>
+                            <a href="home.php" class="btn">Cancel</a>
                         </form>
                     </div>
                 <?php else: ?>

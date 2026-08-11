@@ -41,7 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $scholarships = $conn->query("SELECT * FROM scholarships ORDER BY id DESC")->fetchAll();
 
 // Fetch all student applications
-$stmt = $conn->query("SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, st.dob, st.gender, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id LEFT JOIN students st ON u.id = st.user_id INNER JOIN scholarships s ON ss.scholarship_id = s.id ORDER BY ss.applied_at DESC");
+$stmt = $conn->query("SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, st.dob, st.gender, st.parents_income, st.parents_occupation, st.gpa, st.permanent_address, st.nic, st.contact_numbers, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id LEFT JOIN students st ON u.id = st.user_id INNER JOIN scholarships s ON ss.scholarship_id = s.id ORDER BY ss.applied_at DESC");
 $applications = $stmt->fetchAll();
 
 $pageTitle = 'Manage Applications - Scholarship Management System';

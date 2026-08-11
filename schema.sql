@@ -16,6 +16,12 @@ CREATE TABLE IF NOT EXISTS students (
     name_with_initials VARCHAR(100),
     dob DATE,
     gender VARCHAR(10),
+    parents_income FLOAT,
+    parents_occupation VARCHAR(150),
+    gpa FLOAT,
+    permanent_address TEXT,
+    nic VARCHAR(20),
+    contact_numbers VARCHAR(50),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -30,13 +36,7 @@ CREATE TABLE IF NOT EXISTS scholarships (
 CREATE TABLE IF NOT EXISTS student_scholarships (
     student_id INT NOT NULL,
     scholarship_id INT NOT NULL,
-    parents_income FLOAT,
-    parents_occupation VARCHAR(150),
     purpose VARCHAR(255),
-    gpa FLOAT,
-    permanent_address TEXT,
-    nic VARCHAR(20),
-    contact_numbers VARCHAR(50),
     description TEXT,
     testimonial_checked INT DEFAULT 0,
     status VARCHAR(20) DEFAULT 'pending',
@@ -51,8 +51,8 @@ INSERT INTO users (username, password, role, email) VALUES
 ('ucsc', 'ucsc', 'student', 'student@example.com'),
 ('registrar', 'registrar', 'registrar', 'registrar@example.com');
 
-INSERT INTO students (user_id, full_name, name_with_initials, dob, gender) VALUES
-((SELECT id FROM users WHERE username='ucsc'), 'UCSC Student', 'U. Student', '2000-01-01', 'Male');
+INSERT INTO students (user_id, full_name, name_with_initials, dob, gender, parents_income, parents_occupation, gpa, permanent_address, nic, contact_numbers) VALUES
+((SELECT id FROM users WHERE username='ucsc'), 'UCSC Student', 'U. Student', '2000-01-01', 'Male', 50000, 'Teacher', 3.5, 'Colombo', '123456789012', '0771234567');
 
 INSERT INTO scholarships (name, description, deadline) VALUES
 ('Academic Excellence Award', 'For students with a GPA of 3.5 or above. Covers tuition fees for one academic year.', '2026-12-31'),
