@@ -31,6 +31,11 @@ if ($isStudent && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply']
     $description = trim($_POST['description']);
     $testimonialChecked = isset($_POST['testimonial_checked']) ? 1 : 0;
 
+    $fullName = trim($_POST['full_name']);
+    $nameInitials = trim($_POST['name_with_initials']);
+    $dob = $_POST['dob'];
+    $gender = $_POST['gender'];
+
     // Check if already applied
     $check = $conn->prepare("SELECT COUNT(*) FROM student_scholarships WHERE student_id = ? AND scholarship_id = ?");
     $check->execute([$_SESSION['user_id'], $scholarshipId]);
@@ -39,6 +44,10 @@ if ($isStudent && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply']
     if ($alreadyApplied > 0) {
         $message = 'You have already applied for this scholarship.';
     } else {
+        // Upsert into students table
+        $stmtStudent = $conn->prepare("INSERT INTO students (user_id, full_name, name_with_initials, dob, gender) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE full_name=?, name_with_initials=?, dob=?, gender=?");
+        $stmtStudent->execute([$_SESSION['user_id'], $fullName, $nameInitials, $dob, $gender, $fullName, $nameInitials, $dob, $gender]);
+
         $stmt = $conn->prepare("INSERT INTO student_scholarships (student_id, scholarship_id, parents_income, parents_occupation, purpose, gpa, permanent_address, nic, contact_numbers, description, testimonial_checked) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         if ($stmt->execute([$_SESSION['user_id'], $scholarshipId, $parentsIncome, $parentsOccupation, $purpose, $gpa, $permanentAddress, $nic, $contactNumbers, $description, $testimonialChecked])) {
             $message = 'Application submitted successfully.';
@@ -59,9 +68,12 @@ if ($isStudent) {
     $stmt->execute([$_SESSION['user_id']]);
     $applications = $stmt->fetchAll();
 
-    $profStmt = $conn->prepare("SELECT full_name, name_with_initials, dob, gender FROM users WHERE id = ?");
+    $profStmt = $conn->prepare("SELECT full_name, name_with_initials, dob, gender FROM students WHERE user_id = ?");
     $profStmt->execute([$_SESSION['user_id']]);
     $userProfile = $profStmt->fetch();
+    if (!$userProfile) {
+        $userProfile = ['full_name' => '', 'name_with_initials' => '', 'dob' => '', 'gender' => ''];
+    }
 }
 
 $pageTitle = 'Home - Scholarship Management System';
@@ -98,19 +110,24 @@ require_once '../includes/header.php';
                             <input type="hidden" name="scholarship_id" value="<?php echo $selectedScholarship['id']; ?>">
                             <div class="form-group">
                                 <label>Full Name</label>
-                                <input type="text" name="full_name_display" value="<?php echo htmlspecialchars($userProfile['full_name']); ?>" class="input-readonly" readonly>
+                                <input type="text" name="full_name" value="<?php echo htmlspecialchars($userProfile['full_name']); ?>" required>
                             </div>
                             <div class="form-group">
                                 <label>Name with Initials</label>
-                                <input type="text" name="initials_display" value="<?php echo htmlspecialchars($userProfile['name_with_initials']); ?>" class="input-readonly" readonly>
+                                <input type="text" name="name_with_initials" value="<?php echo htmlspecialchars($userProfile['name_with_initials']); ?>" required>
                             </div>
                             <div class="form-group">
                                 <label>Date of Birth</label>
-                                <input type="text" name="dob_display" value="<?php echo htmlspecialchars($userProfile['dob']); ?>" class="input-readonly" readonly>
+                                <input type="date" name="dob" value="<?php echo htmlspecialchars($userProfile['dob']); ?>" required>
                             </div>
                             <div class="form-group">
                                 <label>Gender</label>
-                                <input type="text" name="gender_display" value="<?php echo htmlspecialchars($userProfile['gender']); ?>" class="input-readonly" readonly>
+                                <select name="gender" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="Male" <?php if($userProfile['gender'] === 'Male') echo 'selected'; ?>>Male</option>
+                                    <option value="Female" <?php if($userProfile['gender'] === 'Female') echo 'selected'; ?>>Female</option>
+                                    <option value="Other" <?php if($userProfile['gender'] === 'Other') echo 'selected'; ?>>Other</option>
+                                </select>
                             </div>
                             <hr>
                             <div class="form-group">

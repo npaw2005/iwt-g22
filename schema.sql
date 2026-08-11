@@ -7,11 +7,16 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'student',
     email VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS students (
+    user_id INT PRIMARY KEY,
     full_name VARCHAR(150),
     name_with_initials VARCHAR(100),
     dob DATE,
     gender VARCHAR(10),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS scholarships (
@@ -41,10 +46,13 @@ CREATE TABLE IF NOT EXISTS student_scholarships (
     FOREIGN KEY (scholarship_id) REFERENCES scholarships(id) ON DELETE CASCADE
 );
 
-INSERT INTO users (username, password, role, email, full_name, name_with_initials, dob, gender) VALUES
-('admin', 'admin', 'admin', 'admin@example.com', NULL, NULL, NULL, NULL),
-('ucsc', 'ucsc', 'student', 'student@example.com', 'UCSC Student', 'U. Student', '2000-01-01', 'Male'),
-('registrar', 'registrar', 'registrar', 'registrar@example.com', NULL, NULL, NULL, NULL);
+INSERT INTO users (username, password, role, email) VALUES
+('admin', 'admin', 'admin', 'admin@example.com'),
+('ucsc', 'ucsc', 'student', 'student@example.com'),
+('registrar', 'registrar', 'registrar', 'registrar@example.com');
+
+INSERT INTO students (user_id, full_name, name_with_initials, dob, gender) VALUES
+((SELECT id FROM users WHERE username='ucsc'), 'UCSC Student', 'U. Student', '2000-01-01', 'Male');
 
 INSERT INTO scholarships (name, description, deadline) VALUES
 ('Academic Excellence Award', 'For students with a GPA of 3.5 or above. Covers tuition fees for one academic year.', '2026-12-31'),
