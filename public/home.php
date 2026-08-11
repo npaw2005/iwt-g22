@@ -11,14 +11,12 @@ $isStudent = $isLoggedIn && $_SESSION['role'] === 'student';
 $message = '';
 $selectedScholarship = null;
 
-// If student clicked Apply on a specific scholarship
 if ($isStudent && isset($_GET['sid'])) {
     $stmt = $conn->prepare("SELECT * FROM scholarships WHERE id = ?");
     $stmt->execute([$_GET['sid']]);
     $selectedScholarship = $stmt->fetch();
 }
 
-// Handle form submission
 if ($isStudent && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply'])) {
     $scholarshipId = $_POST['scholarship_id'];
     $parentsIncome = $_POST['parents_income'];
@@ -30,13 +28,11 @@ if ($isStudent && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply']
     $contactNumbers = trim($_POST['contact_numbers']);
     $description = trim($_POST['description']);
     $testimonialChecked = isset($_POST['testimonial_checked']) ? 1 : 0;
-
     $fullName = trim($_POST['full_name']);
     $nameInitials = trim($_POST['name_with_initials']);
     $dob = $_POST['dob'];
     $gender = $_POST['gender'];
 
-    // Check if already applied
     $check = $conn->prepare("SELECT COUNT(*) FROM student_scholarships WHERE student_id = ? AND scholarship_id = ?");
     $check->execute([$_SESSION['user_id'], $scholarshipId]);
     $alreadyApplied = $check->fetchColumn();
@@ -44,9 +40,17 @@ if ($isStudent && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply']
     if ($alreadyApplied > 0) {
         $message = 'You have already applied for this scholarship.';
     } else {
-        // Upsert into students table
-        $stmtStudent = $conn->prepare("INSERT INTO students (user_id, full_name, name_with_initials, dob, gender, parents_income, parents_occupation, gpa, permanent_address, nic, contact_numbers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE full_name=?, name_with_initials=?, dob=?, gender=?, parents_income=?, parents_occupation=?, gpa=?, permanent_address=?, nic=?, contact_numbers=?");
-        $stmtStudent->execute([$_SESSION['user_id'], $fullName, $nameInitials, $dob, $gender, $parentsIncome, $parentsOccupation, $gpa, $permanentAddress, $nic, $contactNumbers, $fullName, $nameInitials, $dob, $gender, $parentsIncome, $parentsOccupation, $gpa, $permanentAddress, $nic, $contactNumbers]);
+        $profCheck = $conn->prepare("SELECT COUNT(*) FROM students WHERE user_id = ?");
+        $profCheck->execute([$_SESSION['user_id']]);
+        $profExists = $profCheck->fetchColumn();
+
+        if ($profExists > 0) {
+            $stmtStudent = $conn->prepare("UPDATE students SET full_name=?, name_with_initials=?, dob=?, gender=?, parents_income=?, parents_occupation=?, gpa=?, permanent_address=?, nic=?, contact_numbers=? WHERE user_id=?");
+            $stmtStudent->execute([$fullName, $nameInitials, $dob, $gender, $parentsIncome, $parentsOccupation, $gpa, $permanentAddress, $nic, $contactNumbers, $_SESSION['user_id']]);
+        } else {
+            $stmtStudent = $conn->prepare("INSERT INTO students (user_id, full_name, name_with_initials, dob, gender, parents_income, parents_occupation, gpa, permanent_address, nic, contact_numbers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmtStudent->execute([$_SESSION['user_id'], $fullName, $nameInitials, $dob, $gender, $parentsIncome, $parentsOccupation, $gpa, $permanentAddress, $nic, $contactNumbers]);
+        }
 
         $stmt = $conn->prepare("INSERT INTO student_scholarships (student_id, scholarship_id, purpose, description, testimonial_checked) VALUES (?, ?, ?, ?, ?)");
         if ($stmt->execute([$_SESSION['user_id'], $scholarshipId, $purpose, $description, $testimonialChecked])) {
@@ -57,10 +61,8 @@ if ($isStudent && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply']
     }
 }
 
-// Fetch all scholarships for listing
 $allScholarships = $conn->query("SELECT * FROM scholarships ORDER BY id ASC")->fetchAll();
 
-// Fetch student's applications
 $applications = [];
 $userProfile = [];
 if ($isStudent) {
@@ -101,7 +103,6 @@ require_once '../includes/header.php';
 
             <?php if ($isStudent): ?>
                 <?php if ($selectedScholarship): ?>
-                    <!-- APPLICATION FORM for a specific scholarship -->
                     <div class="content-page">
                         <h2>Apply for: <?php echo htmlspecialchars($selectedScholarship['name']); ?></h2>
                         <p><?php echo htmlspecialchars($selectedScholarship['description']); ?></p>
@@ -135,30 +136,30 @@ require_once '../includes/header.php';
                                     <label>Gender</label>
                                     <select name="gender" required>
                                         <option value="">-- Select --</option>
-                                        <option value="Male" <?php if($userProfile['gender'] === 'Male') echo 'selected'; ?>>Male</option>
-                                        <option value="Female" <?php if($userProfile['gender'] === 'Female') echo 'selected'; ?>>Female</option>
-                                        <option value="Other" <?php if($userProfile['gender'] === 'Other') echo 'selected'; ?>>Other</option>
+                                        <option value="Male" <?php if ($userProfile['gender'] === 'Male') echo 'selected'; ?>>Male</option>
+                                        <option value="Female" <?php if ($userProfile['gender'] === 'Female') echo 'selected'; ?>>Female</option>
+                                        <option value="Other" <?php if ($userProfile['gender'] === 'Other') echo 'selected'; ?>>Other</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>Permanent Address</label>
-                                    <textarea name="permanent_address" id="appAddress" rows="2"><?php echo htmlspecialchars($userProfile['permanent_address']); ?></textarea>
+                                    <textarea name="permanent_address" rows="2"><?php echo htmlspecialchars($userProfile['permanent_address']); ?></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label><abbr title="National Identity Card">NIC</abbr> Number</label>
-                                    <input type="text" id="appNic" name="nic" value="<?php echo htmlspecialchars($userProfile['nic']); ?>">
+                                    <input type="text" name="nic" value="<?php echo htmlspecialchars($userProfile['nic']); ?>">
                                 </div>
                                 <div class="form-group">
                                     <label>Contact Number</label>
-                                    <input type="text" id="appContact" name="contact_numbers" value="<?php echo htmlspecialchars($userProfile['contact_numbers']); ?>">
+                                    <input type="text" name="contact_numbers" value="<?php echo htmlspecialchars($userProfile['contact_numbers']); ?>">
                                 </div>
                                 <div class="form-group">
                                     <label>Parents' Annual Income (Rs.)</label>
-                                    <input type="number" step="0.01" id="appIncome" name="parents_income" value="<?php echo htmlspecialchars($userProfile['parents_income']); ?>">
+                                    <input type="number" step="0.01" name="parents_income" value="<?php echo htmlspecialchars($userProfile['parents_income']); ?>">
                                 </div>
                                 <div class="form-group">
                                     <label>Parents' Occupation</label>
-                                    <input type="text" id="appOccupation" name="parents_occupation" value="<?php echo htmlspecialchars($userProfile['parents_occupation']); ?>">
+                                    <input type="text" name="parents_occupation" value="<?php echo htmlspecialchars($userProfile['parents_occupation']); ?>">
                                 </div>
                             </fieldset>
 
@@ -166,7 +167,7 @@ require_once '../includes/header.php';
                                 <legend>Academic Information</legend>
                                 <div class="form-group">
                                     <label>Current <abbr title="Grade Point Average">GPA</abbr> (0.00 - 4.00)</label>
-                                    <input type="number" step="0.01" min="0" max="4.0" id="appGpa" name="gpa" value="<?php echo htmlspecialchars($userProfile['gpa']); ?>">
+                                    <input type="number" step="0.01" min="0" max="4.0" name="gpa" value="<?php echo htmlspecialchars($userProfile['gpa']); ?>">
                                 </div>
                             </fieldset>
 
@@ -174,15 +175,15 @@ require_once '../includes/header.php';
                                 <legend>Additional Information</legend>
                                 <div class="form-group">
                                     <label>Purpose of Request</label>
-                                    <input type="text" id="appPurpose" name="purpose">
+                                    <input type="text" name="purpose">
                                 </div>
                                 <div class="form-group">
                                     <label>Additional Description</label>
-                                    <textarea name="description" id="appDesc" rows="3"></textarea>
+                                    <textarea name="description" rows="3"></textarea>
                                 </div>
                                 <div class="form-group">
                                     <label>
-                                        <input type="checkbox" id="appTestimonial" name="testimonial_checked">
+                                        <input type="checkbox" name="testimonial_checked">
                                         I confirm that I have a testimonial from a Grama Niladhari or authorized personnel.
                                     </label>
                                 </div>
@@ -192,7 +193,6 @@ require_once '../includes/header.php';
                         </form>
                     </div>
                 <?php else: ?>
-                    <!-- LIST OF AVAILABLE SCHOLARSHIPS -->
                     <div class="content-page">
                         <h2>Available Scholarships</h2>
                         <?php if (empty($allScholarships)): ?>
@@ -222,7 +222,6 @@ require_once '../includes/header.php';
                     </div>
                 <?php endif; ?>
 
-                <!-- YOUR APPLICATIONS TABLE -->
                 <div class="table-container">
                     <h2>Your Applications</h2>
                     <table>
@@ -230,7 +229,6 @@ require_once '../includes/header.php';
                         <thead>
                             <tr>
                                 <th>Scholarship</th>
-                                <th>GPA</th>
                                 <th>Status</th>
                                 <th>Applied On</th>
                             </tr>
@@ -239,13 +237,12 @@ require_once '../includes/header.php';
                             <?php foreach ($applications as $app): ?>
                             <tr>
                                 <td><?php echo htmlspecialchars($app['scholarship_name']); ?></td>
-                                <td><?php echo htmlspecialchars($app['gpa']); ?></td>
                                 <td><em><?php echo ucfirst($app['status']); ?></em></td>
                                 <td><?php echo htmlspecialchars($app['applied_at']); ?></td>
                             </tr>
                             <?php endforeach; ?>
-                            <?php if (count($applications) === 0): ?>
-                            <tr><td colspan="4">No applications yet.</td></tr>
+                            <?php if (empty($applications)): ?>
+                            <tr><td colspan="3">No applications yet.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -259,7 +256,6 @@ require_once '../includes/header.php';
             <?php endif; ?>
 
         <?php else: ?>
-            <!-- GUEST VIEW -->
             <div class="content-page">
                 <h2>Available Scholarships</h2>
                 <?php if (empty($allScholarships)): ?>
@@ -294,13 +290,38 @@ require_once '../includes/header.php';
 
     <script type="text/javascript">
         function checkApplication() {
-            var gpa = parseFloat(document.appForm.gpa.value);
-            if (isNaN(gpa) || gpa < 0 || gpa > 4.0) {
-                alert("GPA must be between 0.00 and 4.00.");
+            var fullName = document.appForm.full_name.value;
+            var nameInitials = document.appForm.name_with_initials.value;
+            var dob = document.appForm.dob.value;
+            var gender = document.appForm.gender.value;
+            var nic = document.appForm.nic.value;
+            var gpa = document.appForm.gpa.value;
+
+            if (fullName == "") {
+                alert("Full name is required.");
                 return false;
             }
-
-            var nic = document.appForm.nic.value;
+            if (nameInitials == "") {
+                alert("Name with initials is required.");
+                return false;
+            }
+            if (dob == "") {
+                alert("Date of birth is required.");
+                return false;
+            } else {
+                var parts = dob.split("-");
+                var dobDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (dobDate > today) {
+                    alert("Date of birth cannot be in the future.");
+                    return false;
+                }
+            }
+            if (gender == "") {
+                alert("Please select a gender.");
+                return false;
+            }
             if (nic == "") {
                 alert("Please enter your NIC number.");
                 return false;
@@ -316,12 +337,18 @@ require_once '../includes/header.php';
                     return false;
                 }
             }
-
+            if (gpa == "") {
+                alert("GPA is required.");
+                return false;
+            }
+            if (gpa < 0 || gpa > 4.0) {
+                alert("GPA must be between 0.00 and 4.00.");
+                return false;
+            }
             if (document.appForm.testimonial_checked.checked == false) {
                 alert("You must confirm the testimonial.");
                 return false;
             }
-
             return true;
         }
     </script>

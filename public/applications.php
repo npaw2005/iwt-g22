@@ -9,7 +9,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'registrar') {
 
 $message = '';
 
-// Handle POST actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
 
@@ -37,10 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch all scholarships
 $scholarships = $conn->query("SELECT * FROM scholarships ORDER BY id DESC")->fetchAll();
 
-// Fetch all student applications
 $stmt = $conn->query("SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, st.dob, st.gender, st.parents_income, st.parents_occupation, st.gpa, st.permanent_address, st.nic, st.contact_numbers, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id LEFT JOIN students st ON u.id = st.user_id INNER JOIN scholarships s ON ss.scholarship_id = s.id ORDER BY ss.applied_at DESC");
 $applications = $stmt->fetchAll();
 
@@ -173,11 +170,9 @@ require_once '../includes/header.php';
             var deadlineStr = document.addScholarshipForm.deadline.value;
             if (deadlineStr != "") {
                 var parts = deadlineStr.split("-");
-                // Parse date parts to avoid UTC/local time zone issues
                 var selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
                 var today = new Date();
                 today.setHours(0, 0, 0, 0);
-
                 if (selectedDate < today) {
                     alert("The deadline cannot be set in the past.");
                     return false;

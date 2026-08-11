@@ -49,7 +49,6 @@ require_once '../includes/header.php';
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password">
             </div>
-            <input type="hidden" id="loginErrorHolder" value="">
             <button type="submit" class="btn btn-primary">Login</button>
             <a href="signup.php" class="btn">Sign Up</a>
             <a href="home.php" class="btn">Guest View</a>

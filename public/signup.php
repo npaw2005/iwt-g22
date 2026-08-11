@@ -44,7 +44,7 @@ require_once '../includes/header.php';
         <?php if ($success): ?>
         <script type="text/javascript">alert("<?php echo addslashes($success); ?>");</script>
         <?php endif; ?>
-        <form name="signupForm" id="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()">
+        <form name="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()">
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username">
@@ -77,22 +77,18 @@ require_once '../includes/header.php';
                 alert("Username is required.");
                 return false;
             }
-
             if (email == "") {
                 alert("Valid email is required.");
                 return false;
             }
-
             if (pass.length < 6) {
                 alert("Password must be at least 6 characters.");
                 return false;
             }
-
             if (pass != confirm || confirm == "") {
                 alert("Passwords do not match.");
                 return false;
             }
-
             return true;
         }
     </script>

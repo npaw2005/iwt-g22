@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 $users = [];
 $applications = [];
-$stats = ['total_users' => 0, 'students' => 0, 'staff' => 0];
+$stats = ['total_users' => 0, 'students' => 0, 'staff' => 0, 'scholarships' => 0, 'applications' => 0];
 
 if ($action === 'list') {
     $stmt = $conn->query("SELECT id, username, email, role, created_at FROM users ORDER BY id DESC");
@@ -76,7 +76,7 @@ if ($action === 'list') {
     $stats['total_users'] = count($users);
     foreach ($users as $u) {
         if ($u['role'] === 'student') $stats['students']++;
-        if (in_array($u['role'], ['admin', 'registrar'])) $stats['staff']++;
+        if ($u['role'] === 'admin' || $u['role'] === 'registrar') $stats['staff']++;
     }
 
     $stmt2 = $conn->query("SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, st.dob, st.gender, st.parents_income, st.parents_occupation, st.gpa, st.permanent_address, st.nic, st.contact_numbers, sch.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id LEFT JOIN students st ON u.id = st.user_id INNER JOIN scholarships sch ON ss.scholarship_id = sch.id ORDER BY ss.applied_at DESC");
@@ -222,8 +222,8 @@ require_once '../includes/header.php';
                         <tr>
                             <th>Applicant Details</th>
                             <th>Scholarship</th>
-                            <th>Academic & Income</th>
-                            <th>Contact & Address</th>
+                            <th>Academic &amp; Income</th>
+                            <th>Contact &amp; Address</th>
                             <th>Status</th>
                         </tr>
                     </thead>

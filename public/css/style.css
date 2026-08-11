@@ -81,17 +81,18 @@ h1, h2, h3 {
 input[type="text"],
 input[type="password"],
 input[type="email"],
-input[type="number"] {
+input[type="number"],
+input[type="date"] {
     width: 100%;
     border: 1px solid #000000;
     padding: 5px;
-    box-sizing: border-box;
 }
 
 input[type="text"]:focus,
 input[type="password"]:focus,
 input[type="email"]:focus,
-input[type="number"]:focus {
+input[type="number"]:focus,
+input[type="date"]:focus {
     background-color: #ffffcc;
     outline: 1px solid #000000;
 }
@@ -101,15 +102,17 @@ input[type="number"]:focus {
     width: 100%;
     border: 1px solid #000000;
     padding: 5px;
-    box-sizing: border-box;
 }
 
-.btn, .btn-primary, .btn-danger {
-    box-sizing: border-box;
-    font-family: inherit;
-    font-size: inherit;
-    line-height: normal;
-    vertical-align: middle;
+fieldset {
+    border: 1px solid #000000;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+legend {
+    font-weight: bold;
+    padding: 0 5px;
 }
 
 .btn {
@@ -182,10 +185,6 @@ tbody tr:nth-child(even) {
 
 tbody tr:hover {
     background-color: #eeeeee;
-}
-
-.scholarship-list li, .feature-list li {
-    margin-bottom: 8px;
 }
 
 .dashboard-header {
