@@ -1,23 +1,24 @@
 body {
-    background-color: #ffffff;
-    color: #000000;
+    background-color: #f8f9fa;
+    color: #333333;
+    font-family: Arial, Helvetica, sans-serif;
     margin: 0;
     padding: 10px;
 }
 
 .navbar {
-    border-bottom: 2px solid #000000;
-    background-color: purple;
+    border-bottom: 3px solid #4b0082;
+    background-color: #6a0dad;
     overflow: hidden;
 }
 
 .navbar-brand {
     float: left;
-    font-size: 1.1em;
+    font-size: 1.2em;
     font-weight: bold;
-    color: white;
-    padding: 0.3em 0.8em;
-    border-right: 1px solid white;
+    color: #ffffff;
+    padding: 0.5em 1em;
+    border-right: 1px solid #8a2be2;
 }
 
 .nav-links {
@@ -35,14 +36,14 @@ body {
 .nav-links a {
     float: left;
     text-decoration: none;
-    color: white;
-    background-color: purple;
-    padding: 0.3em 0.8em;
-    border-right: 1px solid white;
+    color: #ffffff;
+    padding: 0.5em 1em;
+    border-right: 1px solid #8a2be2;
+    font-weight: bold;
 }
 
 .nav-links a:hover {
-    background-color: #ff3300;
+    background-color: #ff4500;
 }
 
 .navbar-clear {
@@ -50,32 +51,45 @@ body {
 }
 
 .container, .content-page, .table-container {
-    border: 2px solid #000000;
-    padding: 15px;
-    margin-bottom: 15px;
+    border: 1px solid #d1d1d1;
+    background-color: #ffffff;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 4px;
 }
 
 .auth-container {
-    border: 2px solid #000000;
-    padding: 15px;
-    margin: 40px auto 15px auto;
-    max-width: 400px;
+    border: 1px solid #d1d1d1;
+    background-color: #ffffff;
+    padding: 25px;
+    margin: 40px auto 20px auto;
+    max-width: 450px;
+    border-radius: 4px;
 }
 
-h1, h2, h3 {
+h1 {
+    color: #4b0082;
     margin-top: 0;
-    margin-bottom: 10px;
-    padding-bottom: 5px;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #eeeeee;
+}
+
+h2, h3 {
+    color: #333333;
+    margin-top: 0;
+    margin-bottom: 12px;
 }
 
 .form-group {
-    margin-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     font-weight: bold;
+    color: #555555;
 }
 
 input[type="text"],
@@ -84,8 +98,10 @@ input[type="email"],
 input[type="number"],
 input[type="date"] {
     width: 100%;
-    border: 1px solid #000000;
-    padding: 5px;
+    border: 1px solid #cccccc;
+    padding: 8px;
+    border-radius: 3px;
+    font-family: inherit;
 }
 
 input[type="text"]:focus,
@@ -93,73 +109,86 @@ input[type="password"]:focus,
 input[type="email"]:focus,
 input[type="number"]:focus,
 input[type="date"]:focus {
-    background-color: #ffffcc;
-    outline: 1px solid #000000;
+    background-color: #fdfdde;
+    outline: 1px solid #6a0dad;
+    border-color: #6a0dad;
 }
 
 .form-group select,
 .form-group textarea {
     width: 100%;
-    border: 1px solid #000000;
-    padding: 5px;
+    border: 1px solid #cccccc;
+    padding: 8px;
+    border-radius: 3px;
+    font-family: inherit;
 }
 
 fieldset {
-    border: 1px solid #000000;
-    padding: 10px;
-    margin-bottom: 10px;
+    border: 1px solid #cccccc;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    background-color: #fafafa;
 }
 
 legend {
     font-weight: bold;
-    padding: 0 5px;
+    padding: 2px 8px;
+    color: #6a0dad;
+    border: 1px solid #cccccc;
+    background-color: #ffffff;
+    border-radius: 3px;
 }
 
 .btn {
-    border: 1px solid #000000;
-    background-color: #e0e0e0;
-    color: #000000;
-    padding: 5px 10px;
+    border: 1px solid #bbbbbb;
+    background-color: #e6e6e6;
+    color: #333333;
+    padding: 8px 12px;
     text-decoration: none;
     display: inline-block;
     cursor: pointer;
-    margin-right: 4px;
+    margin-right: 5px;
+    border-radius: 3px;
+    font-weight: bold;
 }
 
 .btn:hover {
-    background-color: #cccccc;
+    background-color: #d4d4d4;
 }
 
 .btn-primary {
-    border: 1px solid #000000;
-    background-color: #336699;
+    border: 1px solid #2a527a;
+    background-color: #3a75a7;
     color: #ffffff;
-    padding: 5px 10px;
+    padding: 8px 12px;
     text-decoration: none;
     display: inline-block;
     cursor: pointer;
-    margin-right: 4px;
+    margin-right: 5px;
+    border-radius: 3px;
+    font-weight: bold;
 }
 
 .btn-primary:hover {
-    background-color: #224477;
-    color: #ffffff;
+    background-color: #2e5d85;
 }
 
 .btn-danger {
-    border: 1px solid #000000;
-    background-color: #cc0000;
+    border: 1px solid #a80000;
+    background-color: #d11a1a;
     color: #ffffff;
-    padding: 5px 10px;
+    padding: 8px 12px;
     text-decoration: none;
     display: inline-block;
     cursor: pointer;
-    margin-right: 4px;
+    margin-right: 5px;
+    border-radius: 3px;
+    font-weight: bold;
 }
 
 .btn-danger:hover {
-    background-color: #990000;
-    color: #ffffff;
+    background-color: #b51515;
 }
 
 table {
@@ -168,43 +197,53 @@ table {
     margin-bottom: 15px;
 }
 
+table caption {
+    font-style: italic;
+    color: #666666;
+    margin-bottom: 8px;
+}
+
 table th, table td {
-    border: 1px solid #000000;
-    padding: 8px;
+    border: 1px solid #cccccc;
+    padding: 10px;
     text-align: left;
 }
 
 table th {
-    background-color: #f0f0f0;
+    background-color: #eeeeee;
     font-weight: bold;
+    color: #333333;
 }
 
 tbody tr:nth-child(even) {
-    background-color: #f8f8f8;
+    background-color: #fbfbfb;
 }
 
 tbody tr:hover {
-    background-color: #eeeeee;
+    background-color: #f1f1f1;
 }
 
 .dashboard-header {
-    border: 2px solid #000000;
-    padding: 10px;
-    margin-bottom: 15px;
-    background-color: #f0f0f0;
+    border: 1px solid #cccccc;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #eeeeee;
+    border-radius: 4px;
 }
 
 .stats-table {
-    width: auto;
+    width: 100%;
 }
 
 .stats-table td {
     text-align: center;
-    font-size: 1.3em;
+    font-size: 1.4em;
     font-weight: bold;
+    color: #3a75a7;
+    padding: 15px;
 }
 
 .input-readonly {
-    background-color: #e8e8e8;
-    color: #555555;
+    background-color: #e9ecef;
+    color: #6c757d;
 }
