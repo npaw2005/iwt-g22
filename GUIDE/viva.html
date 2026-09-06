@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viva & Q&A Prep - Study Guide</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Study Guide</h2>
+        <ul>
+            <li><a href="index.html">Home / Intro</a></li>
+            <li><a href="html.html">HTML</a></li>
+            <li><a href="css.html">CSS</a></li>
+            <li><a href="js.html">JavaScript</a></li>
+            <li><a href="php.html">PHP</a></li>
+            <li><a href="sql.html">SQL</a></li>
+            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>Viva & Q&A Prep</h1>
+        
+<div class="concept-box">
+    <h3>Viva Question 1: How do you get information from the database and make it visible in a form as read-only?</h3>
+    <p><strong>Answer:</strong> First, you use a <code>SELECT</code> query to fetch the specific record based on an ID passed via <code>$_GET</code>. You fetch the row as an associative array. Then, inside your HTML form, you use PHP's <code>echo</code> to print the database value inside the <code>value="..."</code> attribute of the input. Finally, you add the <code>readonly</code> attribute to the HTML input tag to prevent the user from typing in it.</p>
+</div>
+
+<div class="project-context">
+    <h3>Project Context: Code Example</h3>
+    <p><strong>File:</strong> <code>public/admin.php</code> (Lines 62 & 109)</p>
+    <pre><code>&lt;?php
+// 1. Fetch data
+$stmt = $conn-&gt;prepare("SELECT * FROM users WHERE id = ?");
+$stmt-&gt;execute([$id]);
+$editUser = $stmt-&gt;fetch();
+?&gt;
+
+&lt;!-- 2. Display in form (with readonly example) --&gt;
+&lt;input type="text" name="username" value="&lt;?php echo htmlspecialchars($editUser['username']); ?&gt;" readonly&gt;
+</code></pre>
+    <p><strong>Note:</strong> In our actual code, the field isn't read-only because the admin needs to edit it, but adding <code>readonly</code> to the tag is all it takes to lock it down while still submitting the data via POST!</p>
+</div>
+
+<div class="concept-box">
+    <h3>Viva Question 2: Why do we use <code>htmlspecialchars()</code> when printing data from the database?</h3>
+    <p><strong>Answer:</strong> It converts special characters to HTML entities (e.g., <code>&lt;</code> becomes <code>&amp;lt;</code>). This prevents Cross-Site Scripting (XSS) attacks. If a user entered malicious JavaScript as their name, <code>htmlspecialchars()</code> ensures it is printed as harmless text rather than executed by the browser.</p>
+</div>
+
+<div class="concept-box">
+    <h3>Viva Question 3: How does your login system remember who is logged in across different pages?</h3>
+    <p><strong>Answer:</strong> We use PHP Sessions. At the top of every page, we call <code>session_start()</code>. When a user logs in successfully, we store their ID and role in the <code>$_SESSION</code> superglobal array (e.g., <code>$_SESSION['role'] = 'admin'</code>). On other pages, we check if those session variables exist; if not, we use <code>header("Location: login.php")</code> to kick them out.</p>
+</div>
+
+<div class="concept-box">
+    <h3>Viva Question 4: What is the difference between <code>include</code> and <code>require_once</code>?</h3>
+    <p><strong>Answer:</strong> If an <code>include</code> fails (file missing), the script continues with a warning. If a <code>require</code> fails, it throws a fatal error and stops the script. <code>require_once</code> ensures the file is included exactly one time, preventing redeclaration errors (which is why we use it for <code>db.php</code> and headers).</p>
+</div>
+
+    </div>
+</body>
+</html>

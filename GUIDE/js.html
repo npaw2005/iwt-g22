@@ -1,0 +1,71 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript - Study Guide</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Study Guide</h2>
+        <ul>
+            <li><a href="index.html">Home / Intro</a></li>
+            <li><a href="html.html">HTML</a></li>
+            <li><a href="css.html">CSS</a></li>
+            <li><a href="js.html">JavaScript</a></li>
+            <li><a href="php.html">PHP</a></li>
+            <li><a href="sql.html">SQL</a></li>
+            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>JavaScript</h1>
+        
+<div class="concept-box">
+    <h3>Concept: DOM Level 0 Form Access</h3>
+    <p>The syllabus specifically teaches accessing form elements using the older DOM Level 0 approach (<code>document.formName.inputName.value</code>) rather than modern methods like <code>document.getElementById()</code>. Variables are declared with <code>var</code>, and functions use the <code>function</code> keyword (no ES6 arrow functions).</p>
+</div>
+
+<div class="code-example">
+    <h4>General Code Example (Exam Style)</h4>
+    <pre><code>function validateForm() {
+    var u = document.loginForm.username.value;
+    if (u == "") {
+        alert("Username is required");
+        return false;
+    }
+    return true;
+}</code></pre>
+</div>
+
+<div class="project-context">
+    <h3>Project Context: Where is this used?</h3>
+    <p><strong>File:</strong> <code>public/admin.php</code> (Lines 264+)</p>
+    <p><strong>Explanation:</strong> In the admin panel, we use this exact method to validate the Add User form before it is sent to the server. We trigger it using <code>&lt;form onsubmit="return checkAddUser()" name="addUserForm"&gt;</code>.</p>
+    <pre><code>function checkAddUser() {
+    var username = document.addUserForm.username.value;
+    if (username == "") {
+        alert("Please enter a username.");
+        return false;
+    }
+    return true;
+}</code></pre>
+</div>
+
+<div class="concept-box">
+    <h3>Concept: Dialog Boxes</h3>
+    <p>JavaScript provides three native dialog boxes: <code>alert()</code> (for messages), <code>confirm()</code> (for OK/Cancel boolean responses), and <code>prompt()</code> (for user input).</p>
+</div>
+
+<div class="project-context">
+    <h3>Project Context: Where is this used?</h3>
+    <p><strong>File:</strong> <code>public/applications.php</code> (Line 146)</p>
+    <p><strong>Explanation:</strong> We use <code>confirm()</code> directly in the HTML <code>onclick</code> attribute to prevent registrars from accidentally deleting or approving an application without verifying.</p>
+    <pre><code>&lt;button type="submit" onclick="return confirm('Approve this application?')"&gt;Approve&lt;/button&gt;</code></pre>
+</div>
+
+    </div>
+</body>
+</html>

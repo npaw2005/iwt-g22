@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHP - Hypertext Preprocessor - Study Guide</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Study Guide</h2>
+        <ul>
+            <li><a href="index.html">Home / Intro</a></li>
+            <li><a href="html.html">HTML</a></li>
+            <li><a href="css.html">CSS</a></li>
+            <li><a href="js.html">JavaScript</a></li>
+            <li><a href="php.html">PHP</a></li>
+            <li><a href="sql.html">SQL</a></li>
+            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>PHP - Hypertext Preprocessor</h1>
+        
+<div class="concept-box">
+    <h3>Concept: Superglobals ($_POST, $_GET, $_SESSION)</h3>
+    <p>PHP uses superglobals to collect form data and manage user state. The syllabus emphasizes using <code>$_POST</code> for secure form submissions (like login) and <code>$_GET</code> for URL parameters. <code>$_SESSION</code> is critical for maintaining a logged-in state.</p>
+</div>
+
+<div class="code-example">
+    <h4>General Code Example (Exam Style)</h4>
+    <pre><code>&lt;?php
+session_start();
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $user = $_POST['username'];
+    $_SESSION['user'] = $user;
+    header("Location: dashboard.php");
+}
+?&gt;</code></pre>
+</div>
+
+<div class="project-context">
+    <h3>Project Context: Where is this used?</h3>
+    <p><strong>File:</strong> <code>public/login.php</code> (Lines 2-25)</p>
+    <p><strong>Explanation:</strong> In our project, we use <code>session_start()</code> at the very top of every PHP file. In <code>login.php</code>, we check <code>if ($_SERVER['REQUEST_METHOD'] === 'POST')</code> to see if the user clicked login. We then capture <code>$_POST['username']</code> and if the database match is successful, we set <code>$_SESSION['user_id'] = $user['id']</code>.</p>
+</div>
+
+<div class="concept-box">
+    <h3>Concept: Array Mechanics & References</h3>
+    <p>Past papers frequently ask you to predict the output of array assignments (e.g., implicit indexing where <code>$arr[] = 56</code> assigns to the next available integer key) and the <strong>foreach reference leak</strong> gotcha (<code>foreach($arr as &$val)</code>).</p>
+</div>
+
+<div class="code-example">
+    <h4>General Code Example (Exam Style)</h4>
+    <pre><code>&lt;?php
+$nums = [1, 2, 3];
+foreach ($nums as &$n) { $n *= 2; }
+$n = 100; // This overwrites the last element!
+print_r($nums); // Output: [2, 4, 100]
+?&gt;</code></pre>
+</div>
+
+<div class="concept-box">
+    <h3>Concept: PHP & Server Configuration</h3>
+    <p>Exams test your knowledge of Apache vs PHP configuration directives.</p>
+    <ul>
+        <li><strong>Apache (httpd.conf):</strong> ServerRoot, DocumentRoot, LoadModule, PHPIniDir</li>
+        <li><strong>PHP (php.ini):</strong> upload_max_filesize, display_errors</li>
+    </ul>
+</div>
+
+    </div>
+</body>
+</html>

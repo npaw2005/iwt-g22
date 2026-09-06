@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML - HyperText Markup Language - Study Guide</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Study Guide</h2>
+        <ul>
+            <li><a href="index.html">Home / Intro</a></li>
+            <li><a href="html.html">HTML</a></li>
+            <li><a href="css.html">CSS</a></li>
+            <li><a href="js.html">JavaScript</a></li>
+            <li><a href="php.html">PHP</a></li>
+            <li><a href="sql.html">SQL</a></li>
+            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>HTML - HyperText Markup Language</h1>
+        
+<div class="concept-box">
+    <h3>Concept: HTML Forms & Inputs</h3>
+    <p>Forms are used to collect user input. The syllabus focuses on standard attributes like <code>action</code>, <code>method</code>, and <code>name</code>. In paper exams, you are frequently asked to write HTML for a basic registration or login form.</p>
+</div>
+
+<div class="code-example">
+    <h4>General Code Example (Exam Style)</h4>
+    <pre><code>&lt;form action="process.php" method="POST" name="loginForm"&gt;
+    &lt;label for="user"&gt;Username:&lt;/label&gt;
+    &lt;input type="text" id="user" name="username" required&gt;
+    
+    &lt;input type="submit" value="Login"&gt;
+&lt;/form&gt;</code></pre>
+</div>
+
+<div class="project-context">
+    <h3>Project Context: Where is this used?</h3>
+    <p><strong>File:</strong> <code>public/login.php</code></p>
+    <p><strong>Explanation:</strong> In our Scholarship System, we use this exact structure for the login and signup pages. For example, in <code>signup.php</code>, we use a <code>&lt;form&gt;</code> tag with <code>method="POST"</code> and an <code>onsubmit</code> attribute to trigger JavaScript validation before the data is sent to PHP.</p>
+    <pre><code>&lt;form name="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()"&gt;
+    &lt;input type="text" name="username"&gt;
+&lt;/form&gt;</code></pre>
+</div>
+
+<div class="concept-box">
+    <h3>Concept: Semantic Tables</h3>
+    <p>Tables are used to display tabular data using <code>&lt;table&gt;</code>, <code>&lt;tr&gt;</code>, <code>&lt;th&gt;</code>, and <code>&lt;td&gt;</code>. They are heavily tested in exams for displaying database results.</p>
+</div>
+
+<div class="project-context">
+    <h3>Project Context: Where is this used?</h3>
+    <p><strong>File:</strong> <code>public/admin.php</code> (Lines 217+)</p>
+    <p><strong>Explanation:</strong> We used tables to create the "System Report" and "Scholarship Applications" lists. We loop through database records using PHP and echo out <code>&lt;tr&gt;</code> and <code>&lt;td&gt;</code> tags to build the table dynamically.</p>
+</div>
+
+    </div>
+</body>
+</html>

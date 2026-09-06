@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL - Structured Query Language - Study Guide</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Study Guide</h2>
+        <ul>
+            <li><a href="index.html">Home / Intro</a></li>
+            <li><a href="html.html">HTML</a></li>
+            <li><a href="css.html">CSS</a></li>
+            <li><a href="js.html">JavaScript</a></li>
+            <li><a href="php.html">PHP</a></li>
+            <li><a href="sql.html">SQL</a></li>
+            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>SQL - Structured Query Language</h1>
+        
+<div class="concept-box">
+    <h3>Concept: Data Definition Language (DDL) & Foreign Keys</h3>
+    <p>The syllabus requires you to write <code>CREATE TABLE</code> statements, specifically focusing on Primary Keys (<code>AUTO_INCREMENT</code>) and Foreign Keys linking parent and child tables.</p>
+</div>
+
+<div class="code-example">
+    <h4>General Code Example (Exam Style)</h4>
+    <pre><code>CREATE TABLE enrollments (
+    enroll_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT,
+    course_id INT,
+    FOREIGN KEY (student_id) REFERENCES students(student_id)
+);</code></pre>
+</div>
+
+<div class="project-context">
+    <h3>Project Context: Where is this used?</h3>
+    <p><strong>File:</strong> <code>schema.sql</code></p>
+    <p><strong>Explanation:</strong> Our project uses this exact pattern extensively. The <code>student_scholarships</code> table uses a composite primary key and foreign keys to link to the <code>users</code> and <code>scholarships</code> tables. We also use <code>ON DELETE CASCADE</code> which ensures that if a scholarship is deleted, all applications for it are also automatically deleted.</p>
+    <pre><code>CREATE TABLE student_scholarships (
+    student_id INT NOT NULL,
+    scholarship_id INT NOT NULL,
+    PRIMARY KEY (student_id, scholarship_id),
+    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
+);</code></pre>
+</div>
+
+<div class="concept-box">
+    <h3>Concept: Database Connection & Prepared Statements</h3>
+    <p>Exams test modular architecture (splitting config into <code>value.php</code> and <code>con.php</code>). They also test CRUD operations using MySQLi prepared statements (<code>prepare()</code>, <code>bind_param()</code>, <code>execute()</code>) or PDO.</p>
+</div>
+
+<div class="project-context">
+    <h3>Project Context: Where is this used?</h3>
+    <p><strong>File:</strong> <code>config/db.php</code> & <code>public/admin.php</code></p>
+    <p><strong>Explanation:</strong> We implement this modular architecture. <code>config/db.php</code> holds our PDO connection string. In <code>admin.php</code>, when adding a user, we use a prepared statement to prevent SQL injection, which perfectly mirrors the exam requirements.</p>
+    <pre><code>$stmt = $conn->prepare("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)");
+$stmt->execute([$username, $password, $email, $role]);</code></pre>
+</div>
+
+    </div>
+</body>
+</html>

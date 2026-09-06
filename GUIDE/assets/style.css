@@ -1,0 +1,116 @@
+
+:root {
+    --bg-color: #121212;
+    --sidebar-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --link-color: #64b5f6;
+    --link-hover: #90caf9;
+    --border-color: #333333;
+    --code-bg: #2d2d2d;
+    --accent: #bb86fc;
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--sidebar-bg);
+    padding: 20px;
+    border-right: 1px solid var(--border-color);
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.sidebar h2 {
+    color: var(--accent);
+    margin-top: 0;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+    color: var(--link-color);
+    text-decoration: none;
+    font-size: 1.1em;
+    display: block;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.sidebar ul li a:hover {
+    background-color: var(--border-color);
+    color: var(--link-hover);
+}
+
+.content {
+    margin-left: 290px;
+    padding: 40px;
+    max-width: 1000px;
+    flex-grow: 1;
+}
+
+h1, h2, h3 {
+    color: var(--accent);
+}
+
+a {
+    color: var(--link-color);
+}
+
+a:hover {
+    color: var(--link-hover);
+}
+
+pre {
+    background-color: var(--code-bg);
+    padding: 15px;
+    border-radius: 5px;
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+}
+
+code {
+    font-family: 'Courier New', Courier, monospace;
+    color: #a5d6a7;
+}
+
+.concept-box {
+    background-color: var(--sidebar-bg);
+    border-left: 4px solid var(--accent);
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 0 5px 5px 0;
+}
+
+.code-example {
+    margin-bottom: 20px;
+}
+
+.project-context {
+    background-color: #1a237e; /* deep blue */
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+    border-left: 4px solid #64b5f6;
+}
+.project-context h3 {
+    color: #90caf9;
+    margin-top: 0;
+}

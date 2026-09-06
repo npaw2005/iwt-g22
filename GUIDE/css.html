@@ -1,0 +1,59 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS - Cascading Style Sheets - Study Guide</title>
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Study Guide</h2>
+        <ul>
+            <li><a href="index.html">Home / Intro</a></li>
+            <li><a href="html.html">HTML</a></li>
+            <li><a href="css.html">CSS</a></li>
+            <li><a href="js.html">JavaScript</a></li>
+            <li><a href="php.html">PHP</a></li>
+            <li><a href="sql.html">SQL</a></li>
+            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>CSS - Cascading Style Sheets</h1>
+        
+<div class="concept-box">
+    <h3>Concept: CSS Selectors & Attributes</h3>
+    <p>The syllabus requires you to know Element, Class (.), ID (#), and attribute selectors (e.g., <code>input[type="text"]</code>).</p>
+</div>
+
+<div class="code-example">
+    <h4>General Code Example</h4>
+    <pre><code>/* Class Selector */
+.btn { background-color: blue; }
+
+/* Attribute Selector */
+input[type="password"] { border: 1px solid black; }</code></pre>
+</div>
+
+<div class="project-context">
+    <h3>Project Context: Where is this used?</h3>
+    <p><strong>File:</strong> <code>public/css/style.css</code></p>
+    <p><strong>Explanation:</strong> We styled our inputs explicitly using <code>input[type="text"], input[type="password"]</code> so that the styling only applies to text fields and not radio buttons or checkboxes. We used class selectors like <code>.btn</code> and <code>.btn-primary</code> to standardize button looks across the site without repeating code.</p>
+</div>
+
+<div class="concept-box">
+    <h3>Concept: Floating Layouts</h3>
+    <p>Because modern tools like Flexbox and Grid are out of scope, layouts in this syllabus rely on <code>float: left</code>, <code>float: right</code>, and <code>clear: both</code>.</p>
+</div>
+
+<div class="project-context">
+    <h3>Project Context: Where is this used?</h3>
+    <p><strong>File:</strong> <code>public/css/style.css</code></p>
+    <p><strong>Explanation:</strong> Our Navigation Bar (<code>.navbar</code>) uses floating. The brand logo (<code>.navbar-brand</code>) uses <code>float: left</code>, and the navigation links (<code>.nav-links a</code>) also use <code>float: left</code> so they sit horizontally next to each other. We use a clearing div (<code>.navbar-clear { clear: both; }</code>) at the end of the navbar to prevent the layout from collapsing.</p>
+</div>
+
+    </div>
+</body>
+</html>
