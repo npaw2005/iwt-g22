@@ -220,35 +220,20 @@ require_once '../includes/header.php';
                     <caption>Read-only summary of all applications</caption>
                     <thead>
                         <tr>
-                            <th>Applicant Details</th>
+                            <th>Username</th>
+                            <th>Full Name</th>
                             <th>Scholarship</th>
-                            <th>Academic &amp; Income</th>
-                            <th>Contact &amp; Address</th>
+                            <th>Applied On</th>
                             <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php foreach ($applications as $app): ?>
                         <tr>
-                            <td>
-                                <strong><?php echo htmlspecialchars($app['username']); ?></strong> (<?php echo htmlspecialchars($app['gender']); ?>)<br>
-                                <small><?php echo htmlspecialchars($app['full_name']); ?></small><br>
-                                <small>DOB: <?php echo htmlspecialchars($app['dob']); ?> | NIC: <?php echo htmlspecialchars($app['nic']); ?></small>
-                            </td>
-                            <td>
-                                <strong><?php echo htmlspecialchars($app['scholarship_name']); ?></strong><br>
-                                <small>Purpose: <?php echo htmlspecialchars($app['purpose']); ?></small>
-                            </td>
-                            <td>
-                                <small>GPA: <?php echo htmlspecialchars($app['gpa']); ?></small><br>
-                                <small>Income: Rs.<?php echo htmlspecialchars($app['parents_income']); ?></small><br>
-                                <small>Parent Occ.: <?php echo htmlspecialchars($app['parents_occupation']); ?></small>
-                            </td>
-                            <td>
-                                <small>Email: <?php echo htmlspecialchars($app['email']); ?></small><br>
-                                <small>Phone: <?php echo htmlspecialchars($app['contact_numbers']); ?></small><br>
-                                <small>Address: <?php echo htmlspecialchars($app['permanent_address']); ?></small>
-                            </td>
+                            <td><strong><?php echo htmlspecialchars($app['username']); ?></strong></td>
+                            <td><?php echo htmlspecialchars($app['full_name']); ?></td>
+                            <td><strong><?php echo htmlspecialchars($app['scholarship_name']); ?></strong></td>
+                            <td><?php echo htmlspecialchars($app['applied_at']); ?></td>
                             <td><?php echo ucfirst($app['status']); ?></td>
                         </tr>
                         <?php endforeach; ?>
