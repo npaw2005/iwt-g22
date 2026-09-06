@@ -66,6 +66,35 @@
     <pre><code>&lt;button type="submit" onclick="return confirm('Approve this application?')"&gt;Approve&lt;/button&gt;</code></pre>
 </div>
 
+<div class="concept-box">
+    <h3>Concept: Email Validation (Algorithmic, No Regex)</h3>
+    <p>The syllabus specifically tests your ability to validate an email using string methods (<code>indexOf</code> and <code>lastIndexOf</code>) rather than modern Regular Expressions.</p>
+</div>
+
+<div class="code-example">
+    <h4>General Code Example (Exam Style)</h4>
+    <pre><code>function validateEmail() {
+    var emailID = document.myForm.EMail.value;
+    var atpos = emailID.indexOf("@");
+    var dotpos = emailID.lastIndexOf(".");
+
+    // '@' must not be first char, and '.' must be at least 2 chars after '@'
+    if (atpos &lt; 1 || (dotpos - atpos &lt; 2)) {
+        alert("Please enter a valid email address");
+        return false;
+    }
+    return true;
+}</code></pre>
+</div>
+
+<div class="concept-box">
+    <h3>Concept: Type Coercion & Equality (== vs ===)</h3>
+    <p>A frequent exam question involves predicting the output of equality checks. You must know the difference between loose equality (<code>==</code>) which coerces types, and strict equality (<code>===</code>) which checks both type and value.</p>
+    <ul>
+        <li><code>10 == "10"</code> &rarr; <strong>true</strong></li>
+        <li><code>10 === "10"</code> &rarr; <strong>false</strong></li>
+    </ul>
+</div>
     </div>
 </body>
 </html>
