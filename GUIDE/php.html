@@ -19,13 +19,20 @@
 <a href="js.html" class="nav-item ">⚡ 3. JavaScript & DOM</a>
 <a href="php.html" class="nav-item active">🐘 4. PHP & Backend</a>
 <div class="sub-nav">
-  <a href="#sec1">1. Server Directives (httpd vs php.ini)</a>
-  <a href="#sec2">2. Type Juggling & Output Tracing</a>
-  <a href="#sec3">3. Array Mechanics & Key Casting</a>
-  <a href="#sec4">4. Foreach Reference Leak</a>
-  <a href="#sec5">5. Superglobals & Session RBAC</a>
-  <a href="#sec6">6. Inclusions & Modular Architecture</a>
-  <a href="#sec7">7. Security: Prepared SQL & XSS</a>
+  <a href="#sec1">1. Server Architecture &amp; Execution Lifecycle</a>
+  <a href="#sec2">2. Web Server Directives: Apache vs. PHP Classification</a>
+  <a href="#sec3">3. PHP Basic Syntax, Tags & Output Constructs</a>
+  <a href="#sec4">4. Variables, Constants & Scope (define vs $)</a>
+  <a href="#sec5">5. Type Juggling, Operators (+ vs .) & Comparisons</a>
+  <a href="#sec6">6. Indexed, Associative & Multidimensional Arrays</a>
+  <a href="#sec7">7. Array Auto-Indexing & Key Casting Rules</a>
+  <a href="#sec8">8. Array Functions & SPL ArrayIterator</a>
+  <a href="#sec9">9. Control Flow & The Foreach Reference Leak Gotcha</a>
+  <a href="#sec10">10. Functions & Parameter Passing (By-Value vs By-Reference)</a>
+  <a href="#sec11">11. Superglobals & HTTP Form Handling</a>
+  <a href="#sec12">12. Session Management & Role-Based Access Control (RBAC)</a>
+  <a href="#sec13">13. File Inclusion Directives & Modular DB Architecture</a>
+  <a href="#sec14">14. Database Integration & Security (PDO Prepared Statements & XSS)</a>
 </div>
 <a href="sql.html" class="nav-item ">🗄️ 5. SQL & Relational DB</a>
 <a href="viva.html" class="nav-item ">🎓 6. Viva Defense & Q&A</a>
@@ -33,290 +40,278 @@
         </nav>
     </aside>
     <main class="main-wrapper">
-        
-<div class="hero-banner">
-    <h1>4. PHP Server-Side Architecture &amp; Database Integration</h1>
-    <p>Exhaustive analysis of the 186-slide PHP curriculum, web server configurations, tricky output tracing traps (array key casting, foreach reference leaks), secure state sessions, and PDO prepared statements from the <strong>Scholarship Management System</strong>.</p>
-</div>
-
-<!-- SECTION 1 -->
-<div id="sec1" class="section-anchor"></div>
-<h2 class="topic-title">1. Server Architecture &amp; Apache vs. PHP Configuration Classification</h2>
+        <div id="sec1" class="section-anchor"></div>
+<h2 class="topic-title">1. Server Architecture &amp; Execution Lifecycle</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Client vs Server Execution Lifecycle</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Client vs Server Lifecycle</span></div>
     <p>PHP (Hypertext Preprocessor) is an open-source, server-side scripting language executed sequentially on the web server before any HTML is sent to the client browser:</p>
     <table class="study-table">
         <thead>
-            <tr>
-                <th>Execution Metric</th>
-                <th>Client-Side (JavaScript)</th>
-                <th>Server-Side (PHP)</th>
-            </tr>
+            <tr><th>Execution Metric</th><th>Client-Side (JavaScript)</th><th>Server-Side (PHP)</th></tr>
         </thead>
         <tbody>
-            <tr>
-                <td><strong>Runtime Environment</strong></td>
-                <td>Web Browser (V8, SpiderMonkey)</td>
-                <td>Web Server (Apache HTTPD, Nginx)</td>
-            </tr>
-            <tr>
-                <td><strong>Execution Trigger</strong></td>
-                <td>User events (clicks, input, hover)</td>
-                <td>Incoming HTTP Request for <code>.php</code> file</td>
-            </tr>
-            <tr>
-                <td><strong>Execution Flow</strong></td>
-                <td>Asynchronous / Event-driven</td>
-                <td>Strictly sequential (top-to-bottom)</td>
-            </tr>
-            <tr>
-                <td><strong>Source Code Visibility</strong></td>
-                <td>Viewable in browser source view</td>
-                <td>Completely hidden; browser receives only rendered HTML/output</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
-
-<div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">Guaranteed Q3 Exam Trap (AY21 &amp; AY22)</span>
-    </div>
-    <p>Both semester exam papers (AY21 Q3.3 &amp; AY22 Q3.III) present a list of directives and require you to classify whether they belong to <strong>Apache (<code>httpd.conf</code>)</strong> or <strong>PHP (<code>php.ini</code>)</strong>:</p>
-    <table class="study-table">
-        <thead>
-            <tr>
-                <th>Configuration Directive</th>
-                <th>Target Configuration File</th>
-                <th>Purpose &amp; Operational Function</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><code>ServerRoot</code></td>
-                <td><strong>Apache (<code>httpd.conf</code>)</strong></td>
-                <td>Designates the top-level installation directory for Apache binaries, modules, and logs.</td>
-            </tr>
-            <tr>
-                <td><code>DocumentRoot</code></td>
-                <td><strong>Apache (<code>httpd.conf</code>)</strong></td>
-                <td>The filesystem root directory serving public web documents (e.g. <code>/opt/lampp/htdocs</code>).</td>
-            </tr>
-            <tr>
-                <td><code>LoadModule php_module</code></td>
-                <td><strong>Apache (<code>httpd.conf</code>)</strong></td>
-                <td>Instructs Apache to load the PHP interpreter shared object engine into memory.</td>
-            </tr>
-            <tr>
-                <td><code>PHPIniDir</code></td>
-                <td><strong>Apache (<code>httpd.conf</code>)</strong></td>
-                <td>Specifies the exact filesystem directory path where Apache must look for <code>php.ini</code>.</td>
-            </tr>
-            <tr>
-                <td><code>upload_max_filesize</code></td>
-                <td><strong>PHP (<code>php.ini</code>)</strong></td>
-                <td>Limits the maximum allowable byte size for an individual uploaded file (e.g. <code>3M</code>).</td>
-            </tr>
-            <tr>
-                <td><code>post_max_size</code></td>
-                <td><strong>PHP (<code>php.ini</code>)</strong></td>
-                <td>Limits the total size of HTTP POST data submitted in a single request (default: <code>8M</code>).</td>
-            </tr>
-            <tr>
-                <td><code>display_errors</code></td>
-                <td><strong>PHP (<code>php.ini</code>)</strong></td>
-                <td>Determines whether runtime errors/warnings are printed directly into HTML or kept internal.</td>
-            </tr>
+            <tr><td><strong>Runtime Environment</strong></td><td>Web Browser (V8, SpiderMonkey)</td><td>Web Server (Apache HTTPD, Nginx)</td></tr>
+            <tr><td><strong>Execution Trigger</strong></td><td>User events (clicks, input, hover)</td><td>Incoming HTTP Request for <code>.php</code> file</td></tr>
+            <tr><td><strong>Execution Flow</strong></td><td>Asynchronous / Event-driven</td><td>Strictly sequential (top-to-bottom)</td></tr>
+            <tr><td><strong>Source Code Visibility</strong></td><td>Viewable in browser source view</td><td>Completely hidden; browser receives only rendered HTML/output</td></tr>
         </tbody>
     </table>
 </div>
 
 <hr>
-
-<!-- SECTION 2 -->
 <div id="sec2" class="section-anchor"></div>
-<h2 class="topic-title">2. Type Juggling, Operators (+ vs .) &amp; Tracing Pitfalls</h2>
+<h2 class="topic-title">2. Web Server Directives: Apache vs. PHP Classification</h2>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">Guaranteed Q3 Exam Question (AY21 &amp; AY22)</span></div>
+    <table class="study-table">
+        <thead>
+            <tr><th>Configuration Directive</th><th>Target Configuration File</th><th>Purpose &amp; Operational Function</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>ServerRoot</code></td><td><strong>Apache (<code>httpd.conf</code>)</strong></td><td>Designates the top-level installation directory for Apache binaries, modules, and logs.</td></tr>
+            <tr><td><code>DocumentRoot</code></td><td><strong>Apache (<code>httpd.conf</code>)</strong></td><td>The filesystem root directory serving public web documents (e.g. <code>/opt/lampp/htdocs</code>).</td></tr>
+            <tr><td><code>LoadModule php_module</code></td><td><strong>Apache (<code>httpd.conf</code>)</strong></td><td>Instructs Apache to load the PHP interpreter shared object engine into memory.</td></tr>
+            <tr><td><code>PHPIniDir</code></td><td><strong>Apache (<code>httpd.conf</code>)</strong></td><td>Specifies the exact filesystem directory path where Apache must look for <code>php.ini</code>.</td></tr>
+            <tr><td><code>upload_max_filesize</code></td><td><strong>PHP (<code>php.ini</code>)</strong></td><td>Limits the maximum allowable byte size for an individual uploaded file (e.g. <code>3M</code>).</td></tr>
+            <tr><td><code>post_max_size</code></td><td><strong>PHP (<code>php.ini</code>)</strong></td><td>Limits the total size of HTTP POST data submitted in a single request (default: <code>8M</code>).</td></tr>
+            <tr><td><code>display_errors</code></td><td><strong>PHP (<code>php.ini</code>)</strong></td><td>Determines whether runtime errors/warnings are printed directly into HTML or kept internal.</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<hr>
+<div id="sec3" class="section-anchor"></div>
+<h2 class="topic-title">3. PHP Basic Syntax, Tags & Output Constructs</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Dynamic Type Coercion</span>
-    </div>
-    <p>PHP is loosely typed and automatically converts types based on operational context:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&lt;?php ... ?&gt; + echo vs print</span></div>
     <ul>
-        <li><strong>Addition (<code>+</code>) vs Concatenation (<code>.</code>):</strong>
+        <li><strong>Tags:</strong> Standard opening <code>&lt;?php</code> and closing <code>?&gt;</code>. Can be embedded anywhere in HTML.</li>
+        <li><strong>Case Sensitivity Rules:</strong>
             <ul>
-                <li>The <code>+</code> operator is <strong>strictly numerical</strong>. Strings are coerced to numbers: <code>"5" + 10</code> evaluates to integer <code>15</code>.</li>
-                <li>The <code>.</code> operator is <strong>strictly string concatenation</strong>: <code>"5" . 10</code> evaluates to string <code>"510"</code>.</li>
+                <li>Keywords, function names, class names are <strong>case-insensitive</strong> (<code>ECHO</code>, <code>echo</code>, <code>Echo</code> are identical).</li>
+                <li><strong>Variable names are strictly case-sensitive</strong> (<code>$user != $User != $USER</code>).</li>
             </ul>
         </li>
-        <li><strong>Constants via <code>define()</code>:</strong>
+        <li><strong><code>echo</code> vs <code>print</code>:</strong>
             <ul>
-                <li>Constants are declared via <code>define("x", "15");</code> and accessed as barewords without a dollar sign (<code>x</code>).</li>
-                <li>Variables are prefixed with <code>$</code> (<code>$x</code>). <code>x</code> and <code>$x</code> are completely distinct entities!</li>
-            </ul>
-        </li>
-        <li><strong>Loose Equality Trap with <code>in_array()</code>:</strong>
-            <ul>
-                <li><code>in_array("black", $colors)</code> returns boolean <code>false</code> if not found.</li>
-                <li>Under loose comparison (<code>==</code>), <code>false == 0</code> evaluates to <strong><code>true</code></strong>!</li>
+                <li><code>echo</code>: Language construct. Takes multiple comma-separated arguments: <code>echo "A", "B", "C";</code>. Returns nothing (void). Faster.</li>
+                <li><code>print</code>: Takes only a single argument. Always returns <code>1</code>, so it can be used in expressions: <code>$ret = print("Hello");</code>.</li>
             </ul>
         </li>
     </ul>
 </div>
 
+<hr>
+<div id="sec4" class="section-anchor"></div>
+<h2 class="topic-title">4. Variables, Constants & Scope (define vs $)</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Variable Scope &amp; Constants</span></div>
+    <ul>
+        <li><strong>Variables:</strong> Prefixed with <code>$</code>. Dynamically typed. Local to functions unless declared with <code>global $var;</code> or accessed via <code>$GLOBALS['var']</code>.</li>
+        <li><strong>Static Variables:</strong> Declared with <code>static $count = 0;</code> inside a function. Retains its state across function invocations.</li>
+        <li><strong>Constants (<code>define()</code>):</strong>
+            <br>Defined via <code>define("x", "15");</code>. Accessed as barewords without <code>$</code>. Globally accessible across all functions without <code>global</code>.
+        </li>
+    </ul>
+</div>
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">Recent Tracing Questions</span>
-    </div>
-    <p><strong>Past Paper Question 1 (AY21 Q2.2.a):</strong></p>
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">AY21 Q2.2.a Tracing Trap</span></div>
     <pre><code>define("x", "15");
 $x = x + 10;
 echo x;
 
 // EXAM OUTPUT: 15
-// Explanation: echo x prints constant 'x' (15). The variable $x (25) is ignored.</code></pre>
-
-    <p><strong>Past Paper Question 2 (AY22 Q3.II.a):</strong></p>
-    <pre><code>$x = "5"; $y = 10;
-echo $x + $y . " ";
-echo $x . $y;
-
-// EXAM OUTPUT: 15 510</code></pre>
-
-    <p><strong>Past Paper Question 3 (AY22 Q3.II.c):</strong></p>
-    <pre><code>$x = 5;
-echo $x++ . " " . ++$x . " " . $x;
-
-// EXAM OUTPUT: 5 7 7
-// Explanation: $x++ prints 5 then increments to 6. ++$x increments to 7 and prints 7. Final $x is 7.</code></pre>
+// Explanation: echo x targets the constant 'x' (15). The variable $x is ignored.</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 3 -->
-<div id="sec3" class="section-anchor"></div>
-<h2 class="topic-title">3. Array Mechanics, Key Casting &amp; Auto-Indexing Rules</h2>
+<div id="sec5" class="section-anchor"></div>
+<h2 class="topic-title">5. Type Juggling, Operators (+ vs .) & Comparisons</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Indexed, Associative &amp; Key Normalization</span>
-    </div>
-    <p>PHP arrays are ordered maps capable of holding mixed integer and string keys simultaneously:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Addition vs Concatenation</span></div>
     <ul>
-        <li><strong>Next Integer Index Auto-Assignment (<code>$arr[] = val</code>):</strong>
-            <br>When appending with empty brackets <code>[]</code>, PHP automatically assigns an index equal to:
-            $$\text{Current Maximum Integer Key} + 1$$
-            Even if lower integer slots are unoccupied, PHP never backfills!
+        <li><strong>Addition (<code>+</code>) vs Concatenation (<code>.</code>):</strong>
+            <ul>
+                <li><code>+</code> is strictly numeric: <code>"5" + 10</code> evaluates to integer <code>15</code>.</li>
+                <li><code>.</code> is strictly string concatenation: <code>"5" . 10</code> evaluates to string <code>"510"</code>.</li>
+            </ul>
         </li>
-        <li><strong>String Key Casting to Integers:</strong>
-            <br>Strings containing valid decimal integer representations (e.g. <code>"2"</code>, <code>"12"</code>, <code>"0"</code>) are <strong>automatically cast to standard integer keys</strong>!
-            <br><em>Result:</em> An assignment to <code>$arr["2"]</code> will overwrite existing element <code>$arr[2]</code>!
+        <li><strong>Increment Operators:</strong>
+            <ul>
+                <li>Post-increment <code>$x++</code>: Returns original value, then increments.</li>
+                <li>Pre-increment <code>++$x</code>: Increments first, then returns updated value.</li>
+            </ul>
+        </li>
+        <li><strong>The <code>in_array()</code> Loose Equality Trap:</strong>
+            <br><code>in_array("search", $arr)</code> returns boolean <code>false</code> if not found. Under loose comparison <code>==</code>, <code>false == 0</code> evaluates to <strong>true</strong>!
+        </li>
+    </ul>
+</div>
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">AY22 Q3.II Output Tracing</span></div>
+    <pre><code>$x = "5"; $y = 10;
+echo $x + $y . " ";
+echo $x . $y;
+// OUTPUT: 15 510
+
+$x = 5;
+echo $x++ . " " . ++$x . " " . $x;
+// OUTPUT: 5 7 7</code></pre>
+</div>
+
+<hr>
+<div id="sec6" class="section-anchor"></div>
+<h2 class="topic-title">6. Indexed, Associative & Multidimensional Arrays</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Array Types</span></div>
+    <ul>
+        <li><strong>Indexed Arrays:</strong> Sequential integer indices starting at 0: <code>$fruits = ["Apple", "Orange", "Banana"];</code>.</li>
+        <li><strong>Associative Arrays:</strong> Named string keys: <code>$user = ["username" =&gt; "ucsc", "role" =&gt; "student"];</code>.</li>
+        <li><strong>Multidimensional Arrays:</strong> Arrays containing nested child arrays:
+            <pre><code>$matrix = [[1, 2], [3, 4]];
+echo $matrix[0][1] + $matrix[1][0]; // 2 + 3 = 5 (AY22 Q3.II.g)</code></pre>
         </li>
     </ul>
 </div>
 
+<hr>
+<div id="sec7" class="section-anchor"></div>
+<h2 class="topic-title">7. Array Auto-Indexing & Key Casting Rules</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Next Key Assignment &amp; Decimal String Casting</span></div>
+    <ul>
+        <li><strong>Next Integer Auto-Assignment (<code>$arr[] = val</code>):</strong>
+            <br>PHP assigns an index equal to:
+            $$\text{Maximum Existing Integer Key} + 1$$
+            Even if intermediate keys are empty, PHP never backfills!
+        </li>
+        <li><strong>Decimal String Key Casting:</strong>
+            <br>Strings containing valid decimal integer representations (e.g. <code>"2"</code>, <code>"12"</code>) are <strong>automatically cast to standard integer keys</strong>!
+            <br>Therefore, <code>$arr["2"] = 4;</code> will overwrite <code>$arr[2] = 2;</code>!
+        </li>
+    </ul>
+</div>
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">High-Yield Array Tracing Questions</span>
-    </div>
-    <p><strong>Past Paper Question 1 (AY21 Q2.2.d):</strong></p>
-    <pre><code>$arr = array(5 => 1, 12 => 2);
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">AY21 Q2.2.d &amp; AY22 Q3.II.i Traps</span></div>
+    <pre><code>// AY21 Q2.2.d
+$arr = array(5 =&gt; 1, 12 =&gt; 2);
 $arr[] = 56;
 $arr["x"] = 42;
-var_dump($arr);
+// [5]=&gt;1, [12]=&gt;2, [13]=&gt;56 (12+1!), ["x"]=&gt;42
 
-// EXAM OUTPUT:
-// array(4) {
-//   [5]=> int(1)
-//   [12]=> int(2)
-//   [13]=> int(56)   <-- 12 + 1 = 13!
-//   ["x"]=> int(42)
-// }</code></pre>
-
-    <p><strong>Past Paper Question 2 (AY22 Q3.II.i):</strong></p>
-    <pre><code>$a = ["x" => 1, 2 => 2, 0 => 3, "2" => 4];
-foreach ($a as $k => $v) {
-    echo "($k:$v)";
-}
-
-// EXAM OUTPUT: (x:1)(2:4)(0:3)
-// Explanation: "2" is cast to int 2, overwriting the value 2 with 4 while keeping its hash position!</code></pre>
+// AY22 Q3.II.i
+$a = ["x" =&gt; 1, 2 =&gt; 2, 0 =&gt; 3, "2" =&gt; 4];
+foreach ($a as $k =&gt; $v) { echo "($k:$v)"; }
+// OUTPUT: (x:1)(2:4)(0:3)  -- "2" casts to 2 and overwrites value 2 with 4!</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 4 -->
-<div id="sec4" class="section-anchor"></div>
-<h2 class="topic-title">4. The Foreach Reference Leak Gotcha (&amp;$val)</h2>
+<div id="sec8" class="section-anchor"></div>
+<h2 class="topic-title">8. Array Functions & SPL ArrayIterator</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Pass by Reference in Loops</span>
-    </div>
-    <p>When iterating over an array by reference using an ampersand (<code>foreach ($arr as &amp;$val)</code>), each iteration assigns <code>$val</code> as a direct pointer reference to that array slot.</p>
-    <p><strong>The Dangerous Reference Leak Trap:</strong></p>
-    <p>When the loop concludes, <strong>the variable <code>$val</code> does not lose its reference!</strong> It remains permanently bound to the <em>very last element</em> of the array. Any subsequent modification to <code>$val</code> outside the loop will unintentionally overwrite the last element of your array!</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Sorting &amp; Iteration</span></div>
+    <ul>
+        <li><code>sort()</code> / <code>rsort()</code>: Sorts indexed arrays ascending / descending by value (re-indexes keys from 0).</li>
+        <li><code>asort()</code> / <code>arsort()</code>: Sorts associative arrays ascending / descending by value (preserves keys).</li>
+        <li><code>ksort()</code> / <code>krsort()</code>: Sorts associative arrays ascending / descending by key.</li>
+        <li><code>usort($arr, 'callback')</code>: Custom sorting using user-defined comparison function.</li>
+        <li><code>array_merge($a1, $a2)</code>: Merges arrays, renumbering numeric keys.</li>
+        <li><code>array_reduce($arr, 'callback', initial)</code>: Iteratively reduces array to single value.</li>
+        <li><strong>SPL ArrayIterator:</strong>
+            <pre><code>$iterator = new ArrayIterator([1, 2, 3, 4, 5]);
+echo iterator_count($iterator); // OUTPUT: 5 (AY21 Q3.1.b)</code></pre>
+        </li>
+    </ul>
 </div>
 
-<div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">AY22 Q3.II.f Exam Trap</span>
-    </div>
-    <pre><code>$nums = [1, 2, 3];
-foreach ($nums as $n) { $n *= 2; }    // By value: $nums unmodified
-foreach ($nums as &$n) { $n *= 2; }   // By reference: $nums is [2, 4, 6]
-print_r($nums); echo "&lt;br&gt;";
+<hr>
+<div id="sec9" class="section-anchor"></div>
+<h2 class="topic-title">9. Control Flow & The Foreach Reference Leak Gotcha</h2>
 
-$n = 100; // DANGER: $n is still a reference to the last element ($nums[2])!
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&amp;$val Pointer Leak</span></div>
+    <p>When iterating by reference (<code>foreach ($nums as &amp;$n)</code>), each step binds <code>$n</code> as an address pointer to that element.</p>
+    <p><strong>The Deadly Reference Leak Trap (AY22 Q3.II.f):</strong></p>
+    <p>When the loop concludes, <code>$n</code> <strong>remains permanently bound as a reference to the very last array element</strong>! Any subsequent assignment to <code>$n</code> (e.g. <code>$n = 100;</code>) silently overwrites the last element of the array!</p>
+</div>
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">AY22 Q3.II.f Output Tracing</span></div>
+    <pre><code>$nums = [1, 2, 3];
+foreach ($nums as $n) { $n *= 2; }
+foreach ($nums as &$n) { $n *= 2; }
+print_r($nums); echo "&lt;br&gt;";
+$n = 100; // Overwrites $nums[2]!
 print_r($nums);
 
-&lt;!-- EXACT EXAM OUTPUT --&gt;
+&lt;!-- OUTPUT --&gt;
 Array ( [0] =&gt; 2 [1] =&gt; 4 [2] =&gt; 6 ) &lt;br&gt;
 Array ( [0] =&gt; 2 [1] =&gt; 4 [2] =&gt; 100 )</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 5 -->
-<div id="sec5" class="section-anchor"></div>
-<h2 class="topic-title">5. Superglobals, State Persistence &amp; Session Lifecycle</h2>
+<div id="sec10" class="section-anchor"></div>
+<h2 class="topic-title">10. Functions & Parameter Passing (By-Value vs By-Reference)</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">$_GET vs $_POST vs $_SESSION</span>
-    </div>
-    <p>HTTP is a stateless protocol. PHP provides superglobals (automatically accessible across all scopes) to manage state:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&$param vs $param</span></div>
     <ul>
-        <li><code>$_GET</code>: Data sent via URL query parameters (e.g. <code>applications.php?view_sid=4&amp;view_sch=1</code>). Visible, bookmarkable, length-limited (~2KB). Never used for passwords.</li>
-        <li><code>$_POST</code>: Data encapsulated within the HTTP request body. Invisible in browser bar, handles arbitrary binary data up to <code>post_max_size</code>.</li>
-        <li><code>$_SESSION</code>: Server-side state store. Binds user state to a unique session identifier cookie (<code>PHPSESSID</code>) stored on client.
-            <ul>
-                <li><code>session_start()</code>: Must be called at the very top of every PHP script before any HTML output is transmitted.</li>
-                <li>Write session: <code>$_SESSION['role'] = 'admin';</code></li>
-                <li>Destroy session: <code>session_unset(); session_destroy();</code></li>
-            </ul>
+        <li><strong>Pass by Value (Default):</strong> Function receives a copy of the argument; modifications inside the function do not affect the caller's variable.</li>
+        <li><strong>Pass by Reference (<code>&amp;$param</code>):</strong> The ampersand passes the memory address; modifications directly mutate the caller's variable:
+            <pre><code>function addFive(&$val) { $val += 5; }
+$num = 20; addFive($num); echo $num; // OUTPUT: 25 (AY21 Q2.2.b)</code></pre>
         </li>
+        <li><strong>Default Parameters:</strong> <code>function greet($name = "IS1207") { echo "Welcome $name"; }</code></li>
     </ul>
 </div>
 
+<hr>
+<div id="sec11" class="section-anchor"></div>
+<h2 class="topic-title">11. Superglobals & HTTP Form Handling</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">$_GET vs $_POST vs $_SERVER</span></div>
+    <ul>
+        <li><code>$_GET</code>: Reads URL query parameters (e.g. <code>?view_sid=4&amp;view_sch=1</code>). Visible, cached, bookmarkable, limited to ~2KB.</li>
+        <li><code>$_POST</code>: Reads HTTP request body payload. Invisible in URL, unbookmarkable, handles arbitrary size up to <code>post_max_size</code>.</li>
+        <li><code>$_SERVER['REQUEST_METHOD']</code>: Detects request verb (<code>GET</code> or <code>POST</code>).</li>
+        <li><strong>Array Form Inputs:</strong> Checkboxes sharing bracket notation (<code>name="hobbies[]"</code>) are automatically parsed by PHP into a native array in <code>$_POST['hobbies']</code>.</li>
+    </ul>
+</div>
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/admin.php (Lines 1-8) &amp; public/logout.php</span>
-    </div>
-    <p>In <code>public/admin.php</code> lines 1-8, we enforce Role-Based Access Control (RBAC) via session state:</p>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/applications.php (Lines 45-52)</span></div>
+    <pre><code>45: if (isset($_GET['view_sid']) &amp;&amp; isset($_GET['view_sch'])) {
+46:     foreach ($applications as $app) {
+47:         if ($app['student_id'] == $_GET['view_sid'] &amp;&amp; $app['scholarship_id'] == $_GET['view_sch']) {
+48:             $viewApp = $app;
+49:             break;
+50:         }
+51:     }
+52: }</code></pre>
+</div>
+
+<hr>
+<div id="sec12" class="section-anchor"></div>
+<h2 class="topic-title">12. Session Management & Role-Based Access Control (RBAC)</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">session_start() &amp; Access Enforcement</span></div>
+    <p>HTTP is stateless. Calling <code>session_start()</code> at the top of a PHP file reads the client's <code>PHPSESSID</code> cookie and restores the server-side <code>$_SESSION</code> array:</p>
+    <ul>
+        <li>Initialize session: <code>session_start();</code> (Must precede all HTML output).</li>
+        <li>Store user data: <code>$_SESSION['user_id'] = $user['id']; $_SESSION['role'] = $user['role'];</code></li>
+        <li>Destroy session: <code>session_unset(); session_destroy();</code></li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/admin.php (Lines 1-8)</span></div>
     <pre><code>1: &lt;?php
 2: session_start();
 3: require_once '../config/db.php';
@@ -325,132 +320,71 @@ Array ( [0] =&gt; 2 [1] =&gt; 4 [2] =&gt; 100 )</code></pre>
 6:     header("Location: home.php");
 7:     exit();
 8: }</code></pre>
-    <p>In <code>public/logout.php</code>, we execute the full session destruction protocol:</p>
-    <pre><code>1: &lt;?php
-2: session_start();
-3: session_unset();
-4: session_destroy();
-5: header("Location: login.php");
-6: exit();
-7: ?&gt;</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 6 -->
-<div id="sec6" class="section-anchor"></div>
-<h2 class="topic-title">6. File Inclusions &amp; Modular Database Architecture (value.php + con.php)</h2>
+<div id="sec13" class="section-anchor"></div>
+<h2 class="topic-title">13. File Inclusion Directives & Modular DB Architecture</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">include vs require Error Handling</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">include vs require Error Handling</span></div>
     <table class="study-table">
         <thead>
-            <tr>
-                <th>Directive</th>
-                <th>Behavior on Missing File</th>
-                <th>Re-inclusion Safety</th>
-            </tr>
+            <tr><th>Directive</th><th>Failure Behavior</th><th>Use Case</th></tr>
         </thead>
         <tbody>
-            <tr>
-                <td><code>include</code></td>
-                <td>Emits <code>E_WARNING</code>; <strong>script continues execution</strong>.</td>
-                <td>May cause redeclaration errors if loaded multiple times.</td>
-            </tr>
-            <tr>
-                <td><code>require</code></td>
-                <td>Emits <code>E_COMPILE_ERROR</code>; <strong>halts execution immediately</strong>.</td>
-                <td>May cause redeclaration errors if loaded multiple times.</td>
-            </tr>
-            <tr>
-                <td><code>require_once</code></td>
-                <td>Emits <code>E_COMPILE_ERROR</code>; <strong>halts execution immediately</strong>.</td>
-                <td>Guarantees file is evaluated at most once per request lifecycle.</td>
-            </tr>
+            <tr><td><code>include</code></td><td>Emits <code>E_WARNING</code>; script continues running.</td><td>Optional layout elements (widgets).</td></tr>
+            <tr><td><code>require</code></td><td>Emits <code>E_COMPILE_ERROR</code>; halts execution immediately.</td><td>Critical configuration files.</td></tr>
+            <tr><td><code>require_once</code></td><td>Halts on failure; guarantees file is evaluated at most once.</td><td>Database connections, class definitions.</td></tr>
         </tbody>
     </table>
 </div>
-
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">AY21 Q4.5/6 &amp; AY22 Q4.II/III Exam Scenario</span>
-    </div>
-    <p>Both examination papers mandate establishing a modular database architecture separating credentials from connection logic:</p>
-    <pre><code>&lt;!-- FILE 1: con/data/value.php (Credentials) --&gt;
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">AY21 Q4.5/6 &amp; AY22 Q4.II/III Architecture</span></div>
+    <pre><code>&lt;!-- con/data/value.php --&gt;
 &lt;?php
-$servername = "198.16.10.23";
-$username = "root";
-$password = "ucsc";
-$dbname = "scholarship_db";
+$servername = "198.16.10.23"; $username = "root"; $password = "ucsc"; $dbname = "stu";
 ?&gt;
 
-&lt;!-- FILE 2: con/con.php (Connection Engine) --&gt;
+&lt;!-- con/con.php --&gt;
 &lt;?php
 require_once 'data/value.php';
 $conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn-&gt;connect_error) {
-    die("Connection failed: " . $conn-&gt;connect_error);
-}
+if ($conn-&gt;connect_error) { die("Failed: " . $conn-&gt;connect_error); }
 ?&gt;</code></pre>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">config/db.php (Lines 1-14)</span>
-    </div>
-    <p>Our project implements this connection architecture using PDO with exception error handling:</p>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">config/db.php (Lines 1-14)</span></div>
     <pre><code>1: &lt;?php
-2: $host = 'localhost';
-3: $dbname = 'scholarship_db';
-4: $user = 'root';
-5: $pass = '';
-6: 
-7: try {
-8:     $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
-9:     $conn-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-10:     $conn-&gt;setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-11: } catch (PDOException $e) {
-12:     die("Database connection failed: " . $e-&gt;getMessage());
-13: }
-14: ?&gt;</code></pre>
+2: $host = 'localhost'; $dbname = 'scholarship_db'; $user = 'root'; $pass = '';
+3: try {
+4:     $conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);
+5:     $conn-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+6: } catch (PDOException $e) {
+7:     die("Database connection failed: " . $e-&gt;getMessage());
+8: }</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 7 -->
-<div id="sec7" class="section-anchor"></div>
-<h2 class="topic-title">7. Database Security: Prepared Statements &amp; XSS Sanitization</h2>
+<div id="sec14" class="section-anchor"></div>
+<h2 class="topic-title">14. Database Integration & Security (PDO Prepared Statements & XSS)</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">SQL Injection &amp; Cross-Site Scripting Immunity</span>
-    </div>
-    <p><strong>Preventing SQL Injection with Parameterized Queries:</strong></p>
-    <p>When user input is directly concatenated into SQL strings (<code>WHERE user = '$name'</code>), malicious SQL statements can alter execution logic. Prepared statements compile the SQL command structure on the database engine <em>first</em>, treating all incoming parameters strictly as passive data, rendering SQL injection mathematically impossible.</p>
-
-    <p><strong>Preventing Cross-Site Scripting (XSS) with <code>htmlspecialchars()</code>:</strong></p>
-    <p>Reflecting unescaped database strings into HTML allows attackers to inject malicious <code>&lt;script&gt;</code> tags. <code>htmlspecialchars($str)</code> converts <code>&lt;</code> to <code>&amp;lt;</code>, <code>&gt;</code> to <code>&amp;gt;</code>, and <code>&amp;</code> to <code>&amp;amp;</code>, forcing the browser to render strings harmlessly as plain text.</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">SQL Injection &amp; XSS Prevention</span></div>
+    <ul>
+        <li><strong>Preventing SQL Injection:</strong> Never concatenate user input directly into SQL strings. Always use <strong>Prepared Statements</strong> with parameter placeholders (<code>?</code>). The database compiles query structure first, treating user input purely as passive data.</li>
+        <li><strong>Preventing Cross-Site Scripting (XSS):</strong> Always escape dynamic outputs printed to HTML using <code>htmlspecialchars($str)</code>, converting <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, <code>"</code> into safe character entities.</li>
+    </ul>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/admin.php (Lines 23-24) &amp; public/login.php (Line 19)</span>
-    </div>
-    <p>In <code>public/admin.php</code> line 23, we execute a prepared insert:</p>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/admin.php (Lines 23-24)</span></div>
     <pre><code>23: $stmt = $conn-&gt;prepare("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)");
 24: if ($stmt-&gt;execute([$username, $password, $email, $role])) {
 25:     $message = "User added successfully.";
 26: }</code></pre>
-    <p>And throughout our views, whenever database strings are printed to the browser, they are wrapped in <code>htmlspecialchars()</code>:</p>
-    <pre><code>&lt;td&gt;&lt;?php echo htmlspecialchars($u['username']); ?&gt;&lt;/td&gt;</code></pre>
 </div>
+
+<hr>
 
     </main>
 </body>

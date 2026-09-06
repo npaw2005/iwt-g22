@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSS Styling & Preprocessor Architecture | IS1207 Complete Study Guide</title>
+    <title>CSS Styling, Layouts & Preprocessors | IS1207 Complete Study Guide</title>
     <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -17,15 +17,20 @@
 <a href="html.html" class="nav-item ">🌐 1. HTML Mastery</a>
 <a href="css.html" class="nav-item active">🎨 2. CSS & Layouts</a>
 <div class="sub-nav">
-  <a href="#sec1">1. Inclusion & Specificity</a>
-  <a href="#sec2">2. Selectors & Combinators</a>
-  <a href="#sec3">3. Attribute Wildcards</a>
-  <a href="#sec4">4. Pseudo-Classes & LVHA</a>
-  <a href="#sec5">5. CSS Counters</a>
-  <a href="#sec6">6. Box Model Calculations</a>
-  <a href="#sec7">7. Float Layouts & Clearfix</a>
-  <a href="#sec8">8. Pure CSS Dropdown Menus</a>
-  <a href="#sec9">9. Sass / SCSS Preprocessors</a>
+  <a href="#sec1">1. Implementation Methods & Cascading Hierarchy</a>
+  <a href="#sec2">2. CSS Syntax Fundamentals & Length Units</a>
+  <a href="#sec3">3. Core Selectors & Grouping vs Descendant Distinction</a>
+  <a href="#sec4">4. The 4 CSS3 Combinators</a>
+  <a href="#sec5">5. Attribute Wildcard Selectors</a>
+  <a href="#sec6">6. Interactive Pseudo-Classes & Link LVHA Order</a>
+  <a href="#sec7">7. Structural Pseudo-Classes & Zebra Striping</a>
+  <a href="#sec8">8. Pseudo-Elements & CSS Automatic Counters</a>
+  <a href="#sec9">9. The Box Model Math & box-sizing</a>
+  <a href="#sec10">10. Display Property Modes & Semantic Retrofit</a>
+  <a href="#sec11">11. Float Layouts & Clearfix Mechanics</a>
+  <a href="#sec12">12. Pure CSS Dropdown Menus (AY22 Exam Widget)</a>
+  <a href="#sec13">13. Table & Form Control UI Polishing</a>
+  <a href="#sec14">14. Sass / SCSS Preprocessor Architecture</a>
 </div>
 <a href="js.html" class="nav-item ">⚡ 3. JavaScript & DOM</a>
 <a href="php.html" class="nav-item ">🐘 4. PHP & Backend</a>
@@ -35,179 +40,135 @@
         </nav>
     </aside>
     <main class="main-wrapper">
-        
-<div class="hero-banner">
-    <h1>2. CSS Styling, Layouts &amp; Preprocessor Architecture</h1>
-    <p>Comprehensive topic-by-topic analysis of the CSS syllabus (80 lecture slides), combinator mechanics, box model calculations, pure CSS dropdown menus, SCSS compilation, and full codebase styling from <strong>public/css/style.css</strong>.</p>
-</div>
-
-<!-- SECTION 1 -->
-<div id="sec1" class="section-anchor"></div>
-<h2 class="topic-title">1. CSS Implementation Methods &amp; Cascading Specificity</h2>
+        <div id="sec1" class="section-anchor"></div>
+<h2 class="topic-title">1. Implementation Methods & Cascading Hierarchy</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Inclusion Methods &amp; Priority Hierarchy</span>
-    </div>
-    <p>CSS rules can be applied to an HTML document through four mechanisms:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Inclusion Priority Rules</span></div>
+    <p>CSS rules are attached to markup through four mechanisms with strict cascading priority:</p>
     <ol>
-        <li><strong>External Stylesheet:</strong> Placed in a separate <code>.css</code> file and linked in <code>&lt;head&gt;</code> via <code>&lt;link rel="stylesheet" type="text/css" href="style.css"&gt;</code>. Ideal for site-wide consistency.</li>
-        <li><strong>Internal / Embedded Style:</strong> Placed inside <code>&lt;style&gt;</code> tags within the <code>&lt;head&gt;</code>. Applies exclusively to that single document.</li>
-        <li><strong>Imported Style:</strong> Using <code>@import url("style.css");</code> inside a <code>&lt;style&gt;</code> block.</li>
-        <li><strong>Inline Style:</strong> Declared directly within the HTML element tag via <code>style="..."</code> (e.g. <code>&lt;p style="color: red;"&gt;</code>).</li>
+        <li><strong>External Stylesheet:</strong> Stored in an external <code>.css</code> file linked within <code>&lt;head&gt;</code>: <code>&lt;link rel="stylesheet" type="text/css" href="style.css"&gt;</code>. Highest maintainability.</li>
+        <li><strong>Internal / Embedded Stylesheet:</strong> Enclosed within <code>&lt;style type="text/css"&gt; ... &lt;/style&gt;</code> in <code>&lt;head&gt;</code>. Local to a single document.</li>
+        <li><strong>Imported Stylesheet:</strong> Loaded via <code>@import url("style.css");</code> inside a <code>&lt;style&gt;</code> block.</li>
+        <li><strong>Inline Style:</strong> Declared directly within the opening HTML tag: <code>&lt;div style="color: blue;"&gt;</code>. Highest specificity among standard rules.</li>
     </ol>
-    <p><strong>The Cascading Specificity Order:</strong></p>
-    <p>When multiple conflicting rules target the same element, the browser resolves them using strict priority:</p>
-    $$\text{Browser Default} &lt; \text{External Stylesheet} &lt; \text{Internal / Embedded} &lt; \text{Inline Style} &lt; \text{!important override}$$
+    <p><strong>Cascading Specificity Resolution:</strong></p>
+    $$\text{Browser Default} &lt; \text{External Stylesheet} &lt; \text{Internal Stylesheet} &lt; \text{Inline Style} &lt; \text{!important override}$$
 </div>
-
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">Syntax Error Identification</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">Property Spelling Traps</span></div>
     <p><strong>Past Paper Question Trap (AY21 Q1 &amp; AY22 Q1):</strong></p>
     <ul>
-        <li><strong>Invalid Property Names:</strong> The examiner writes <code>font-type: Arial;</code> (Invalid! Must be <code>font-family: Arial;</code>).</li>
-        <li><strong>Missing Length Units:</strong> Writing <code>font-size: 24;</code> (Invalid! Lengths require explicit units like <code>px</code>, <code>em</code>, or <code>rem</code>: <code>font-size: 24px;</code>).</li>
-        <li><strong>Invalid Hex Color Strings:</strong> Writing <code>color: #blue;</code> or <code>color: #12345;</code> (Hex must be 3 or 6 hex digits: <code>#0000ff</code>).</li>
+        <li><code>font-type: Arial;</code> &rarr; <strong>INVALID</strong>. Must be <code>font-family: Arial;</code>.</li>
+        <li><code>font-size: 20;</code> &rarr; <strong>INVALID</strong>. Missing length units! Must be <code>font-size: 20px;</code>.</li>
+        <li><code>color: #green;</code> &rarr; <strong>INVALID</strong>. Must be named <code>color: green;</code> or hex <code>color: #008000;</code>.</li>
     </ul>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/css/style.css (Lines 1-9)</span>
-    </div>
-    <p>Our project uses a single centralized external stylesheet (<code>public/css/style.css</code>) linked in <code>includes/header.php</code> line 14. We set universal body typography and background gradients cleanly:</p>
-    <pre><code>1: body {
-2:     background: #f0f2f5;
-3:     background-image: linear-gradient(to bottom right, #f0f2f5, #e0e5ec);
-4:     color: #4a4a4a;
-5:     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-6:     margin: 0;
-7:     padding: 20px;
-8:     min-height: 100vh;
-9: }</code></pre>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/css/style.css (Lines 1-9)</span></div>
+    <p>Our project avoids inline styles entirely, centralizing all rules in <code>public/css/style.css</code> linked via <code>includes/header.php</code> line 14.</p>
 </div>
 
 <hr>
-
-<!-- SECTION 2 -->
 <div id="sec2" class="section-anchor"></div>
-<h2 class="topic-title">2. Selectors, Specificity &amp; The 4 CSS3 Combinators</h2>
+<h2 class="topic-title">2. CSS Syntax Fundamentals & Length Units</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Combinator Traversal Rules</span>
-    </div>
-    <p>CSS combinators define exact spatial relationships between elements in the DOM tree:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Rulesets &amp; Units</span></div>
+    <p><strong>Ruleset Structure:</strong> <code>selector { property: value; }</code></p>
+    <ul>
+        <li><strong>Absolute Units:</strong> <code>px</code> (pixels - 1/96th of an inch), <code>pt</code> (points - 1/72th of an inch), <code>cm</code>, <code>mm</code>, <code>in</code>.</li>
+        <li><strong>Relative Units:</strong>
+            <ul>
+                <li><code>%</code>: Percentage relative to parent element's computed dimension.</li>
+                <li><code>em</code>: Relative to current element's <code>font-size</code> (or parent font-size).</li>
+                <li><code>rem</code>: Root em. Relative strictly to the root <code>&lt;html&gt;</code> element's font-size.</li>
+                <li><code>vh</code> / <code>vw</code>: Viewport height and viewport width percentages (<code>100vh</code> = 100% of screen height).</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/css/style.css (Line 8)</span></div>
+    <p>In <code>style.css</code> line 8, we enforce full viewport height using relative viewport units: <code>min-height: 100vh;</code>.</p>
+</div>
+
+<hr>
+<div id="sec3" class="section-anchor"></div>
+<h2 class="topic-title">3. Core Selectors & Grouping vs Descendant Distinction</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Selectors &amp; Comma Rule</span></div>
+    <ul>
+        <li><strong>Universal Selector (<code>*</code>):</strong> Matches every element in DOM (<code>* { margin: 0; }</code>).</li>
+        <li><strong>Type Selector (<code>h1</code>):</strong> Matches all instances of that HTML tag.</li>
+        <li><strong>Class Selector (<code>.className</code>):</strong> Matches elements with <code>class="className"</code>. Reusable.</li>
+        <li><strong>ID Selector (<code>#idName</code>):</strong> Matches unique element with <code>id="idName"</code>.</li>
+        <li><strong>The Comma (<code>,</code>) vs Space ( ) Distinction (EXAM FAVORITE!):</strong>
+            <ul>
+                <li><code>li a, .dropbtn</code>: Grouped selector. Applies identical styling to all <code>&lt;a&gt;</code> tags inside <code>&lt;li&gt;</code> <strong>AND</strong> all elements with class <code>.dropbtn</code>.</li>
+                <li><code>li a .dropbtn</code>: Descendant chain. Targets an element with class <code>.dropbtn</code> that is nested inside an <code>&lt;a&gt;</code> inside a <code>&lt;li&gt;</code>.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/css/style.css (Line 59)</span></div>
+    <pre><code>59: .container, .content-page, .table-container {
+60:     background-color: #ffffff;
+61:     border: 1px solid #e1e8ed;
+62:     padding: 30px;
+63:     margin-bottom: 25px;
+64:     border-radius: 8px;
+65: }</code></pre>
+</div>
+
+<hr>
+<div id="sec4" class="section-anchor"></div>
+<h2 class="topic-title">4. The 4 CSS3 Combinators</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Tree Relationship Combinators</span></div>
     <table class="study-table">
         <thead>
-            <tr>
-                <th>Combinator</th>
-                <th>Syntax</th>
-                <th>Name</th>
-                <th>Target Element Matched</th>
-            </tr>
+            <tr><th>Combinator</th><th>Syntax</th><th>Name</th><th>Elements Matched</th></tr>
         </thead>
         <tbody>
-            <tr>
-                <td><strong>Descendant</strong></td>
-                <td><code>div p</code> (Space)</td>
-                <td>Descendant Selector</td>
-                <td>Matches <strong>any</strong> <code>&lt;p&gt;</code> tag located inside a <code>&lt;div&gt;</code> at any nesting depth (children, grandchildren, etc.).</td>
-            </tr>
-            <tr>
-                <td><strong>Child</strong></td>
-                <td><code>div &gt; p</code></td>
-                <td>Child Selector</td>
-                <td>Matches only <code>&lt;p&gt;</code> tags that are <strong>immediate direct children</strong> of <code>&lt;div&gt;</code>. (Ignored if wrapped in a <code>&lt;span&gt;</code>!).</td>
-            </tr>
-            <tr>
-                <td><strong>Adjacent Sibling</strong></td>
-                <td><code>div + p</code></td>
-                <td>Adjacent Sibling</td>
-                <td>Matches the single <code>&lt;p&gt;</code> element that immediately follows the closing <code>&lt;/div&gt;</code>, sharing the identical parent.</td>
-            </tr>
-            <tr>
-                <td><strong>General Sibling</strong></td>
-                <td><code>div ~ p</code></td>
-                <td>General Sibling</td>
-                <td>Matches <strong>all</strong> <code>&lt;p&gt;</code> elements that appear after <code>&lt;/div&gt;</code>, sharing the identical parent.</td>
-            </tr>
+            <tr><td><strong>Descendant</strong></td><td><code>div p</code></td><td>Space</td><td>Matches <strong>any</strong> <code>&lt;p&gt;</code> inside <code>&lt;div&gt;</code> at any depth (children, grandchildren, etc.).</td></tr>
+            <tr><td><strong>Child</strong></td><td><code>div &gt; p</code></td><td><code>&gt;</code></td><td>Matches only <code>&lt;p&gt;</code> tags that are <strong>immediate direct children</strong> of <code>&lt;div&gt;</code>.</td></tr>
+            <tr><td><strong>Adjacent Sibling</strong></td><td><code>div + p</code></td><td><code>+</code></td><td>Matches the single <code>&lt;p&gt;</code> immediately following <code>&lt;/div&gt;</code> with identical parent.</td></tr>
+            <tr><td><strong>General Sibling</strong></td><td><code>div ~ p</code></td><td><code>~</code></td><td>Matches <strong>all</strong> <code>&lt;p&gt;</code> elements appearing after <code>&lt;/div&gt;</code> with identical parent.</td></tr>
         </tbody>
     </table>
-
-    <p><strong>The Comma (<code>,</code>) vs Space ( ) Distinction:</strong></p>
-    <ul>
-        <li><code>li a, .dropbtn</code>: Grouped selector. Applies the styles to all <code>&lt;a&gt;</code> tags inside <code>&lt;li&gt;</code> <strong>AND</strong> all elements with class <code>.dropbtn</code>.</li>
-        <li><code>li a .dropbtn</code>: Descendant chain. Applies style <strong>only</strong> to an element with class <code>.dropbtn</code> that is nested inside an <code>&lt;a&gt;</code> inside a <code>&lt;li&gt;</code>.</li>
-    </ul>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/css/style.css (Lines 29-48)</span>
-    </div>
-    <p>In <code>public/css/style.css</code>, we utilized descendant selectors to style the navbar without polluting general links:</p>
-    <pre><code>29: .nav-links {
-30:     float: left;
-31:     width: auto;
-32:     padding: 0;
-33:     margin: 0;
-34:     list-style-type: none;
-35: }
-36: 
-37: .nav-links li {
-38:     display: inline;
-39: }
-40: 
-41: .nav-links a {
-42:     float: left;
-43:     text-decoration: none;
-44:     color: #ecf0f1;
-45:     padding: 14px 20px;
-46:     font-weight: bold;
-47:     border-right: 1px solid #34495e;
-48: }</code></pre>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/css/style.css (Lines 102-108)</span></div>
+    <pre><code>102: .form-group label {
+103:     display: block;
+104:     margin-bottom: 8px;
+105:     font-weight: bold;
+106:     color: #34495e;
+107:     font-size: 0.95em;
+108: }</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 3 -->
-<div id="sec3" class="section-anchor"></div>
-<h2 class="topic-title">3. Attribute Wildcard Selectors</h2>
+<div id="sec5" class="section-anchor"></div>
+<h2 class="topic-title">5. Attribute Wildcard Selectors</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Regex-Style Attribute Matching</span>
-    </div>
-    <p>CSS3 allows targeting elements by matching partial string patterns in their attribute values:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Wildcard Pattern Matching</span></div>
     <ul>
-        <li><code>[attr^="val"]</code> (Prefix Match): Matches if the attribute value <strong>begins</strong> with <code>val</code>.
-            <br>Example: <code>a[href^="https://"] { padding-left: 20px; }</code> (targets secure external links).
-        </li>
-        <li><code>[attr$="val"]</code> (Suffix Match): Matches if the attribute value <strong>ends</strong> with <code>val</code>.
-            <br>Example: <code>a[href$=".pdf"] { background: url('pdf-icon.png') no-repeat; }</code> (targets PDF downloads).
-        </li>
-        <li><code>[attr*="val"]</code> (Substring Match): Matches if the attribute value <strong>contains</strong> <code>val</code> anywhere.
-            <br>Example: <code>[class*="btn-"] { font-weight: bold; }</code> (matches <code>btn-primary</code>, <code>btn-danger</code>).
-        </li>
-        <li><code>[attr="val"]</code> (Exact Match): Matches when attribute exactly equals <code>val</code>.</li>
+        <li><code>[attr]</code>: Matches elements possessing attribute regardless of value.</li>
+        <li><code>[attr="val"]</code>: Matches exact value.</li>
+        <li><code>[attr^="val"]</code> (Starts With): Matches if attribute begins with <code>val</code> (e.g. <code>[class^="btn-"]</code>).</li>
+        <li><code>[attr$="val"]</code> (Ends With): Matches if attribute ends with <code>val</code> (e.g. <code>a[href$=".pdf"]</code>).</li>
+        <li><code>[attr*="val"]</code> (Contains): Matches if attribute contains <code>val</code> anywhere.</li>
     </ul>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/css/style.css (Lines 110-136)</span>
-    </div>
-    <p>In our project, we styled form controls precisely using exact attribute selectors:</p>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/css/style.css (Lines 110-124)</span></div>
+    <p>We styled inputs by exact attribute selectors so checkboxes and radio buttons are not deformed:</p>
     <pre><code>110: input[type="text"],
 111: input[type="password"],
 112: input[type="email"],
@@ -218,49 +179,28 @@
 117:     width: 100%;
 118:     border: 1px solid #bdc3c7;
 119:     padding: 10px 12px;
-120:     border-radius: 4px;
-121:     font-family: inherit;
-122:     font-size: 1em;
-123:     background-color: #fdfdfd;
+...
 124: }</code></pre>
-    <p><strong>Code Analysis:</strong> By targeting inputs by attribute, checkboxes (<code>type="checkbox"</code>) and radio buttons are preserved in their native dimensions rather than being stretched to 100% width.</p>
 </div>
 
 <hr>
-
-<!-- SECTION 4 -->
-<div id="sec4" class="section-anchor"></div>
-<h2 class="topic-title">4. Pseudo-Classes, Link LVHA Order &amp; Zebra Striping</h2>
+<div id="sec6" class="section-anchor"></div>
+<h2 class="topic-title">6. Interactive Pseudo-Classes & Link LVHA Order</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Interactive States &amp; Structural Pseudo-Classes</span>
-    </div>
-    <p><strong>The Link LVHA Rule (Strict Examination Order):</strong></p>
-    <p>When styling hyperlinks, pseudo-classes must be declared in this exact order to avoid state override conflicts:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Strict Pseudo-Class Order</span></div>
+    <p>Hyperlink pseudo-classes must be authored in this exact order to avoid cascading state conflicts:</p>
     $$\text{:link} \longrightarrow \text{:visited} \longrightarrow \text{:hover} \longrightarrow \text{:active}$$
     <ul>
-        <li><code>:link</code>: Unvisited hyperlink.</li>
-        <li><code>:visited</code>: Hyperlink already visited by user.</li>
-        <li><code>:hover</code>: Mouse pointer hovers over element.</li>
-        <li><code>:active</code>: Moment the element is being clicked/depressed.</li>
-        <li><code>:focus</code>: Triggered when an input gains keyboard/tab focus.</li>
-    </ul>
-
-    <p><strong>Structural Zebra Striping:</strong></p>
-    <ul>
-        <li>Row Zebra: <code>tbody tr:nth-child(even) { background-color: #f2f2f2; }</code></li>
-        <li>Column Zebra: <code>td:nth-child(even), th:nth-child(even) { background-color: #e0e0e0; }</code></li>
+        <li><code>:link</code>: Default state of unvisited hyperlink.</li>
+        <li><code>:visited</code>: Visited link in browser history.</li>
+        <li><code>:hover</code>: Mouse cursor rests over element.</li>
+        <li><code>:active</code>: Element is being actively pressed down by mouse button.</li>
+        <li><code>:focus</code>: Triggered when an input receives keyboard or tab cursor focus.</li>
     </ul>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/css/style.css (Lines 126-136 &amp; Lines 235-241)</span>
-    </div>
-    <p>In <code>public/css/style.css</code>, we styled user interaction states and zebra table rows:</p>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/css/style.css (Lines 126-136)</span></div>
     <pre><code>126: input[type="text"]:focus,
 127: input[type="password"]:focus,
 ...
@@ -268,9 +208,25 @@
 133:     background-color: #ffffff;
 134:     outline: 2px solid #3498db;
 135:     border-color: #3498db;
-136: }
-...
-235: tbody tr:nth-child(even) {
+136: }</code></pre>
+</div>
+
+<hr>
+<div id="sec7" class="section-anchor"></div>
+<h2 class="topic-title">7. Structural Pseudo-Classes & Zebra Striping</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">nth-child Table Striping</span></div>
+    <ul>
+        <li><code>:first-child</code> / <code>:last-child</code>: Matches first or last child of parent.</li>
+        <li><code>tbody tr:nth-child(even)</code>: Horizontal table row zebra striping.</li>
+        <li><code>td:nth-child(even), th:nth-child(even)</code>: Vertical table column zebra striping.</li>
+        <li><code>:nth-child(2n+1)</code>: Mathematical formula matching odd children.</li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/css/style.css (Lines 235-241)</span></div>
+    <pre><code>235: tbody tr:nth-child(even) {
 236:     background-color: #fafbfc;
 237: }
 238: 
@@ -280,30 +236,19 @@
 </div>
 
 <hr>
-
-<!-- SECTION 5 -->
-<div id="sec5" class="section-anchor"></div>
-<h2 class="topic-title">5. Pseudo-Elements &amp; CSS Automatic Counters</h2>
+<div id="sec8" class="section-anchor"></div>
+<h2 class="topic-title">8. Pseudo-Elements & CSS Automatic Counters</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">::before, ::after &amp; counter-increment</span>
-    </div>
-    <p>CSS Automatic Counters allow numbering elements automatically through stylesheet rules without altering the HTML markup:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Slide 61 Counter Algorithm</span></div>
     <ol>
         <li><code>counter-reset: counter_name [initial_val];</code>: Initializes counter on parent container.</li>
         <li><code>counter-increment: counter_name;</code>: Increments counter variable on target element.</li>
-        <li><code>content: counter(counter_name);</code>: Renders the generated numeric string inside <code>::before</code> or <code>::after</code>.</li>
+        <li><code>content: counter(counter_name);</code>: Renders the computed numeric string inside <code>::before</code> or <code>::after</code>.</li>
     </ol>
 </div>
-
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">Slide 61 Exam Formula</span>
-    </div>
-    <p><strong>Past Paper Question:</strong> "Write the complete CSS code to number all <code>&lt;h1&gt;</code> elements as 'Section 1.', 'Section 2.' and all <code>&lt;h2&gt;</code> elements as '1.1', '1.2'."</p>
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">Slide 61 Exam Formula</span></div>
     <pre><code>body { counter-reset: section; }
 h1 { counter-reset: subsection; }
 
@@ -319,16 +264,11 @@ h2::before {
 </div>
 
 <hr>
-
-<!-- SECTION 6 -->
-<div id="sec6" class="section-anchor"></div>
-<h2 class="topic-title">6. The CSS Box Model &amp; Box-Sizing Math</h2>
+<div id="sec9" class="section-anchor"></div>
+<h2 class="topic-title">9. The Box Model Math & box-sizing</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">content-box vs border-box</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">content-box vs border-box</span></div>
     <p>Every element is treated as a rectangular box comprising 4 concentric layers:</p>
     $$\text{Margin} \longrightarrow \text{Border} \longrightarrow \text{Padding} \longrightarrow \text{Content}$$
     <ul>
@@ -344,90 +284,77 @@ h2::before {
 </div>
 
 <hr>
-
-<!-- SECTION 7 -->
-<div id="sec7" class="section-anchor"></div>
-<h2 class="topic-title">7. Float Layouts, Clearfix &amp; Overflow Mechanics</h2>
+<div id="sec10" class="section-anchor"></div>
+<h2 class="topic-title">10. Display Property Modes & Semantic Retrofit</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">float + clear: both</span>
-    </div>
-    <p>Because CSS Flexbox and Grid are out of scope in this introductory syllabus, multi-column web layouts rely on floating:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">block vs inline vs inline-block</span></div>
     <ul>
-        <li><code>float: left | right</code>: Removes element from normal inline flow and shifts it to the left/right margin.</li>
-        <li><strong>The Float Collapsing Problem:</strong> When child elements float, their parent container height collapses to <code>0px</code> because floated children do not occupy flow height.</li>
-        <li><strong>The Clearfix Solution:</strong> Inserting an element with <code>clear: both;</code> directly before closing the parent restores the visual boundary.</li>
+        <li><code>display: block;</code>: Starts on a new line, takes up 100% available container width (e.g. <code>&lt;div&gt;</code>, <code>&lt;p&gt;</code>, <code>&lt;h1&gt;</code>).</li>
+        <li><code>display: inline;</code>: Flows within text line. Ignores width, height, top/bottom margins (e.g. <code>&lt;span&gt;</code>, <code>&lt;a&gt;</code>).</li>
+        <li><code>display: inline-block;</code>: Flows inline with text, but respects width, height, padding, and margin properties!</li>
+        <li><code>display: none;</code>: Completely removes element from the visual Render Tree (unlike <code>visibility: hidden</code> which preserves whitespace).</li>
     </ul>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/css/style.css (Lines 11-57) &amp; includes/header.php</span>
-    </div>
-    <p>In our project, we implemented a pure float-based navigation bar with clearing:</p>
-    <pre><code>/* public/css/style.css */
-.navbar-brand { float: left; ... }
-.nav-links { float: left; ... }
-.nav-links a { float: left; ... }
-.navbar-clear { clear: both; }
-
-&lt;!-- includes/header.php --&gt;
-&lt;nav class="navbar"&gt;
-    &lt;div class="navbar-brand"&gt;...&lt;/div&gt;
-    &lt;ul class="nav-links"&gt;...&lt;/ul&gt;
-    &lt;div class="navbar-clear"&gt;&lt;/div&gt;
-&lt;/nav&gt;</code></pre>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/css/style.css (Lines 157-169)</span></div>
+    <p>In line 163, button anchors use <code>display: inline-block;</code> so they sit next to each other while accepting custom padding, borders, and margins.</p>
 </div>
 
 <hr>
+<div id="sec11" class="section-anchor"></div>
+<h2 class="topic-title">11. Float Layouts & Clearfix Mechanics</h2>
 
-<!-- SECTION 8 -->
-<div id="sec8" class="section-anchor"></div>
-<h2 class="topic-title">8. Pure CSS Dropdown Menus (Guaranteed 25M Exam Question)</h2>
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">float: left + clear: both</span></div>
+    <p>Because CSS Flexbox and Grid are out of scope in this introductory syllabus, multi-column layouts rely on floating:</p>
+    <ul>
+        <li><code>float: left | right;</code>: Pushes element to margin, causing inline content to wrap around it.</li>
+        <li><strong>The Float Collapse Problem:</strong> When child elements float, their parent container height collapses to <code>0px</code> because floated children do not occupy flow height.</li>
+        <li><strong>The Clearfix Solution:</strong> An element with <code>clear: both;</code> declared at the end of the parent forces the parent container to enclose all floated children.</li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/css/style.css (Lines 19-57)</span></div>
+    <pre><code>.navbar-brand { float: left; ... }
+.nav-links { float: left; ... }
+.nav-links a { float: left; ... }
+.navbar-clear { clear: both; }</code></pre>
+</div>
+
+<hr>
+<div id="sec12" class="section-anchor"></div>
+<h2 class="topic-title">12. Pure CSS Dropdown Menus (AY22 Exam Widget)</h2>
 
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">AY22 Question 2 Pattern</span>
-    </div>
-    <p>A recurring 25-mark examination question requires writing the complete HTML skeleton and CSS rules for a pure CSS hover dropdown navigation menu.</p>
-    <p><strong>The Core Formula:</strong></p>
-    <ol>
-        <li>Container: <code>position: relative; display: inline-block;</code>.</li>
-        <li>Dropdown List: <code>display: none; position: absolute;</code>.</li>
-        <li>Hover Trigger: <code>.dropdown:hover .dropdown-content { display: block; }</code>.</li>
-    </ol>
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">AY22 Q2 25-Mark Widget</span></div>
     <pre><code>&lt;!-- HTML STRUCTURE --&gt;
 &lt;ul class="navbar"&gt;
     &lt;li&gt;&lt;a href="home.php"&gt;Home&lt;/a&gt;&lt;/li&gt;
     &lt;li class="dropdown"&gt;
         &lt;a href="javascript:void(0)" class="dropbtn"&gt;Scholarships &#9662;&lt;/a&gt;
         &lt;div class="dropdown-content"&gt;
-            &lt;a href="undergraduate.php"&gt;Undergraduate&lt;/a&gt;
-            &lt;a href="postgraduate.php"&gt;Postgraduate&lt;/a&gt;
+            &lt;a href="academic.php"&gt;Academic Excellence&lt;/a&gt;
+            &lt;a href="sports.php"&gt;Sports Awards&lt;/a&gt;
         &lt;/div&gt;
     &lt;/li&gt;
 &lt;/ul&gt;
 
-/* CSS STYLING */
-li.dropdown { display: inline-block; }
+/* CSS RULES */
+li.dropdown { display: inline-block; position: relative; }
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
+    background-color: #ffffff;
+    min-width: 180px;
     box-shadow: 0px 8px 16px rgba(0,0,0,0.2);
     z-index: 1;
 }
 .dropdown-content a {
-    color: black;
+    color: #333333;
     padding: 12px 16px;
     text-decoration: none;
     display: block;
-    text-align: left;
 }
 .dropdown:hover .dropdown-content {
     display: block;
@@ -435,40 +362,63 @@ li.dropdown { display: inline-block; }
 </div>
 
 <hr>
-
-<!-- SECTION 9 -->
-<div id="sec9" class="section-anchor"></div>
-<h2 class="topic-title">9. CSS Preprocessors: Sass / SCSS Syntax &amp; Loops</h2>
+<div id="sec13" class="section-anchor"></div>
+<h2 class="topic-title">13. Table & Form Control UI Polishing</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Variables, Mixins &amp; Loops</span>
-    </div>
-    <p>CSS Preprocessors (Sass, SCSS, LESS) extend vanilla CSS with programming features:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">border-collapse &amp; Readonly Styling</span></div>
     <ul>
-        <li><strong>Variables:</strong> Declared with <code>$</code> (e.g. <code>$primary-color: #3498db;</code>).</li>
-        <li><strong>Nesting:</strong> Nest child selectors inside parents, mirroring the HTML hierarchy.</li>
+        <li><code>border-collapse: collapse;</code>: Merges adjacent cell borders into a single crisp hairline border.</li>
+        <li><code>caption { font-style: italic; }</code>: Accessible table summary styling.</li>
+        <li><code>outline: none;</code>: Removes default browser focus ring, replaced with custom border highlight.</li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/css/style.css (Lines 202-213 &amp; 268-272)</span></div>
+    <pre><code>202: table {
+203:     width: 100%;
+204:     border-collapse: collapse;
+205:     margin-bottom: 20px;
+206: }
+...
+268: .input-readonly {
+269:     background-color: #eaeded;
+270:     color: #7f8c8d;
+271:     border-color: #d5d8dc;
+272: }</code></pre>
+</div>
+
+<hr>
+<div id="sec14" class="section-anchor"></div>
+<h2 class="topic-title">14. Sass / SCSS Preprocessor Architecture</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Variables, Mixins, Extend &amp; Loops</span></div>
+    <ul>
+        <li><strong>Variables:</strong> Declared with <code>$</code> (e.g. <code>$theme-blue: #3498db;</code>).</li>
+        <li><strong>Nesting:</strong> Nest child selectors inside parent rulesets.</li>
         <li><strong>Mixins vs Extend (CRITICAL DISTINCTION!):</strong>
             <ul>
-                <li><code>@mixin</code> &amp; <code>@include</code>: Copies styles directly into each selector, increasing compiled CSS size.</li>
-                <li><code>@extend</code>: Groups selectors together with commas (<code>.btn, .btn-primary { ... }</code>), creating optimized compiled CSS.</li>
+                <li><code>@mixin name { ... }</code> + <code>@include name;</code>: Duplicates CSS declarations into every consuming selector.</li>
+                <li><code>@extend .target;</code>: Groups selectors together with commas (<code>.btn, .btn-primary { ... }</code>), generating optimized compiled output.</li>
             </ul>
         </li>
-        <li><strong><code>@for</code> Loop with Variable Interpolation:</strong>
+        <li><strong><code>@for</code> Loop with Variable Interpolation (<code>#{$var}</code>):</strong>
             <pre><code>@for $i from 1 through 3 {
-    .col-#{$i} {
-        width: 100px * $i;
+    .border-#{$i} {
+        border: #{$i}px solid #3498db;
     }
 }
 /* Compiles to:
-.col-1 { width: 100px; }
-.col-2 { width: 200px; }
-.col-3 { width: 300px; } */</code></pre>
+.border-1 { border: 1px solid #3498db; }
+.border-2 { border: 2px solid #3498db; }
+.border-3 { border: 3px solid #3498db; } */</code></pre>
         </li>
-        <li><strong>Partials:</strong> SCSS files prefixed with an underscore (<code>_variables.scss</code>) are partials and are not compiled directly. Imported via <code>@import 'variables';</code>.</li>
+        <li><strong>Partials:</strong> SCSS files prefixed with an underscore (<code>_reset.scss</code>) are partials and are not compiled directly into standalone CSS. Loaded via <code>@import 'reset';</code>.</li>
     </ul>
 </div>
+
+<hr>
 
     </main>
 </body>

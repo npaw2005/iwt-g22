@@ -16,9 +16,8 @@
             <a href="index.html" class="nav-item active">🏠 Home & Overview</a>
 <div class="sub-nav">
   <a href="#strategic-architecture">Strategic Architecture</a>
-  <a href="#exam-blueprint">IS1207 Exam Blueprint</a>
-  <a href="#project-architecture">Project Architecture Map</a>
-  <a href="#roadmap">Topic Roadmap</a>
+  <a href="#exam-blueprint">Exam Blueprint</a>
+  <a href="#curriculum-index">70-Topic Curriculum Index</a>
 </div>
 <a href="html.html" class="nav-item ">🌐 1. HTML Mastery</a>
 <a href="css.html" class="nav-item ">🎨 2. CSS & Layouts</a>
@@ -32,148 +31,173 @@
     <main class="main-wrapper">
         
 <div class="hero-banner">
-    <h1>IS1207: Complete Syllabus & Viva Defense System</h1>
-    <p>An exhaustive, multi-tier study portal tailored for the UCSC <strong>IS1207: Internet and Web Technologies</strong> semester examination and the <strong>Scholarship Management System</strong> viva defense session.</p>
+    <h1>IS1207: Complete Syllabus &amp; Viva Defense Portal</h1>
+    <p>An exhaustive, multi-dimensional study portal designed for the UCSC <strong>IS1207: Internet and Web Technologies</strong> semester examination and the <strong>Scholarship Management System</strong> viva defense session.</p>
 </div>
 
 <div class="box box-concept">
     <div class="box-header">
         <span class="box-tag">Strategic Architecture</span>
-        <span class="file-badge">3-Dimensional Learning Engine</span>
+        <span class="file-badge">Syllabus + Past Papers + Production Codebase</span>
     </div>
-    <p>This guide bridges the gap between academic theory, rigorous examination patterns, and production codebase defense. Every single topic across HTML, CSS, JavaScript, PHP, and SQL is dissected through three concurrent lenses:</p>
+    <p>This portal covers <strong>70+ granular topics</strong> spanning the entire university curriculum, calibrated directly against the <strong>AY21 &amp; AY22 semester examinations</strong> and our actual XAMPP codebase:</p>
     <ul>
-        <li><strong>Theoretical Syllabus Blueprint:</strong> Complete conceptual breakdown adhering strictly to university lecture slides.</li>
-        <li><strong>Past Paper Alerts & Exam Traps:</strong> Deconstruction of real past paper questions (AY21 & AY22 examinations), identifying intentional traps, syntax correction patterns, and code-tracing pitfalls.</li>
-        <li><strong>Codebase Implementation & Viva Defense:</strong> Exact file and line references from our project repository, demonstrating how academic concepts materialize in a working XAMPP web system.</li>
+        <li><strong>Syllabus Theoretical Foundations:</strong> Complete slide-by-slide concepts from the official UCSC lecture notes.</li>
+        <li><strong>Past Paper Alerts &amp; Traps:</strong> Deconstruction of exam questions, highlighting intentional pitfalls, syntax correction patterns, and code-tracing traps.</li>
+        <li><strong>Codebase Implementation:</strong> Exact file paths and line numbers in <code>/home/niduka/iwt/scholarship_system/</code> showing where each concept is implemented in production.</li>
+        <li><strong>Viva Defense &amp; Live Coding:</strong> Examiner trick questions, model answers, and step-by-step instructions for on-the-spot code editing challenges.</li>
     </ul>
 </div>
 
 <h2 class="topic-title">📋 UCSC IS1207 Examination Blueprint (100 Marks)</h2>
-<p>Both AY21 and AY22 semester exam papers strictly enforce an identical four-question architecture, each carrying exactly 25 marks. Understanding this macro-structure is essential for maximum scoring:</p>
-
 <table class="study-table">
     <thead>
         <tr>
             <th>Question</th>
             <th>Primary Domain</th>
-            <th>Tested Capabilities</th>
-            <th>High-Yield Focus Areas</th>
+            <th>Format &amp; Tested Capabilities</th>
+            <th>High-Yield Exam Focus Areas</th>
         </tr>
     </thead>
     <tbody>
         <tr>
             <td><strong>Question 1</strong> (25M)</td>
-            <td>HTML & CSS Syntax & Error Identification</td>
-            <td>Identify whether given snippets are valid or invalid; provide exact corrections.</td>
-            <td><code>&lt;meta&gt;</code> placement inside body, <code>href</code> vs <code>src</code> in anchors, image map <code>usemap</code> # syntax, CSS property spelling (<code>font-family</code> vs <code>font-type</code>), length units, Sass <code>@for</code> loops & variable interpolation.</td>
+            <td>HTML &amp; CSS Syntax Errors</td>
+            <td>Identify whether given snippets are valid or invalid; rewrite corrected versions.</td>
+            <td><code>&lt;meta&gt;</code> inside body, <code>href</code> vs <code>src</code> in anchors, image map <code>usemap="#name"</code> syntax, CSS property spelling (<code>font-family</code> vs <code>font-type</code>), length units (<code>px</code>), Sass <code>@for</code> loops &amp; variable interpolation.</td>
         </tr>
         <tr>
             <td><strong>Question 2</strong> (25M)</td>
-            <td>Visual Output Prediction & UI Components</td>
+            <td>Visual Output Prediction &amp; UI Components</td>
             <td>Sketch rendering grids, predict CSS cascade/combinators, write complete CSS widgets.</td>
             <td>Table rendering with intersecting <code>rowspan</code> and <code>colspan</code>, <code>&lt;tfoot&gt;</code> positioning gotchas, pure CSS hover dropdown menus (<code>display: none</code> to <code>block</code>), CSS counters.</td>
         </tr>
         <tr>
             <td><strong>Question 3</strong> (25M)</td>
-            <td>JS & PHP Code Tracing, Server Configurations</td>
+            <td>JS &amp; PHP Tracing, Server Configurations</td>
             <td>Trace script execution outputs, classify web server vs runtime directives.</td>
             <td>JS strict (<code>===</code>) vs loose (<code>==</code>) equality, modulo loop outputs, PHP type juggling (<code>+</code> vs <code>.</code>), array auto-indexing, <code>foreach</code> reference leaks (<code>&amp;$val</code>), Apache <code>httpd.conf</code> vs PHP <code>php.ini</code> directives.</td>
         </tr>
         <tr>
             <td><strong>Question 4</strong> (25M)</td>
-            <td>Relational SQL & PHP Backend Architecture</td>
+            <td>Relational SQL &amp; PHP Backend Architecture</td>
             <td>Write complete DDL schemas with Foreign Keys, construct DML CRUD queries, write modular PHP connection scripts.</td>
-            <td><code>CREATE TABLE</code> with composite PKs & FKs, modular configuration (<code>value.php</code> + <code>con.php</code>), PDO / MySQLi prepared statements (<code>prepare()</code>, <code>execute()</code>), multi-table <code>JOIN</code> queries rendered into HTML tables.</td>
+            <td><code>CREATE TABLE</code> with composite PKs &amp; FKs, modular configuration (<code>value.php</code> + <code>con.php</code>), PDO / MySQLi prepared statements (<code>prepare()</code>, <code>execute()</code>), multi-table <code>JOIN</code> queries rendered into HTML tables.</td>
         </tr>
     </tbody>
 </table>
 
-<h2 class="topic-title">🏛️ Project Architecture: Scholarship Management System</h2>
-<div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Map</span>
-        <span class="file-badge">/home/niduka/iwt/scholarship_system/</span>
+<h2 class="topic-title">📚 Comprehensive 70-Topic Curriculum Index</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-top: 16px;">
+    
+    <div class="box box-concept">
+        <h3 class="sub-title"><a href="html.html">🌐 1. HTML Mastery (14 Topics) &rarr;</a></h3>
+        <ol style="margin-left: 18px; font-size: 0.9rem;">
+            <li>Web Architecture, DNS Hierarchy &amp; Rendering Pipeline</li>
+            <li>URL Anatomy &amp; Web Generations (1.0 to 5.0)</li>
+            <li>Doctype Declarations &amp; Character Encodings</li>
+            <li>Document Metadata, Timed Redirection &amp; Favicons</li>
+            <li>Semantic Structural Layout Containers</li>
+            <li>Text Level Semantics &amp; Typography</li>
+            <li>Quotations, Abbreviations &amp; Bi-Directional Text</li>
+            <li>Ordered, Unordered &amp; Description Lists</li>
+            <li>Hyperlinks, Targets &amp; Directory Traversal Formula</li>
+            <li>Image Maps &amp; Geometric Coordinates</li>
+            <li>Complex Tables, Spans &amp; Rendering Grids</li>
+            <li>Forms &amp; Encoding Types (Enctype)</li>
+            <li>Form Controls &amp; Fieldsets Grouping</li>
+            <li>Input Constraints &amp; Readonly Form Flow</li>
+        </ol>
     </div>
-    <p>Our project implements a secure, normalized web application running on Apache/PHP/MySQL (XAMPP). It is built entirely without third-party frameworks or libraries to strictly satisfy course rubric constraints:</p>
-    <table class="study-table">
-        <thead>
-            <tr>
-                <th>Component / Directory</th>
-                <th>File Path</th>
-                <th>Role & Architectural Purpose</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td><strong>Database Schema</strong></td>
-                <td><code>schema.sql</code></td>
-                <td>Normalized relational database (<code>scholarship_db</code>) with 4 tables: <code>users</code>, <code>students</code>, <code>scholarships</code>, and <code>student_scholarships</code>. Enforces foreign key constraints with <code>ON DELETE CASCADE</code>.</td>
-            </tr>
-            <tr>
-                <td><strong>Database Config</strong></td>
-                <td><code>config/db.php</code></td>
-                <td>Modular PDO database connection establishing connection persistence, UTF-8 character encoding, and <code>PDO::ERRMODE_EXCEPTION</code> error handling.</td>
-            </tr>
-            <tr>
-                <td><strong>Modular Layout</strong></td>
-                <td><code>includes/header.php</code> & <code>includes/footer.php</code></td>
-                <td>Dynamic navigation bar enforcing session-based role visibility (Guest, Student, Registrar, Admin). Standardizes HTML5 doctype, metadata, and stylesheets across all views.</td>
-            </tr>
-            <tr>
-                <td><strong>Student Portal</strong></td>
-                <td><code>public/home.php</code></td>
-                <td>Multi-state view: Guest listing, Student scholarship browser, multi-section application form with pre-filled read-only profile data, and personal application history table.</td>
-            </tr>
-            <tr>
-                <td><strong>Registrar Control</strong></td>
-                <td><code>public/applications.php</code></td>
-                <td>Scholarship lifecycle management (add, remove) and application processing. Implements drill-down application review via <code>$_GET['view_sid']</code> with approval/rejection workflows.</td>
-            </tr>
-            <tr>
-                <td><strong>Administrator Panel</strong></td>
-                <td><code>public/admin.php</code></td>
-                <td>System reporting dashboard (live SQL aggregation), user management CRUD (add, edit, safe delete), and system-wide application overview.</td>
-            </tr>
-            <tr>
-                <td><strong>Authentication</strong></td>
-                <td><code>public/login.php</code>, <code>public/signup.php</code>, <code>public/logout.php</code></td>
-                <td>Secure authentication handling session initialization, duplicate username checks, client-side DOM Level 0 validation, and session destruction.</td>
-            </tr>
-            <tr>
-                <td><strong>Styling Engine</strong></td>
-                <td><code>public/css/style.css</code></td>
-                <td>Pure CSS3 stylesheet utilizing float-based layout, clearfix techniques, attribute selectors, pseudo-classes, gradient buttons, and responsive tables without external frameworks.</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
 
-<h2 class="topic-title">🚀 Complete Topic Roadmap</h2>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 16px;">
     <div class="box box-concept">
-        <h3 class="sub-title"><a href="html.html">1. HTML Mastery &rarr;</a></h3>
-        <p>Document skeleton, metadata traps, semantic containers, complex table spans (rowspan/colspan), HTML5 forms, fieldsets, input types, and image maps.</p>
+        <h3 class="sub-title"><a href="css.html">🎨 2. CSS &amp; Layouts (14 Topics) &rarr;</a></h3>
+        <ol style="margin-left: 18px; font-size: 0.9rem;">
+            <li>Implementation Methods &amp; Cascading Hierarchy</li>
+            <li>CSS Syntax Fundamentals &amp; Length Units</li>
+            <li>Core Selectors &amp; Comma vs Space Rules</li>
+            <li>The 4 CSS3 Combinators (Child, Sibling)</li>
+            <li>Attribute Wildcard Selectors (^=, $=, *=)</li>
+            <li>Interactive Pseudo-Classes &amp; Link LVHA Order</li>
+            <li>Structural Pseudo-Classes &amp; Zebra Striping</li>
+            <li>Pseudo-Elements &amp; Automatic CSS Counters</li>
+            <li>The Box Model Math &amp; box-sizing</li>
+            <li>Display Property Modes &amp; Semantic Retrofit</li>
+            <li>Float Layouts &amp; Clearfix Mechanics</li>
+            <li>Pure CSS Dropdown Menus (AY22 Exam Widget)</li>
+            <li>Table &amp; Form Control UI Polishing</li>
+            <li>Sass / SCSS Preprocessor Architecture</li>
+        </ol>
     </div>
+
     <div class="box box-concept">
-        <h3 class="sub-title"><a href="css.html">2. CSS & Layouts &rarr;</a></h3>
-        <p>Specificity rules, combinators (> , +, ~), attribute selectors, box model, float clearing, pure CSS dropdown menus, table styling, and SCSS loops.</p>
+        <h3 class="sub-title"><a href="js.html">⚡ 3. JavaScript &amp; DOM (14 Topics) &rarr;</a></h3>
+        <ol style="margin-left: 18px; font-size: 0.9rem;">
+            <li>Execution Context &amp; Script Placement</li>
+            <li>Variables, Scope &amp; Hoisting (var vs let vs const)</li>
+            <li>Data Types, null vs. undefined &amp; void(0)</li>
+            <li>Arithmetic Operators &amp; Number Coercion</li>
+            <li>Comparison Operators &amp; Strict Equality (== vs ===)</li>
+            <li>Logical Operators &amp; Short-Circuit Evaluation</li>
+            <li>Branching &amp; The Switch Fallthrough Trap</li>
+            <li>Loops, Modulo Tracing &amp; Labeled Statements</li>
+            <li>Functions, Scope &amp; Arguments Object</li>
+            <li>Objects, Constructor Functions &amp; Prototypes</li>
+            <li>DOM Level 0 Form Model Hierarchy</li>
+            <li>Form Submission Pipeline &amp; return Keyword</li>
+            <li>Non-Regex Algorithmic Validation (Email, NIC)</li>
+            <li>Dialog Boxes &amp; Client Cookies Architecture</li>
+        </ol>
     </div>
+
     <div class="box box-concept">
-        <h3 class="sub-title"><a href="js.html">3. JavaScript & DOM &rarr;</a></h3>
-        <p>DOM Level 0 hierarchy, client-side validation, non-regex string email algorithms, type coercion (== vs ===), dialog boxes, cookies, and loop output tracing.</p>
+        <h3 class="sub-title"><a href="php.html">🐘 4. PHP &amp; Backend (14 Topics) &rarr;</a></h3>
+        <ol style="margin-left: 18px; font-size: 0.9rem;">
+            <li>Server Architecture &amp; Execution Lifecycle</li>
+            <li>Web Server Directives: Apache vs. PHP Classification</li>
+            <li>PHP Basic Syntax, Tags &amp; Output Constructs</li>
+            <li>Variables, Constants &amp; Scope (define vs $)</li>
+            <li>Type Juggling, Operators (+ vs .) &amp; Comparisons</li>
+            <li>Indexed, Associative &amp; Multidimensional Arrays</li>
+            <li>Array Auto-Indexing &amp; Key Casting Rules</li>
+            <li>Array Functions &amp; SPL ArrayIterator</li>
+            <li>Control Flow &amp; The Foreach Reference Leak Gotcha</li>
+            <li>Functions &amp; Parameter Passing (By-Value vs By-Ref)</li>
+            <li>Superglobals &amp; HTTP Form Handling</li>
+            <li>Session Management &amp; Role-Based Access Control</li>
+            <li>File Inclusion Directives &amp; Modular DB Architecture</li>
+            <li>Database Integration &amp; Prepared SQL Security</li>
+        </ol>
     </div>
+
     <div class="box box-concept">
-        <h3 class="sub-title"><a href="php.html">4. PHP & Backend &rarr;</a></h3>
-        <p>Apache vs PHP configuration, type juggling, array key casting, foreach reference leaks (&$val), superglobals, session management, PDO prepared statements, and XSS prevention.</p>
+        <h3 class="sub-title"><a href="sql.html">🗄️ 5. SQL &amp; Relational DB (14 Topics) &rarr;</a></h3>
+        <ol style="margin-left: 18px; font-size: 0.9rem;">
+            <li>Relational Database Foundations &amp; Terminology</li>
+            <li>Relational Key Hierarchy &amp; Composite Keys</li>
+            <li>Database Normalization (1NF, 2NF, 3NF)</li>
+            <li>Relational Database Anomalies</li>
+            <li>DDL Database &amp; Table Construction</li>
+            <li>Column Constraints &amp; Auto-Increment</li>
+            <li>Primary &amp; Composite Keys Construction</li>
+            <li>Foreign Keys &amp; Referential Actions (CASCADE)</li>
+            <li>Table Alteration &amp; TRUNCATE vs. DELETE</li>
+            <li>DML Data Insertion Operations</li>
+            <li>DML Record Updates &amp; Deletions</li>
+            <li>Pattern Matching &amp; Filtering (LIKE, BETWEEN)</li>
+            <li>Aggregate Functions &amp; The HAVING Rule</li>
+            <li>Relational Joins: 4-Table Production Queries</li>
+        </ol>
     </div>
-    <div class="box box-concept">
-        <h3 class="sub-title"><a href="sql.html">5. SQL & Relational DB &rarr;</a></h3>
-        <p>Relational theory, 3NF normalization, composite keys, foreign keys (CASCADE), DDL table construction, DML CRUD queries, aggregate stats, and 4-table joins.</p>
-    </div>
+
     <div class="box box-viva">
-        <h3 class="sub-title"><a href="viva.html">6. Viva Defense & Q&A &rarr;</a></h3>
-        <p>Top 25 examiner trap questions with model responses, live coding challenges (e.g. creating readonly form fields), and architectural justifications.</p>
+        <h3 class="sub-title"><a href="viva.html">🎓 6. Viva Defense &amp; Q&amp;A &rarr;</a></h3>
+        <ol style="margin-left: 18px; font-size: 0.9rem;">
+            <li>Viva Strategy &amp; Examiner Psychology</li>
+            <li>End-to-End System Request Lifecycle</li>
+            <li>Top 20 Examiner Defense Questions &amp; Answers</li>
+            <li>Live Hands-On Coding Defense Challenges</li>
+        </ol>
     </div>
 </div>
 

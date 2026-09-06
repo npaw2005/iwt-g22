@@ -18,13 +18,20 @@
 <a href="css.html" class="nav-item ">🎨 2. CSS & Layouts</a>
 <a href="js.html" class="nav-item active">⚡ 3. JavaScript & DOM</a>
 <div class="sub-nav">
-  <a href="#sec1">1. Execution & Scoping</a>
-  <a href="#sec2">2. Coercion & Equality (===)</a>
-  <a href="#sec3">3. Switch & Labeled Loops</a>
-  <a href="#sec4">4. DOM Level 0 & OnSubmit</a>
-  <a href="#sec5">5. Email, NIC & Date Algorithms</a>
-  <a href="#sec6">6. Dialog Boxes & Confirmations</a>
-  <a href="#sec7">7. Cookies Management</a>
+  <a href="#sec1">1. Execution Context & Script Placement</a>
+  <a href="#sec2">2. Variables, Scope & Hoisting (var vs let vs const)</a>
+  <a href="#sec3">3. Data Types, null vs. undefined & javascript:void(0)</a>
+  <a href="#sec4">4. Arithmetic Operators & Number Coercion</a>
+  <a href="#sec5">5. Comparison Operators & Strict Equality (== vs ===)</a>
+  <a href="#sec6">6. Logical Operators & Short-Circuit Evaluation</a>
+  <a href="#sec7">7. Branching & The Switch Fallthrough Trap</a>
+  <a href="#sec8">8. Loops, Modulo Tracing & Labeled Statements</a>
+  <a href="#sec9">9. Functions, Scope & Arguments Object</a>
+  <a href="#sec10">10. Objects, Constructor Functions & Prototypes</a>
+  <a href="#sec11">11. DOM Level 0 Form Model Hierarchy</a>
+  <a href="#sec12">12. Form Submission Event Pipeline & The Mandatory return Keyword</a>
+  <a href="#sec13">13. Non-Regex Algorithmic Validation (Email, NIC & Dates)</a>
+  <a href="#sec14">14. Dialog Boxes & Client Cookies Architecture</a>
 </div>
 <a href="php.html" class="nav-item ">🐘 4. PHP & Backend</a>
 <a href="sql.html" class="nav-item ">🗄️ 5. SQL & Relational DB</a>
@@ -33,275 +40,275 @@
         </nav>
     </aside>
     <main class="main-wrapper">
-        
-<div class="hero-banner">
-    <h1>3. JavaScript &amp; DOM Level 0 Client Architecture</h1>
-    <p>Comprehensive topic-by-topic analysis of the complete JavaScript syllabus, DOM Level 0 form navigation, strict comparison tracing, non-regex algorithmic validation, cookies, and production code validation from the <strong>Scholarship Management System</strong>.</p>
-</div>
-
-<!-- SECTION 1 -->
-<div id="sec1" class="section-anchor"></div>
-<h2 class="topic-title">1. Execution Context, Script Tags &amp; Scope Mechanics</h2>
+        <div id="sec1" class="section-anchor"></div>
+<h2 class="topic-title">1. Execution Context & Script Placement</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">&lt;script&gt; Tag &amp; Variable Declarations</span>
-    </div>
-    <p>JavaScript is a dynamically typed, single-threaded, client-side scripting language executed directly by the browser's JavaScript engine (V8, SpiderMonkey):</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Single-Threaded Client Engine</span></div>
+    <p>JavaScript is a lightweight, interpreted, prototype-based scripting language executed sequentially on the client browser:</p>
     <ul>
-        <li><strong>Script Tag Embedding:</strong> Placed inside <code>&lt;script type="text/javascript"&gt; ... &lt;/script&gt;</code>. In legacy curricula, code was frequently enclosed within HTML comment blocks (<code>&lt;!-- //--&gt;</code>) to prevent older non-JS browsers from rendering script text.</li>
-        <li><strong>Head vs Bottom-of-Body Placement:</strong> Scripts placed in the <code>&lt;head&gt;</code> execute before the DOM has loaded. Form validation scripts targeting HTML form elements <strong>must be placed at the bottom of the body</strong> or executed inside <code>window.onload</code> so that the form DOM nodes exist when the script executes.</li>
-        <li><strong>Variable Scoping:</strong>
+        <li><strong>Script Tag Placement:</strong>
             <ul>
-                <li><code>var</code>: Function-scoped (or globally scoped if declared outside functions). Hoisted to the top of its execution context with an initial value of <code>undefined</code>.</li>
-                <li><code>let</code> &amp; <code>const</code>: Block-scoped (contained within curly braces <code>{ ... }</code>). Subject to Temporal Dead Zone (TDZ).</li>
-                <li><strong>Implicit Globals:</strong> Assigning to an undeclared variable (e.g. <code>atpos = email.indexOf("@");</code> without <code>var</code>) automatically binds that identifier to the global <code>window</code> object!</li>
+                <li><code>&lt;head&gt;</code> placement: Script executes before the HTML body is parsed. If the script attempts to access form elements, <code>document.formName</code> evaluates to <code>undefined</code> because the DOM tree has not yet been constructed!</li>
+                <li><strong>Bottom-of-Body placement:</strong> Placing <code>&lt;script&gt;</code> immediately before <code>&lt;/body&gt;</code> guarantees all form controls and HTML elements are rendered in memory before JavaScript executes.</li>
             </ul>
         </li>
-        <li><strong>The <code>null</code> vs <code>undefined</code> Distinction:</strong>
+        <li><code>defer</code> vs <code>async</code>:
             <ul>
-                <li><code>undefined</code>: Variable has been declared but has not been assigned a value; or a function returns without an explicit return statement. Type: <code>undefined</code>.</li>
-                <li><code>null</code>: Intentional programmatic representation of "no value" or empty object reference. Type: <code>object</code> (a famous historical JS quirk!).</li>
-                <li><code>javascript:void(0)</code>: Evaluates expression <code>0</code> and returns <code>undefined</code>, effectively preventing hyperlinks from navigating or scrolling to top.</li>
+                <li><code>async</code>: Downloads script asynchronously while HTML parses, executes immediately upon download (blocks parser during execution).</li>
+                <li><code>defer</code>: Downloads script asynchronously, but defers execution until the HTML document has finished parsing.</li>
             </ul>
         </li>
     </ul>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/login.php (Lines 58-73) &amp; public/signup.php</span>
-    </div>
-    <p>In <code>public/login.php</code> lines 58-73, our validation script is strategically placed immediately after the HTML form and right before <code>includes/footer.php</code>:</p>
-    <pre><code>58: &lt;script type="text/javascript"&gt;
-59:     function checkLogin() {
-60:         var username = document.loginForm.username.value;
-61:         var password = document.loginForm.password.value;
-62: 
-63:         if (username == "") {
-64:             alert("Please enter your username.");
-65:             return false;
-66:         }
-67:         if (password == "") {
-68:             alert("Please enter your password.");
-69:             return false;
-70:         }
-71:         return true;
-72:     }
-73: &lt;/script&gt;</code></pre>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/login.php (Lines 58-73)</span></div>
+    <p>In all our project pages (<code>login.php</code>, <code>signup.php</code>, <code>home.php</code>, <code>admin.php</code>), validation scripts are positioned at the bottom of the body right before <code>includes/footer.php</code>.</p>
 </div>
 
 <hr>
-
-<!-- SECTION 2 -->
 <div id="sec2" class="section-anchor"></div>
-<h2 class="topic-title">2. Operators, Type Coercion &amp; Strict Equality (== vs ===)</h2>
+<h2 class="topic-title">2. Variables, Scope & Hoisting (var vs let vs const)</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Loose vs Strict Type Comparison</span>
-    </div>
-    <p>Understanding implicit type coercion is a critical exam topic:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Scope Hierarchy</span></div>
+    <table class="study-table">
+        <thead>
+            <tr><th>Identifier</th><th>Scope Level</th><th>Hoisting Behavior</th><th>Re-declaration Allowed?</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>var</code></td><td>Function Scope (or Global)</td><td>Hoisted to top of scope initialized with <code>undefined</code>.</td><td><strong>Yes</strong></td></tr>
+            <tr><td><code>let</code></td><td>Block Scope (<code>{ ... }</code>)</td><td>Hoisted to block top but in Temporal Dead Zone (TDZ).</td><td>No</td></tr>
+            <tr><td><code>const</code></td><td>Block Scope (<code>{ ... }</code>)</td><td>Hoisted to block top but in Temporal Dead Zone (TDZ). Immutable binding.</td><td>No</td></tr>
+        </tbody>
+    </table>
+    <p><strong>The Implicit Global Hazard:</strong> Assigning a value to an undeclared variable without <code>var</code>/<code>let</code> (e.g. <code>counter = 0;</code>) automatically attaches that variable as a global property on <code>window.counter</code>, risking variable collisions.</p>
+</div>
+
+<hr>
+<div id="sec3" class="section-anchor"></div>
+<h2 class="topic-title">3. Data Types, null vs. undefined & javascript:void(0)</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Primitive Types &amp; Historical Quirks</span></div>
     <ul>
-        <li><strong>Loose Equality (<code>==</code>):</strong> Converts both operands to a common type before performing comparison.
+        <li><strong>Primitive Types:</strong> Number, String, Boolean, Null, Undefined, Symbol (ES6), BigInt.</li>
+        <li><strong>The Fundamental <code>null</code> vs <code>undefined</code> Distinction:</strong>
             <ul>
-                <li><code>10 == "10"</code> &rarr; <code>true</code> (String coerced to Number).</li>
-                <li><code>0 == false</code> &rarr; <code>true</code> (Boolean coerced to Number: <code>false</code> &rarr; <code>0</code>).</li>
-                <li><code>null == undefined</code> &rarr; <code>true</code> (Special rule: equal only to each other).</li>
-                <li><code>"" == 0</code> &rarr; <code>true</code> (Empty string coerced to <code>0</code>).</li>
+                <li><code>undefined</code>: Variable declared but not assigned a value; or a function returning without a value. <code>typeof undefined === "undefined"</code>.</li>
+                <li><code>null</code>: Intentional programmatic representation of an empty object pointer. <code>typeof null === "object"</code> (historical JS quirk).</li>
             </ul>
         </li>
-        <li><strong>Strict Equality (<code>===</code>):</strong> Checks both <strong>value AND data type</strong> with zero coercion.
+        <li><strong><code>javascript:void(0)</code>:</strong> The <code>void</code> operator evaluates the given expression (<code>0</code>) and unconditionally returns <code>undefined</code>. Frequently used in anchor tags (<code>&lt;a href="javascript:void(0)"&gt;</code>) to prevent browser navigation, URL hashing, or scrolling to top.</li>
+    </ul>
+</div>
+
+<hr>
+<div id="sec4" class="section-anchor"></div>
+<h2 class="topic-title">4. Arithmetic Operators & Number Coercion</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">+ vs -, *, /, %</span></div>
+    <ul>
+        <li>The <code>+</code> operator performs string concatenation if <strong>either operand is a string</strong>: <code>"10" + 5</code> evaluates to string <code>"105"</code>.</li>
+        <li>All other arithmetic operators (<code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>) automatically coerce operands to numbers:
             <ul>
-                <li><code>10 === "10"</code> &rarr; <code>false</code> (Number vs String).</li>
-                <li><code>0 === false</code> &rarr; <code>false</code> (Number vs Boolean).</li>
-                <li><code>null === undefined</code> &rarr; <code>false</code> (Object vs Undefined).</li>
-            </ul>
-        </li>
-        <li><strong>Arithmetic vs Concatenation:</strong>
-            <ul>
-                <li>The <code>+</code> operator concatenates if either operand is a string: <code>"5" + 2</code> evaluates to <code>"52"</code>.</li>
-                <li>Other arithmetic operators (<code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>) always coerce strings to numbers: <code>"10" - 3</code> evaluates to numeric <code>7</code>.</li>
+                <li><code>"10" - 5</code> evaluates to numeric <code>5</code>.</li>
+                <li><code>"10" * "2"</code> evaluates to numeric <code>20</code>.</li>
+                <li><code>"10" / "2"</code> evaluates to numeric <code>5</code>.</li>
+                <li><code>"10" % 3</code> evaluates to numeric <code>1</code> (remainder).</li>
+                <li><code>"abc" - 5</code> evaluates to <code>NaN</code> (Not-a-Number).</li>
             </ul>
         </li>
     </ul>
 </div>
 
+<hr>
+<div id="sec5" class="section-anchor"></div>
+<h2 class="topic-title">5. Comparison Operators & Strict Equality (== vs ===)</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Loose vs Strict Equality</span></div>
+    <ul>
+        <li><strong>Loose Equality (<code>==</code>):</strong> Performs implicit type coercion to convert operands to a common type before comparison:
+            <ul>
+                <li><code>10 == "10"</code> &rarr; <strong>true</strong> (String coerced to Number).</li>
+                <li><code>0 == false</code> &rarr; <strong>true</strong> (Boolean coerced to Number: <code>false</code> &rarr; <code>0</code>).</li>
+                <li><code>null == undefined</code> &rarr; <strong>true</strong>.</li>
+                <li><code>"" == 0</code> &rarr; <strong>true</strong>.</li>
+            </ul>
+        </li>
+        <li><strong>Strict Equality (<code>===</code>):</strong> Checks both <strong>value AND data type</strong> without coercion:
+            <ul>
+                <li><code>10 === "10"</code> &rarr; <strong>false</strong> (Number vs String).</li>
+                <li><code>0 === false</code> &rarr; <strong>false</strong> (Number vs Boolean).</li>
+                <li><code>null === undefined</code> &rarr; <strong>false</strong>.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">IS1207 (2) 2025 Paper Q3 Pattern</span>
-    </div>
-    <p><strong>Past Paper Question:</strong> "Write the exact browser output for the following JavaScript snippet:"</p>
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">IS1207 2025 Paper Q3 Pattern</span></div>
     <pre><code>let a = 10, b = "10";
 document.write("a == b -> " + (a == b) + "&lt;br&gt;");
 document.write("a === b -> " + (a === b) + "&lt;br&gt;");
 
-&lt;!-- EXACT EXAM OUTPUT --&gt;
+&lt;!-- OUTPUT --&gt;
 a == b -> true
 a === b -> false</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 3 -->
-<div id="sec3" class="section-anchor"></div>
-<h2 class="topic-title">3. Control Flow, Switch Fallthrough &amp; Labeled Loops</h2>
+<div id="sec6" class="section-anchor"></div>
+<h2 class="topic-title">6. Logical Operators & Short-Circuit Evaluation</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Loops &amp; Branching Logic</span>
-    </div>
-    <p><strong>The Switch Case Fallthrough Trap:</strong></p>
-    <p>In JavaScript, a <code>switch</code> statement matches cases using strict equality (<code>===</code>). If a <code>break</code> statement is omitted, execution cascades into all subsequent case statements regardless of whether their condition matches!</p>
-
-    <p><strong>Labeled Loops (Break/Continue with Labels):</strong></p>
-    <p>A label provides an identifier to a statement or loop block, allowing <code>break</code> or <code>continue</code> to target an outer nested loop directly:</p>
-    <pre><code>outerloop:
-for (var i = 0; i &lt; 3; i++) {
-    for (var j = 0; j &lt; 3; j++) {
-        if (i == 1 &amp;&amp; j == 1) {
-            break outerloop; // Terminates the entire outer loop, not just inner!
-        }
-        document.write(i + "," + j + " ");
-    }
-}
-// Output: 0,0 0,1 0,2 1,0</code></pre>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&amp;&amp;, ||, !</span></div>
+    <p>JavaScript logical operators utilize short-circuit evaluation:</p>
+    <ul>
+        <li><code>expr1 &amp;&amp; expr2</code>: If <code>expr1</code> is falsy, short-circuits immediately and returns <code>expr1</code> without evaluating <code>expr2</code>.</li>
+        <li><code>expr1 || expr2</code>: If <code>expr1</code> is truthy, short-circuits immediately and returns <code>expr1</code> without evaluating <code>expr2</code>.</li>
+        <li><strong>Falsy values in JS:</strong> <code>false</code>, <code>0</code>, <code>""</code> (empty string), <code>null</code>, <code>undefined</code>, <code>NaN</code>. All other values are truthy.</li>
+    </ul>
 </div>
 
+<hr>
+<div id="sec7" class="section-anchor"></div>
+<h2 class="topic-title">7. Branching & The Switch Fallthrough Trap</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">switch Case Matching</span></div>
+    <p>The <code>switch</code> statement matches expressions using strict equality (<code>===</code>).</p>
+    <p><strong>The Fallthrough Trap (EXAM FAVORITE!):</strong></p>
+    <p>If a <code>break</code> statement is omitted at the end of a matching <code>case</code> block, JavaScript <strong>falls through into every subsequent case block</strong>, executing all subsequent code regardless of whether the condition matches, until it hits a <code>break</code> or ends!</p>
+</div>
+
+<hr>
+<div id="sec8" class="section-anchor"></div>
+<h2 class="topic-title">8. Loops, Modulo Tracing & Labeled Statements</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">while, do-while, for &amp; Labels</span></div>
+    <ul>
+        <li><code>while (condition)</code>: Pre-condition check (may execute 0 times).</li>
+        <li><code>do { ... } while (condition);</code>: Post-condition check (guaranteed to execute at least once).</li>
+        <li><code>for (init; condition; increment)</code>: Standard counter loop.</li>
+        <li><strong>Labeled Statements:</strong> Assigns an identifier label to an outer loop, permitting <code>break label;</code> or <code>continue label;</code> to escape deeply nested loops directly.</li>
+    </ul>
+</div>
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">Loop Modulo Output Tracing</span>
-    </div>
-    <p><strong>Past Paper Question (from sample cordesl.pdf &amp; AY21 Q3):</strong></p>
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">Loop Modulo Output Tracing</span></div>
     <pre><code>for (i = 1; i &lt; 100; i++) {
     if (i % 11 == 0) {
         document.write(i, ",");
     }
 }
-
-&lt;!-- EXACT EXAM OUTPUT (Multiples of 11 up to 99) --&gt;
-11,22,33,44,55,66,77,88,99,</code></pre>
+// OUTPUT: 11,22,33,44,55,66,77,88,99,</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 4 -->
-<div id="sec4" class="section-anchor"></div>
-<h2 class="topic-title">4. DOM Level 0 Form Access &amp; Event Architecture</h2>
+<div id="sec9" class="section-anchor"></div>
+<h2 class="topic-title">9. Functions, Scope & Arguments Object</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">document.forms Hierarchy</span>
-    </div>
-    <p>The UCSC curriculum exclusively teaches DOM Level 0 for form handling. Elements are accessed by walking down the window-document-form hierarchy:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Declaration, Return &amp; Arguments</span></div>
+    <p>Functions encapsulate reusable procedural logic:</p>
     <ul>
-        <li>Access by form name: <code>document.formName.inputName.value</code>.</li>
-        <li>Access by form index: <code>document.forms[0].elements[0].value</code>.</li>
-        <li><strong>Form Control Value Access:</strong>
-            <ul>
-                <li>Text, Password, Email, Date: <code>document.myForm.username.value</code>.</li>
-                <li>Checkbox: <code>document.myForm.agree.checked</code> (Returns boolean <code>true</code> or <code>false</code>).</li>
-                <li>Radio Buttons: Loop through array <code>document.myForm.gender</code> and check <code>[i].checked</code>.</li>
-                <li>Dropdown Select: <code>document.myForm.country.value</code> or <code>document.myForm.country.selectedIndex</code>.</li>
-            </ul>
-        </li>
-        <li><strong>The <code>onsubmit="return validate()"</code> Rule (CRITICAL!):</strong>
-            <ul>
-                <li>The inline attribute <strong>MUST include the <code>return</code> keyword</strong>: <code>&lt;form onsubmit="return checkForm()"&gt;</code>.</li>
-                <li>If the function returns <code>false</code>, the browser cancels the default HTTP submission. If <code>return</code> is omitted (e.g. <code>onsubmit="checkForm()"</code>), the form will submit anyway even if the function returns <code>false</code>!</li>
-            </ul>
-        </li>
+        <li><code>function funcName(param1, param2) { return val; }</code></li>
+        <li>If no <code>return</code> statement exists, the function automatically returns <code>undefined</code>.</li>
+        <li><code>arguments</code> object: An array-like object available within all non-arrow functions containing all passed parameters (<code>arguments[0]</code>, <code>arguments.length</code>).</li>
     </ul>
 </div>
 
-<div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/signup.php (Lines 47 &amp; 69-94)</span>
-    </div>
-    <p>In <code>public/signup.php</code>, we attached client-side validation using DOM Level 0:</p>
-    <pre><code>47: &lt;form name="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()"&gt;
-...
-70: function checkForm() {
-71:     var user = document.signupForm.username.value;
-72:     var email = document.signupForm.email.value;
-73:     var pass = document.signupForm.password.value;
-74:     var confirm = document.signupForm.confirm_password.value;
-75: 
-76:     if (user == "") {
-77:         alert("Username is required.");
-78:         return false;
-79:     }
-...
-88:     if (pass != confirm || confirm == "") {
-89:         alert("Passwords do not match.");
-90:         return false;
-91:     }
-92:     return true;
-93: }</code></pre>
+<hr>
+<div id="sec10" class="section-anchor"></div>
+<h2 class="topic-title">10. Objects, Constructor Functions & Prototypes</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Object Construction Patterns</span></div>
+    <ul>
+        <li><strong>Object Literal:</strong> <code>var student = { name: "UCSC", gpa: 3.8 };</code></li>
+        <li><strong>Constructor Function (with <code>this</code> and <code>new</code>):</strong>
+            <pre><code>function Scholarship(id, name, amount) {
+    this.id = id;
+    this.name = name;
+    this.amount = amount;
+}
+var award = new Scholarship(1, "Academic Excellence", 50000);</code></pre>
+        </li>
+        <li><strong>The <code>with</code> Statement (Slide 12):</strong> Deprecated statement used to extend the scope chain: <code>with (obj) { prop = "val"; }</code>.</li>
+    </ul>
 </div>
 
 <hr>
-
-<!-- SECTION 5 -->
-<div id="sec5" class="section-anchor"></div>
-<h2 class="topic-title">5. Form Validation Algorithms: Email, NIC &amp; Dates</h2>
+<div id="sec11" class="section-anchor"></div>
+<h2 class="topic-title">11. DOM Level 0 Form Model Hierarchy</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Pure Algorithmic Validation without Regular Expressions</span>
-    </div>
-    <p>The university syllabus specifically forbids or discourages regex for introductory students, testing direct string manipulation algorithms instead:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">document.formName.fieldName.value</span></div>
+    <p>The UCSC syllabus exclusively teaches the DOM Level 0 navigation model:</p>
+    <ul>
+        <li>Direct element access: <code>document.formName.inputName.value</code>.</li>
+        <li>Index-based access: <code>document.forms[0].elements[0].value</code>.</li>
+        <li>Checkbox state: <code>document.appForm.testimonial_checked.checked</code> (returns boolean <code>true</code> or <code>false</code>).</li>
+        <li>Dropdown selection: <code>document.appForm.gender.value</code> or <code>document.appForm.gender.selectedIndex</code>.</li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/admin.php (Lines 264-280)</span></div>
+    <pre><code>264: function checkAddUser() {
+265:     var username = document.addUserForm.username.value;
+266:     var email = document.addUserForm.email.value;
+267:     var password = document.addUserForm.password.value;
+268: 
+269:     if (username == "") {
+270:         alert("Please enter a username.");
+271:         return false;
+272:     }
+...
+281:     return true;
+282: }</code></pre>
+</div>
+
+<hr>
+<div id="sec12" class="section-anchor"></div>
+<h2 class="topic-title">12. Form Submission Event Pipeline & The Mandatory return Keyword</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">onsubmit="return validate()"</span></div>
+    <p><strong>The Mandatory return Rule (CRITICAL!):</strong></p>
+    <p>When wiring validation to a form: <code>&lt;form onsubmit="return checkApplication()"&gt;</code>:</p>
+    <ul>
+        <li>The <code>return</code> keyword is <strong>compulsory</strong>.</li>
+        <li>If <code>return</code> is included and <code>checkApplication()</code> returns <code>false</code>, the browser receives <code>return false;</code> and cancels the default HTTP form submission.</li>
+        <li>If <code>return</code> is omitted (e.g. <code>onsubmit="checkApplication()"</code>), the function runs and returns <code>false</code>, but the <code>onsubmit</code> event handler itself returns <code>undefined</code>, which the browser treats as truthy and submits the form anyway!</li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/home.php (Line 113)</span></div>
+    <pre><code>113: &lt;form name="appForm" action="home.php" method="POST" onsubmit="return checkApplication()"&gt;</code></pre>
+</div>
+
+<hr>
+<div id="sec13" class="section-anchor"></div>
+<h2 class="topic-title">13. Non-Regex Algorithmic Validation (Email, NIC & Dates)</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Pure String Algorithmic Inspection</span></div>
+    <p>The university syllabus specifically avoids regex for introductory students, mandating direct algorithmic checks:</p>
     <ol>
         <li><strong>Algorithmic Email Validation (<code>indexOf</code> / <code>lastIndexOf</code>):</strong>
-            <p>From <code>13_JS_FormValidation.pdf</code> slide 14, an email is validated with two mathematical conditions:</p>
             <ul>
-                <li>Condition 1: <code>atpos &lt; 1</code> (&commat; must not be the first character).</li>
-                <li>Condition 2: <code>dotpos - atpos &lt; 2</code> (the period <code>.</code> must occur at least two characters after &commat;).</li>
+                <li>Condition 1: <code>atpos &lt; 1</code> (&commat; must not be the very first character).</li>
+                <li>Condition 2: <code>dotpos - atpos &lt; 2</code> (period <code>.</code> must occur at least two positions after &commat;).</li>
             </ul>
         </li>
-        <li><strong>Character-by-Character String Inspection:</strong>
-            <p>Looping through characters using <code>charAt(i)</code> to ensure all characters are ASCII digits between <code>"0"</code> and <code>"9"</code>.</p>
-        </li>
-        <li><strong>Temporal Validation (Date Objects):</strong>
-            <p>Splitting date strings (<code>YYYY-MM-DD</code>) into year, month, day components, constructing a <code>new Date(y, m-1, d)</code>, and comparing timestamps against current system time (<code>new Date()</code>).</p>
-        </li>
+        <li><strong>Character Loop Traversal:</strong> Looping through characters with <code>charAt(i)</code> to ensure all characters are ASCII digits between <code>"0"</code> and <code>"9"</code>.</li>
+        <li><strong>Date Object Comparisons:</strong> Splitting date strings with <code>split("-")</code>, generating <code>new Date(y, m-1, d)</code>, and comparing timestamps against <code>new Date()</code>.</li>
     </ol>
 </div>
-
-<div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">Master Email Validation Template</span>
-    </div>
-    <pre><code>function validateEmail() {
-    var emailID = document.myForm.EMail.value;
-    var atpos = emailID.indexOf("@");
-    var dotpos = emailID.lastIndexOf(".");
-
-    if (atpos &lt; 1 || (dotpos - atpos &lt; 2)) {
-        alert("Please enter a valid email address.");
-        document.myForm.EMail.focus();
-        return false;
-    }
-    return true;
-}</code></pre>
-</div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/home.php (Lines 311-347)</span>
-    </div>
-    <p>In <code>public/home.php</code>, we implemented date boundary checks and pure character-by-character Sri Lankan 12-digit NIC validation:</p>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/home.php (Lines 311-339)</span></div>
     <pre><code>311: } else {
 312:     var parts = dob.split("-");
 313:     var dobDate = new Date(parts[0], parts[1] - 1, parts[2]);
@@ -327,76 +334,30 @@ for (var i = 0; i &lt; 3; i++) {
 </div>
 
 <hr>
-
-<!-- SECTION 6 -->
-<div id="sec6" class="section-anchor"></div>
-<h2 class="topic-title">6. Dialog Boxes &amp; Dangerous Action Confirmation</h2>
+<div id="sec14" class="section-anchor"></div>
+<h2 class="topic-title">14. Dialog Boxes & Client Cookies Architecture</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">alert, confirm &amp; prompt</span>
-    </div>
-    <p>JavaScript provides three native modal popup boxes:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Dialog Boxes + document.cookie</span></div>
     <ul>
-        <li><code>alert("text")</code>: Information notification. Displays text with single OK button. Execution halts until closed.</li>
-        <li><code>confirm("question")</code>: Binary consent dialog. Displays OK and Cancel buttons. Returns boolean <code>true</code> if user clicks OK, or <code>false</code> if Cancel is clicked.</li>
-        <li><code>prompt("label", "default")</code>: Text input prompt. Returns the string entered by user, or <code>null</code> if user cancels.</li>
+        <li><code>alert("msg")</code>: Informational notification with OK button.</li>
+        <li><code>confirm("prompt")</code>: Binary confirmation returning <code>true</code> or <code>false</code>.</li>
+        <li><code>prompt("text", "default")</code>: Returns user text string or <code>null</code>.</li>
+        <li><strong>Cookie Management:</strong>
+            <ul>
+                <li>Set cookie: <code>document.cookie = "key=val;expires=" + date.toUTCString() + ";path=/";</code></li>
+                <li>Read cookie: <code>var arr = document.cookie.split(';');</code></li>
+                <li>Delete cookie: Set expiry date to a past timestamp (e.g. <code>now.setMonth(now.getMonth() - 1);</code>).</li>
+            </ul>
+        </li>
     </ul>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/applications.php (Lines 97-102 &amp; 146)</span>
-    </div>
-    <p>In <code>public/applications.php</code>, we paired <code>confirm()</code> directly with form submissions to prevent accidental removals or approvals:</p>
-    <pre><code>97: &lt;form action="applications.php" method="POST" style="display:inline;"&gt;
-98:     &lt;input type="hidden" name="action" value="remove_scholarship"&gt;
-99:     &lt;input type="hidden" name="scholarship_id" value="&lt;?php echo $sch['id']; ?&gt;"&gt;
-100:     &lt;button type="submit" class="btn btn-danger" onclick="return confirm('Remove this scholarship? All related applications will also be deleted.')"&gt;Remove&lt;/button&gt;
-101: &lt;/form&gt;</code></pre>
-    <p><strong>Code Analysis:</strong> If the registrar clicks "Cancel", <code>confirm()</code> returns <code>false</code>. Because it is prefixed with <code>return</code>, the button click event is cancelled and no HTTP POST request is transmitted to the server.</p>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/applications.php (Line 100)</span></div>
+    <pre><code>100: &lt;button type="submit" class="btn btn-danger" onclick="return confirm('Remove this scholarship? All related applications will also be deleted.')"&gt;Remove&lt;/button&gt;</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 7 -->
-<div id="sec7" class="section-anchor"></div>
-<h2 class="topic-title">7. Client-Side Cookies Architecture</h2>
-
-<div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">8_JS_cookies.pdf Curriculum</span>
-    </div>
-    <p>Cookies store small text key-value pairs directly in the client browser across sessions:</p>
-    <ul>
-        <li><strong>Cookie Format:</strong> <code>key=value;expires=date_string;path=path;domain=domain;secure</code></li>
-        <li><strong>Setting a Cookie:</strong>
-            <pre><code>// Simple session cookie (deleted when browser closes)
-document.cookie = "username=ucsc;";
-
-// Persistent Cookie expiring in 30 days
-var now = new Date();
-now.setMonth(now.getMonth() + 1);
-document.cookie = "username=ucsc;expires=" + now.toUTCString() + ";path=/";</code></pre>
-        </li>
-        <li><strong>Reading &amp; Parsing Cookies:</strong>
-            <pre><code>var allCookies = document.cookie; // Returns "key1=val1; key2=val2"
-var cookieArray = allCookies.split(';');
-for (var i = 0; i &lt; cookieArray.length; i++) {
-    var name = cookieArray[i].split('=')[0].trim();
-    var value = cookieArray[i].split('=')[1];
-}</code></pre>
-        </li>
-        <li><strong>Deleting a Cookie:</strong> Setting the <code>expires</code> parameter to a historical date in the past immediately forces the browser to destroy the cookie:
-            <pre><code>var past = new Date();
-past.setMonth(past.getMonth() - 1);
-document.cookie = "username=;expires=" + past.toUTCString() + ";path=/";</code></pre>
-        </li>
-    </ul>
-</div>
 
     </main>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML Mastery & Semantic Architecture | IS1207 Complete Study Guide</title>
+    <title>HTML Mastery & Web Authoring Architecture | IS1207 Complete Study Guide</title>
     <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
@@ -16,14 +16,20 @@
             <a href="index.html" class="nav-item ">🏠 Home & Overview</a>
 <a href="html.html" class="nav-item active">🌐 1. HTML Mastery</a>
 <div class="sub-nav">
-  <a href="#sec1">1. Web Architecture & DNS</a>
-  <a href="#sec2">2. URL Anatomy & Doctype</a>
-  <a href="#sec3">3. Semantic Structural Layout</a>
-  <a href="#sec4">4. Hyperlink Paths Formula</a>
-  <a href="#sec5">5. Image Maps Geometry</a>
-  <a href="#sec6">6. Tables & Spanning Grids</a>
-  <a href="#sec7">7. Forms & Readonly Flow</a>
-  <a href="#sec8">8. Framesets & Target Windows</a>
+  <a href="#sec1">1. Web Architecture & DNS Resolution</a>
+  <a href="#sec2">2. URL Anatomy & Web Generations (1.0 - 5.0)</a>
+  <a href="#sec3">3. Doctype Declarations & Character Encoding</a>
+  <a href="#sec4">4. Document Metadata, Redirection & Favicons</a>
+  <a href="#sec5">5. Semantic Structural Layout Containers</a>
+  <a href="#sec6">6. Text Level Semantics &amp; Typography</a>
+  <a href="#sec7">7. Quotations, Abbreviations &amp; Bi-Directional Text</a>
+  <a href="#sec8">8. Ordered, Unordered &amp; Description Lists</a>
+  <a href="#sec9">9. Hyperlinks, Link Targets &amp; Directory Traversal Formula</a>
+  <a href="#sec10">10. Image Maps &amp; Geometric Coordinates</a>
+  <a href="#sec11">11. Complex Tables, Spans &amp; Rendering Grids</a>
+  <a href="#sec12">12. Forms &amp; Encoding Types (Enctype)</a>
+  <a href="#sec13">13. Form Controls &amp; Fieldsets Grouping</a>
+  <a href="#sec14">14. Input Constraints &amp; Readonly Form Flow</a>
 </div>
 <a href="css.html" class="nav-item ">🎨 2. CSS & Layouts</a>
 <a href="js.html" class="nav-item ">⚡ 3. JavaScript & DOM</a>
@@ -34,469 +40,403 @@
         </nav>
     </aside>
     <main class="main-wrapper">
-        
-<div class="hero-banner">
-    <h1>1. HTML Mastery &amp; Web Authoring Architecture</h1>
-    <p>Exhaustive, topic-by-topic study guide covering the complete UCSC HTML syllabus (171 lecture slides), exact semester exam past-paper traps, and line-by-line implementation in the <strong>Scholarship Management System</strong>.</p>
-</div>
-
-<!-- SECTION 1 -->
-<div id="sec1" class="section-anchor"></div>
-<h2 class="topic-title">1. Web Architecture, DNS &amp; Browser Rendering Pipeline</h2>
+        <div id="sec1" class="section-anchor"></div>
+<h2 class="topic-title">1. Web Architecture & DNS Resolution</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">4-Phase Web Request Lifecycle</span>
-    </div>
-    <p>When a user types a URL (e.g., <code>http://localhost/scholarship_system/public/login.php</code>) into a browser, the request executes through four rigorous architectural phases:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">4-Phase Request Lifecycle</span></div>
+    <p>When an end-user navigates to a URL such as <code>http://localhost/scholarship_system/public/login.php</code>, the transaction is processed across four distinct infrastructural tiers:</p>
     <ol>
-        <li><strong>DNS Lookup Hierarchy:</strong> Resolves domain name to IP address.
+        <li><strong>DNS Hierarchy Traversal:</strong>
             <ul>
-                <li>Browser cache &rarr; OS/Router cache &rarr; Recursive DNS Resolver (ISP).</li>
-                <li>Hierarchy traversal: <strong>Root DNS Server (<code>.</code>)</strong> &rarr; <strong>TLD Server (<code>.com</code>, <code>.lk</code>)</strong> &rarr; <strong>Authoritative Name Server</strong> (returns numeric IP like <code>192.168.1.50</code>).</li>
+                <li>The browser inspects local memory cache &rarr; Operating system DNS cache &rarr; Local router cache.</li>
+                <li>If unresolved, queries the <strong>Recursive DNS Resolver</strong> (ISP / Cloudflare <code>1.1.1.1</code> / Google <code>8.8.8.8</code>).</li>
+                <li>The resolver walks the DNS hierarchy: queries <strong>Root Name Server (<code>.</code>)</strong> &rarr; identifies <strong>Top-Level Domain (TLD) Server (<code>.com</code>, <code>.lk</code>)</strong> &rarr; queries <strong>Authoritative Name Server</strong>, which responds with the target machine's numeric IPv4/IPv6 address.</li>
             </ul>
         </li>
-        <li><strong>TCP &amp; TLS Handshake:</strong>
+        <li><strong>Transport Layer (TCP &amp; TLS Handshake):</strong>
             <ul>
-                <li><strong>TCP 3-Way Handshake:</strong> <code>SYN</code> (Synchronize) &rarr; <code>SYN-ACK</code> (Synchronize + Acknowledge) &rarr; <code>ACK</code> (Acknowledge).</li>
-                <li><strong>TLS Handshake (HTTPS):</strong> Cipher suite negotiation, digital certificate verification, asymmetric public/private key exchange to establish a shared symmetric session key.</li>
+                <li>Establishes reliable transmission via the <strong>TCP 3-Way Handshake</strong>: <code>SYN</code> (Synchronize) &rarr; <code>SYN-ACK</code> (Synchronize + Acknowledge) &rarr; <code>ACK</code> (Acknowledge).</li>
+                <li>If HTTPS is enabled, establishes asymmetric cryptographic exchange (TLS Handshake) to negotiate cipher suites and shared symmetric keys.</li>
             </ul>
         </li>
-        <li><strong>HTTP Request / Response Transaction:</strong>
+        <li><strong>HTTP Request/Response Processing:</strong> The browser dispatches an HTTP request (Method, URI, Headers, Payload) to Apache HTTPD. Apache invokes the PHP runtime engine, executes database queries against MySQL via PDO, and responds with HTTP status (e.g. <code>200 OK</code>, <code>302 Redirect</code>) and an HTML text payload.</li>
+        <li><strong>Browser Rendering Pipeline:</strong>
             <ul>
-                <li>Browser sends HTTP Request (Method <code>GET</code>/<code>POST</code>, Headers, Payload).</li>
-                <li>Server (Apache/PHP) processes business logic, queries MySQL database, and returns HTTP Response (Status code <code>200 OK</code>, <code>302 Redirect</code>, <code>404 Not Found</code>, <code>500 Server Error</code>, MIME <code>Content-Type: text/html</code>, HTML payload).</li>
-            </ul>
-        </li>
-        <li><strong>Browser Rendering Engine Pipeline:</strong>
-            <ul>
-                <li><strong>DOM Construction:</strong> Parses HTML tokens into Document Object Model (DOM) tree nodes.</li>
-                <li><strong>CSSOM Construction:</strong> Parses internal, external, and inline CSS into CSS Object Model (CSSOM) tree nodes.</li>
-                <li><strong>Render Tree Synthesis:</strong> Merges DOM + CSSOM into Render Tree (elements with <code>display: none</code> are excluded; <code>visibility: hidden</code> elements are included).</li>
-                <li><strong>Reflow / Layout:</strong> Computes the exact geometric dimensions, bounding boxes, and coordinates of every render object on screen.</li>
-                <li><strong>Repaint:</strong> Rasterizes visual pixels (colors, borders, backgrounds, shadows) to the physical display buffer.</li>
+                <li><strong>DOM Construction:</strong> Parses raw HTML tokens into a tree of Document Object Model nodes.</li>
+                <li><strong>CSSOM Construction:</strong> Parses linked stylesheets (<code>style.css</code>) into the CSS Object Model.</li>
+                <li><strong>Render Tree Generation:</strong> Merges DOM and CSSOM trees, ignoring non-visual nodes like <code>&lt;head&gt;</code> and elements styled with <code>display: none</code>.</li>
+                <li><strong>Layout / Reflow:</strong> Computes exact bounding box coordinates and pixel dimensions for every visible node.</li>
+                <li><strong>Paint:</strong> Fills visual pixels on the screen (colors, borders, gradients, text).</li>
             </ul>
         </li>
     </ol>
 </div>
-
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">IS1207 Exam Focus</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">IS1207 Q1 Rendering Trap</span></div>
     <p><strong>Past Paper Question:</strong> "Explain why script tags placed in the <code>&lt;head&gt;</code> without <code>defer</code> or <code>async</code> block HTML rendering."</p>
-    <p><strong>Exam Solution:</strong> When the HTML parser encounters a <code>&lt;script&gt;</code> tag, it immediately halts DOM construction to fetch and execute the JavaScript, as JS may invoke <code>document.write()</code> or alter the DOM. This causes render blocking until the script execution completes.</p>
+    <p><strong>Exam Solution:</strong> When the browser parser encounters a synchronous <code>&lt;script&gt;</code> tag, it immediately halts DOM construction to download and execute the script, because JavaScript can modify the DOM via <code>document.write()</code> or DOM APIs. This blocks the rendering pipeline until script completion.</p>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">includes/header.php (Lines 8-16) &amp; includes/footer.php</span>
-    </div>
-    <p>In our project, we optimize the rendering pipeline by placing CSS stylesheets inside <code>&lt;head&gt;</code> in <code>includes/header.php</code> to allow early CSSOM generation, while form-validation JavaScript scripts (such as <code>checkLogin()</code> and <code>checkApplication()</code>) are placed at the bottom of the body right before <code>includes/footer.php</code> to prevent render-blocking of visible form controls.</p>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">includes/header.php (Lines 8-16) &amp; includes/footer.php</span></div>
+    <p>In our project, stylesheets are intentionally declared inside <code>&lt;head&gt;</code> in <code>includes/header.php</code> to expedite CSSOM generation, while all validation scripts (e.g. <code>public/login.php</code> line 58) are placed at the bottom of the body right before <code>includes/footer.php</code> to ensure the form DOM nodes are fully constructed before script attachment.</p>
+</div>
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Defense Q&amp;A</span><span class="file-badge">Examiner Prompt</span></div>
+    <p><strong>Examiner:</strong> "How does Apache know to process your PHP files instead of serving them as plain text?"</p>
+    <p><strong>Candidate Answer:</strong> "Through the <code>LoadModule php_module</code> directive in Apache's <code>httpd.conf</code> configuration file, which delegates all incoming requests ending in <code>.php</code> to the PHP interpreter before sending the rendered HTML to the browser."</p>
 </div>
 
 <hr>
-
-<!-- SECTION 2 -->
 <div id="sec2" class="section-anchor"></div>
-<h2 class="topic-title">2. URL Anatomy, Web Generations &amp; Document Doctype</h2>
+<h2 class="topic-title">2. URL Anatomy & Web Generations (1.0 - 5.0)</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">URL Structure + Evolution</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">URL Structure + Web Evolution</span></div>
     <p><strong>URL Anatomy:</strong> <code>scheme://host.domain:port/path/filename</code></p>
     <ul>
-        <li><code>scheme</code>: Protocol (<code>http</code>, <code>https</code>).</li>
+        <li><code>scheme</code>: Protocol used to access the resource (<code>http</code>, <code>https</code>, <code>ftp</code>).</li>
         <li><code>host</code>: Subdomain or machine name (<code>www</code>, <code>localhost</code>).</li>
-        <li><code>domain</code>: Registered domain name (<code>ucsc.cmb.ac.lk</code>).</li>
-        <li><code>port</code>: Port number (Default: <code>80</code> for HTTP, <code>443</code> for HTTPS, <code>3306</code> for MySQL).</li>
-        <li><code>path</code>: Directory path on the web server (<code>/scholarship_system/public/</code>).</li>
-        <li><code>filename</code>: Target resource (<code>home.php</code>).</li>
+        <li><code>domain</code>: Registered domain name (<code>cmb.ac.lk</code>).</li>
+        <li><code>port</code>: Port number on the host (Default: <code>80</code> for HTTP, <code>443</code> for HTTPS, <code>3306</code> for MySQL).</li>
+        <li><code>path</code>: Directory path on the server filesystem (<code>/scholarship_system/public/</code>).</li>
+        <li><code>filename</code>: Specific resource file requested (<code>home.php</code>).</li>
     </ul>
-
-    <p><strong>Web Evolution (Web 1.0 to Web 5.0):</strong></p>
+    <p><strong>Web Generations Matrix:</strong></p>
     <table class="study-table">
         <thead>
-            <tr>
-                <th>Generation</th>
-                <th>Core Paradigm</th>
-                <th>Key Characteristics</th>
-            </tr>
+            <tr><th>Generation</th><th>Definition</th><th>Core Characteristics</th><th>Examples</th></tr>
         </thead>
         <tbody>
-            <tr>
-                <td><strong>Web 1.0</strong></td>
-                <td>Read-Only (Static)</td>
-                <td>Flat HTML files, one-way passive consumption, server-side directory listings.</td>
-            </tr>
-            <tr>
-                <td><strong>Web 2.0</strong></td>
-                <td>Read-Write (Interactive)</td>
-                <td>User-generated content, dynamic applications, social networks, AJAX, relational databases. (Our project falls here!).</td>
-            </tr>
-            <tr>
-                <td><strong>Web 3.0</strong></td>
-                <td>Executable / Semantic</td>
-                <td>Machine-readable semantic web, RDF/OWL ontologies, smart autonomous agents.</td>
-            </tr>
-            <tr>
-                <td><strong>Web 4.0</strong></td>
-                <td>Ubiquitous / Mobile</td>
-                <td>Seamless integration between physical IoT devices, wearable tech, and mobile clouds.</td>
-            </tr>
-            <tr>
-                <td><strong>Web 5.0</strong></td>
-                <td>Symbiotic / Emotional</td>
-                <td>Emotional and cognitive interaction between humans and intelligent neural interfaces.</td>
-            </tr>
+            <tr><td><strong>Web 1.0</strong></td><td>Read-Only (Static)</td><td>One-way information delivery, static HTML pages, server directory files.</td><td>Britannica Online, personal homepages.</td></tr>
+            <tr><td><strong>Web 2.0</strong></td><td>Read-Write (Interactive)</td><td>User-generated content, relational databases, dynamic forms, social networks.</td><td>Facebook, Wikipedia, our Scholarship System.</td></tr>
+            <tr><td><strong>Web 3.0</strong></td><td>Executable / Semantic</td><td>Machine-to-machine comprehension, RDF/OWL metadata ontologies, contextual data.</td><td>Semantic search engines, smart assistant integration.</td></tr>
+            <tr><td><strong>Web 4.0</strong></td><td>Mobile &amp; Ubiquitous</td><td>Real-time synchronization between cloud systems and mobile/IoT hardware.</td><td>Autonomous vehicles, interconnected smart grids.</td></tr>
+            <tr><td><strong>Web 5.0</strong></td><td>Emotional / Symbiotic</td><td>Emotional recognition and neural/perceptive interactions between human and machine.</td><td>Cognitive neural assistants.</td></tr>
         </tbody>
     </table>
 </div>
 
-<div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">Doctype &amp; Metadata Traps</span>
-    </div>
-    <p><strong>Past Paper Question Trap (AY21 Q1 &amp; AY22 Q1):</strong></p>
-    <ol>
-        <li><strong>Doctype Case &amp; Exclamation:</strong> Missing the exclamation mark (e.g. writing <code>&lt;DOCTYPE html&gt;</code> instead of <code>&lt;!DOCTYPE html&gt;</code>).</li>
-        <li><strong>Meta Refresh Redirection:</strong> The exam asks for delayed redirection syntax:
-            <pre><code>&lt;!-- Reloads page every 30 seconds --&gt;
-&lt;meta http-equiv="refresh" content="30"&gt;
+<hr>
+<div id="sec3" class="section-anchor"></div>
+<h2 class="topic-title">3. Doctype Declarations & Character Encoding</h2>
 
-&lt;!-- Redirects to login.php after 5 seconds --&gt;
-&lt;meta http-equiv="refresh" content="5; url=login.php"&gt;</code></pre>
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&lt;!DOCTYPE html&gt; + UTF-8</span></div>
+    <p>Every standards-compliant HTML document must initiate with a Document Type Declaration: <code>&lt;!DOCTYPE html&gt;</code>.</p>
+    <ul>
+        <li><strong>Standards Mode vs Quirks Mode:</strong> Omitting the doctype forces the browser into Quirks Mode, causing erratic rendering and non-standard box-model calculations mimicking 1990s Netscape/IE browsers.</li>
+        <li><strong>Character Encodings:</strong>
+            <ul>
+                <li><strong>ASCII:</strong> 7-bit encoding containing 128 English characters and control codes.</li>
+                <li><strong>ISO-8859-1 (Latin-1):</strong> 8-bit extension containing 256 Western European character sets.</li>
+                <li><strong>UTF-8:</strong> Variable-width (1 to 4 bytes) Unicode encoding standard covering virtually every global human script, technical symbol, and emoji. Declared via <code>&lt;meta charset="UTF-8"&gt;</code>.</li>
+            </ul>
         </li>
-        <li><strong>Favicon Link Tag:</strong>
-            <pre><code>&lt;link rel="icon" type="image/x-icon" href="/favicon.ico"&gt;</code></pre>
-        </li>
-    </ol>
+    </ul>
+</div>
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">Doctype Syntax Traps</span></div>
+    <p><strong>Past Paper Question Trap (AY21 Q1):</strong> The examiner writes <code>&lt;DOCTYPE HTML&gt;</code> (missing the leading <code>!</code> exclamation mark) or places doctypes inside the <code>&lt;head&gt;</code>. The doctype must be the very first line of the document before the opening <code>&lt;html&gt;</code> tag.</p>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">includes/header.php (Lines 8-11)</span></div>
+    <pre><code>8: &lt;!DOCTYPE html&gt;
+9: &lt;html lang="en"&gt;
+10: &lt;head&gt;
+11:     &lt;meta charset="UTF-8"&gt;</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 3 -->
-<div id="sec3" class="section-anchor"></div>
-<h2 class="topic-title">3. Semantic Layout &amp; Text Quotation Semantics</h2>
+<div id="sec4" class="section-anchor"></div>
+<h2 class="topic-title">4. Document Metadata, Redirection & Favicons</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Semantic Structural Elements</span>
-    </div>
-    <p>HTML5 deprecates generic <code>&lt;div&gt;</code> tags for layout in favor of meaningful semantic containers:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&lt;meta&gt; Attributes &amp; Timed Redirection</span></div>
+    <p>Metadata tags placed within <code>&lt;head&gt;</code> communicate configuration instructions to browsers and web crawlers:</p>
     <ul>
-        <li><code>&lt;nav&gt;</code>: Structural block containing primary site navigation links.</li>
-        <li><code>&lt;header&gt;</code> &amp; <code>&lt;footer&gt;</code>: Intro and footer blocks for pages or individual sections.</li>
-        <li><code>&lt;section&gt;</code>: A thematic group of related content, typically beginning with an <code>&lt;h2&gt;</code>-<code>&lt;h6&gt;</code>.</li>
-        <li><code>&lt;article&gt;</code>: Self-contained composition that makes sense independently.</li>
-        <li><code>&lt;aside&gt;</code>: Ancillary content (sidebars, callout notes).</li>
-        <li><code>&lt;details&gt;</code> &amp; <code>&lt;summary&gt;</code>: Native expandable/collapsible disclosure widget.</li>
+        <li><code>&lt;meta name="description" content="..."&gt;</code>: Summary shown in search engine result snippets.</li>
+        <li><code>&lt;meta name="keywords" content="..."&gt;</code>: Search index keywords.</li>
+        <li><code>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0"&gt;</code>: Configures mobile viewport zoom.</li>
+        <li><strong>Timed Refresh &amp; Redirection via HTTP-Equiv:</strong>
+            <ul>
+                <li>Refresh page every 30 seconds: <code>&lt;meta http-equiv="refresh" content="30"&gt;</code></li>
+                <li>Delayed redirection after 5 seconds: <code>&lt;meta http-equiv="refresh" content="5; url=login.php"&gt;</code></li>
+            </ul>
+        </li>
+        <li><strong>Favicon Link Tag:</strong> <code>&lt;link rel="icon" type="image/x-icon" href="favicon.ico"&gt;</code></li>
+        <li><strong>Base Target Tag:</strong> <code>&lt;base target="_blank" href="http://localhost/app/"&gt;</code> sets global target behavior.</li>
     </ul>
+</div>
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">Metadata Placement Traps</span></div>
+    <p><strong>Past Paper Question Trap (AY22 Q1):</strong> An exam snippet shows <code>&lt;meta charset="UTF-8"&gt;</code> and <code>&lt;title&gt;</code> placed inside the <code>&lt;body&gt;</code> tag. You must identify this as an error and relocate all metadata and link tags into <code>&lt;head&gt;</code>.</p>
+</div>
 
-    <p><strong>Text Quotation &amp; Typography Semantics:</strong></p>
+<hr>
+<div id="sec5" class="section-anchor"></div>
+<h2 class="topic-title">5. Semantic Structural Layout Containers</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">HTML5 Structural Tags</span></div>
+    <p>HTML5 semantic layout tags replace non-descriptive <code>&lt;div&gt;</code> elements with programmatic meaning:</p>
     <ul>
-        <li><code>&lt;q&gt;</code>: Short inline quotation. The browser <strong>automatically injects surrounding quotation marks</strong>.</li>
-        <li><code>&lt;blockquote cite="URL"&gt;</code>: Block-level quotation. Renders with left and right margins/indents.</li>
-        <li><code>&lt;abbr title="Tooltip"&gt;</code>: Identifies acronyms/abbreviations; browser renders a dotted underline and displays tooltip on hover.</li>
-        <li><code>&lt;address&gt;</code>: Author/organization contact information (rendered in italic font).</li>
+        <li><code>&lt;header&gt;</code>: Introductory container for page titles, branding, and hero content.</li>
+        <li><code>&lt;nav&gt;</code>: Section containing primary navigational links.</li>
+        <li><code>&lt;main&gt;</code>: Encloses the dominant, unique content of the document (only one <code>&lt;main&gt;</code> per page).</li>
+        <li><code>&lt;section&gt;</code>: Thematic grouping of content, typically introduced by an <code>&lt;h2&gt;</code>-<code>&lt;h6&gt;</code> heading.</li>
+        <li><code>&lt;article&gt;</code>: Self-contained composition that can be distributed independently (e.g. blog post).</li>
+        <li><code>&lt;aside&gt;</code>: Tangentially related side content, secondary links, or sidebars.</li>
+        <li><code>&lt;footer&gt;</code>: Concluding block holding copyright, legal disclaimers, and contact details.</li>
+        <li><strong>Older Browser Retrofit Rule (Slide 51):</strong> Older browsers treat unknown HTML5 elements as inline. They must be styled with <code>display: block;</code> in CSS:
+            <code>header, nav, section, article, aside, footer { display: block; }</code>
+        </li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">includes/header.php (Line 17) &amp; includes/footer.php</span></div>
+    <p>In <code>includes/header.php</code> line 17, our site navigation is enclosed in <code>&lt;nav class="navbar"&gt;</code>, and pages conclude with <code>includes/footer.php</code> closing the document cleanly.</p>
+</div>
+
+<hr>
+<div id="sec6" class="section-anchor"></div>
+<h2 class="topic-title">6. Text Level Semantics &amp; Typography</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Visual vs Semantic Text Elements</span></div>
+    <p>HTML separates visual styling from semantic importance:</p>
+    <ul>
+        <li><code>&lt;h1&gt;</code> to <code>&lt;h6&gt;</code>: Heading hierarchy (1 is largest/most important; 6 is smallest).</li>
+        <li><code>&lt;strong&gt;</code> vs <code>&lt;b&gt;</code>: <code>&lt;b&gt;</code> is purely visual bolding; <code>&lt;strong&gt;</code> signals strong semantic importance to accessibility screen-readers.</li>
+        <li><code>&lt;em&gt;</code> vs <code>&lt;i&gt;</code>: <code>&lt;i&gt;</code> is visual italic; <code>&lt;em&gt;</code> signals stressed emphasis.</li>
+        <li><code>&lt;mark&gt;</code>: Highlights text with default yellow background.</li>
+        <li><code>&lt;code&gt;</code>: Renders text in fixed-width monospace font.</li>
+        <li><code>&lt;sup&gt;</code> &amp; <code>&lt;sub&gt;</code>: Superscript (e.g. <code>x&lt;sup&gt;2&lt;/sup&gt;</code>) and subscript (e.g. <code>H&lt;sub&gt;2&lt;/sub&gt;O</code>).</li>
+        <li><code>&lt;hr&gt;</code>: Self-closing thematic horizontal rule divider.</li>
+        <li><code>&lt;br&gt;</code>: Self-closing line break without paragraph spacing.</li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/admin.php (Line 218)</span></div>
+    <p>In <code>public/admin.php</code> line 218: <code>&lt;h2&gt;Scholarship Applications &lt;em&gt;(Overview)&lt;/em&gt;&lt;/h2&gt;</code>.</p>
+</div>
+
+<hr>
+<div id="sec7" class="section-anchor"></div>
+<h2 class="topic-title">7. Quotations, Abbreviations &amp; Bi-Directional Text</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&lt;q&gt;, &lt;blockquote&gt;, &lt;abbr&gt;, &lt;bdo&gt;</span></div>
+    <ul>
+        <li><code>&lt;q&gt;</code>: Short inline quotation. The browser <strong>automatically generates quotation marks</strong> (<code>“...”</code>) around the content.</li>
+        <li><code>&lt;blockquote cite="URL"&gt;</code>: Block-level quotation. Indented from both left and right margins.</li>
+        <li><code>&lt;abbr title="Grade Point Average"&gt;GPA&lt;/abbr&gt;</code>: Defines abbreviations. Browser renders a dotted bottom border and displays the <code>title</code> tooltip on hover.</li>
+        <li><code>&lt;address&gt;</code>: Encloses contact information for the document author/owner (rendered in italics).</li>
+        <li><code>&lt;cite&gt;</code>: Defines title of a creative work (book, paper, song). Rendered in italics.</li>
         <li><code>&lt;bdo dir="rtl|ltr"&gt;</code>: Bi-Directional Override to flip text direction.</li>
     </ul>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">includes/header.php (Lines 17-36) &amp; public/home.php (Line 149)</span>
-    </div>
-    <p>In <code>includes/header.php</code>, we strictly utilized <code>&lt;nav class="navbar"&gt;</code> for the main site navigation:</p>
-    <pre><code>17: &lt;nav class="navbar"&gt;
-18:     &lt;div class="navbar-brand"&gt;Scholarship System&lt;/div&gt;
-19:     &lt;ul class="nav-links"&gt;
-20:         &lt;li&gt;&lt;a href="home.php"&gt;Home&lt;/a&gt;&lt;/li&gt;
-21:         &lt;li&gt;&lt;a href="functionalities.php"&gt;Functionalities&lt;/a&gt;&lt;/li&gt;
-...
-34:     &lt;/ul&gt;
-35:     &lt;div class="navbar-clear"&gt;&lt;/div&gt;
-36: &lt;/nav&gt;</code></pre>
-    <p>In <code>public/home.php</code> line 149 and line 169, we used semantic abbreviations:</p>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/home.php (Lines 149 &amp; 169)</span></div>
     <pre><code>149: &lt;label&gt;&lt;abbr title="National Identity Card"&gt;NIC&lt;/abbr&gt; Number&lt;/label&gt;
 169: &lt;label&gt;Current &lt;abbr title="Grade Point Average"&gt;GPA&lt;/abbr&gt; (0.00 - 4.00)&lt;/label&gt;</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 4 -->
-<div id="sec4" class="section-anchor"></div>
-<h2 class="topic-title">4. Hyperlink Protocols &amp; Directory Path Resolution Formula</h2>
+<div id="sec8" class="section-anchor"></div>
+<h2 class="topic-title">8. Ordered, Unordered &amp; Description Lists</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Absolute vs Relative Directory Navigation</span>
-    </div>
-    <p>Mastering path traversal is a mandatory requirement tested in both exam questions and server file configuration:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">List Construction &amp; Attributes</span></div>
     <ul>
-        <li><strong>Absolute Path:</strong> Starts with a leading slash <code>/</code>, indexing from the server root: <code>&lt;a href="/iwt/scholarship_system/public/login.php"&gt;</code>.</li>
-        <li><strong>Relative Path:</strong> Indexes from the directory of the currently executing file:
+        <li><strong>Unordered Lists (<code>&lt;ul&gt;</code>):</strong> Bulleted lists. Bullets styled via CSS <code>list-style-type: disc | circle | square | none</code>.</li>
+        <li><strong>Ordered Lists (<code>&lt;ol&gt;</code>):</strong> Numbered lists with two critical attributes:
             <ul>
-                <li>Same folder: <code>href="home.php"</code> or <code>href="./home.php"</code>.</li>
-                <li>Child subfolder: <code>href="css/style.css"</code>.</li>
-                <li>Parent folder (step up 1 level): <code>href="../config/db.php"</code>.</li>
-                <li>Grandparent folder (step up 2 levels): <code>href="../../index.php"</code>.</li>
+                <li><code>type="1|a|A|i|I"</code>: Numbering style (arabic, lowercase alpha, uppercase alpha, lowercase roman, uppercase roman).</li>
+                <li><code>start="N"</code>: Numeric start index. E.g. <code>&lt;ol type="a" start="8"&gt;</code> begins numbering at the 8th letter: <strong>'h'</strong>!</li>
             </ul>
         </li>
-        <li><strong>Same-Page Fragment Anchor:</strong> <code>&lt;a href="#target-id"&gt;Jump&lt;/a&gt;</code> jumps to <code>&lt;div id="target-id"&gt;</code>.</li>
-        <li><strong>Cross-Page Fragment Anchor:</strong> <code>&lt;a href="help.php#faq"&gt;Read FAQ&lt;/a&gt;</code>. (Note: <em>Never</em> put spaces before or after the <code>#</code>).</li>
+        <li><strong>Description Lists (<code>&lt;dl&gt;</code>):</strong>
+            <ul>
+                <li><code>&lt;dt&gt;</code>: Description Term.</li>
+                <li><code>&lt;dd&gt;</code>: Description Data/Definition (rendered with indentation).</li>
+            </ul>
+        </li>
     </ul>
 </div>
-
-<div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">Slide 79 Exam Formula</span>
-    </div>
-    <p><strong>Past Paper Question:</strong> "A web page is located at <code>c:/b/web/k/h/2.html</code>. Write the exact HTML code to display an image located at <code>c:/b/web/a/f/e/1.jpg</code>."</p>
-    <p><strong>Mathematical Step-by-Step Resolution:</strong></p>
-    <ol>
-        <li>Current directory is <code>c:/b/web/k/h/</code>.</li>
-        <li>Move up one directory to <code>k/</code>: <code>../</code></li>
-        <li>Move up second directory to <code>web/</code>: <code>../../</code></li>
-        <li>Navigate down target tree into <code>a/f/e/</code>: <code>a/f/e/</code></li>
-        <li>Append target image: <code>1.jpg</code></li>
-    </ol>
-    <pre><code>&lt;!-- THE EXACT EXAM ANSWER --&gt;
-&lt;img src="../../a/f/e/1.jpg" alt="Photo"&gt;</code></pre>
-</div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/login.php (Line 3) &amp; includes/header.php (Line 14)</span>
-    </div>
-    <p>Our project demonstrates both relative path tiers:</p>
-    <ul>
-        <li>In <code>public/login.php</code> line 3, PHP executes from <code>public/</code> and needs to access <code>config/db.php</code>. It steps up one level: <code>require_once '../config/db.php';</code>.</li>
-        <li>In <code>includes/header.php</code> line 14, the browser executes the HTML in the context of the public URL, referencing the child folder: <code>&lt;link rel="stylesheet" href="css/style.css"&gt;</code>.</li>
-    </ul>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">includes/header.php (Lines 19-34)</span></div>
+    <p>Our site navigation is structured as an unordered list inside the navbar: <code>&lt;ul class="nav-links"&gt; &lt;li&gt;&lt;a href="home.php"&gt;Home&lt;/a&gt;&lt;/li&gt; ... &lt;/ul&gt;</code>.</p>
 </div>
 
 <hr>
-
-<!-- SECTION 5 -->
-<div id="sec5" class="section-anchor"></div>
-<h2 class="topic-title">5. Image Maps &amp; Coordinate Geometry</h2>
+<div id="sec9" class="section-anchor"></div>
+<h2 class="topic-title">9. Hyperlinks, Link Targets &amp; Directory Traversal Formula</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">&lt;img usemap&gt; + &lt;map&gt; + &lt;area&gt;</span>
-    </div>
-    <p>An Image Map enables clickable hot-spots across different geometric zones of a single image:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">Anchor Attributes &amp; Traversal Rules</span></div>
+    <p>Anchor tags (<code>&lt;a&gt;</code>) navigate between web resources using the mandatory <code>href</code> attribute:</p>
     <ul>
-        <li><code>&lt;img src="diagram.png" usemap="#map_name" alt="..."&gt;</code>: Must have <code>usemap</code> attribute with a leading hash <code>#</code>.</li>
-        <li><code>&lt;map name="map_name"&gt;</code>: Container element. Must have a <code>name</code> attribute matching the <code>usemap</code> value (without hash).</li>
-        <li><code>&lt;area shape="..." coords="..." href="..." alt="..."&gt;</code>:
+        <li><code>target="_self"</code>: Default. Opens document in current frame/tab.</li>
+        <li><code>target="_blank"</code>: Opens document in a new tab/window.</li>
+        <li><code>target="_parent"</code>: Opens in immediate parent frameset.</li>
+        <li><code>target="_top"</code>: Breaks out of all framesets to fill the entire window.</li>
+        <li><strong>In-Page Fragment Bookmarks:</strong> <code>&lt;a href="#faq"&gt;Jump to FAQ&lt;/a&gt;</code> links directly to <code>&lt;div id="faq"&gt;</code>.</li>
+        <li><strong>Cross-Page Fragment Bookmarks:</strong> <code>&lt;a href="help.php#faq"&gt;FAQ&lt;/a&gt;</code> (No space between filename and <code>#</code>).</li>
+    </ul>
+</div>
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">Slide 79 Exam Formula</span></div>
+    <p><strong>Past Paper Question:</strong> "A file is located at <code>c:/b/web/k/h/2.html</code>. Write the HTML tag to display an image located at <code>c:/b/web/a/f/e/1.jpg</code>."</p>
+    <p><strong>Step-by-Step Resolution:</strong></p>
+    <ol>
+        <li>Current folder: <code>c:/b/web/k/h/</code></li>
+        <li>Up 1 level to <code>k/</code>: <code>../</code></li>
+        <li>Up 2 levels to <code>web/</code>: <code>../../</code></li>
+        <li>Down into target directory: <code>a/f/e/</code></li>
+        <li>Target file: <code>1.jpg</code></li>
+    </ol>
+    <pre><code>&lt;img src="../../a/f/e/1.jpg" alt="Target Image"&gt;</code></pre>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/admin.php (Lines 178-180)</span></div>
+    <p>In <code>public/admin.php</code> lines 178-180, we generate dynamic query-string hyperlinks: <code>&lt;a href="admin.php?action=edit&amp;id=&lt;?php echo $u['id']; ?&gt;" class="btn"&gt;Edit&lt;/a&gt;</code>.</p>
+</div>
+
+<hr>
+<div id="sec10" class="section-anchor"></div>
+<h2 class="topic-title">10. Image Maps &amp; Geometric Coordinates</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&lt;map&gt; + &lt;area&gt; Geometry</span></div>
+    <p>An Image Map enables clickable hot-spots across different geometric zones of a single raster image:</p>
+    <ul>
+        <li><code>&lt;img src="campus.jpg" usemap="#campus_map" alt="..."&gt;</code>: Must have <code>usemap</code> prefixed with hash <code>#</code>.</li>
+        <li><code>&lt;map name="campus_map"&gt;</code>: Container element. Must match <code>usemap</code> string without hash.</li>
+        <li><code>&lt;area shape="..." coords="..." href="..." alt="..."&gt;</code>: Clickable region:
             <ul>
                 <li><code>shape="rect"</code>: <code>coords="x1, y1, x2, y2"</code> (Top-left X, Y, Bottom-right X, Y). Exactly <strong>4 integers</strong>.</li>
                 <li><code>shape="circle"</code>: <code>coords="center_x, center_y, radius"</code>. Exactly <strong>3 integers</strong>.</li>
-                <li><code>shape="poly"</code>: <code>coords="x1, y1, x2, y2, x3, y3, ..."</code>. Series of X,Y vertex coordinate pairs (even number of values).</li>
+                <li><code>shape="poly"</code>: <code>coords="x1, y1, x2, y2, x3, y3, ..."</code>. Sequential vertex pairs.</li>
             </ul>
         </li>
     </ul>
 </div>
-
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">Guaranteed Q1 Syntax Trap</span>
-    </div>
-    <p><strong>Past Paper Question Trap (AY21 Q1 &amp; AY22 Q1):</strong> The examiner tests image maps every single year with 3 traps:</p>
-    <pre><code>&lt;!-- WRONG (Zero Marks) --&gt;
-&lt;img src="plan.jpg" usemap="campus"&gt;  &lt;!-- ERROR 1: Missing # --&gt;
-&lt;map id="campus"&gt;                     &lt;!-- ERROR 2: Uses id instead of name --&gt;
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">Guaranteed Q1 Exam Trap</span></div>
+    <pre><code>&lt;!-- WRONG --&gt;
+&lt;img src="map.jpg" usemap="campus"&gt;  &lt;!-- ERROR 1: Missing # --&gt;
+&lt;map id="campus"&gt;                    &lt;!-- ERROR 2: Uses id instead of name --&gt;
     &lt;area shape="rectangular" coords="10,20,50,80" src="p1.html"&gt; &lt;!-- ERROR 3: shape must be 'rect'; uses src instead of href --&gt;
 &lt;/map&gt;
 
-&lt;!-- FULLY CORRECTED VERSION --&gt;
-&lt;img src="plan.jpg" usemap="#campus" alt="Campus Plan"&gt;
+&lt;!-- CORRECT RE-WRITE --&gt;
+&lt;img src="map.jpg" usemap="#campus" alt="Campus Map"&gt;
 &lt;map name="campus"&gt;
-    &lt;area shape="rect" coords="10,20,50,80" href="p1.html" alt="Room 1"&gt;
+    &lt;area shape="rect" coords="10,20,50,80" href="p1.html" alt="Admin Building"&gt;
 &lt;/map&gt;</code></pre>
 </div>
 
 <hr>
-
-<!-- SECTION 6 -->
-<div id="sec6" class="section-anchor"></div>
-<h2 class="topic-title">6. Semantic Tables &amp; Spanning Grids</h2>
+<div id="sec11" class="section-anchor"></div>
+<h2 class="topic-title">11. Complex Tables, Spans &amp; Rendering Grids</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">&lt;table&gt; Structural Model</span>
-    </div>
-    <p>HTML tables organize relational information into rows and columns:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&lt;table&gt;, &lt;caption&gt;, &lt;thead&gt;, &lt;tbody&gt;, &lt;tfoot&gt;</span></div>
+    <p>Tables organize relational 2D data grids:</p>
     <ul>
-        <li><code>&lt;table&gt;</code>: Root table wrapper.</li>
-        <li><code>&lt;caption&gt;</code>: Accessible table title. <strong>Must be placed immediately after <code>&lt;table&gt;</code> before any <code>&lt;tr&gt;</code>!</strong></li>
-        <li><code>&lt;thead&gt;</code>: Table header section containing column headings in <code>&lt;th&gt;</code> cells.</li>
-        <li><code>&lt;tbody&gt;</code>: Core data section containing data in <code>&lt;td&gt;</code> cells.</li>
-        <li><code>&lt;tfoot&gt;</code>: Summary/calculation footer section.</li>
-        <li><strong>Spanning Rules:</strong>
-            <ul>
-                <li><code>colspan="N"</code>: Merges cell across $N$ columns horizontally.</li>
-                <li><code>rowspan="N"</code>: Merges cell across $N$ rows vertically.</li>
-            </ul>
-        </li>
+        <li><code>&lt;caption&gt;</code>: Table title. <strong>Must be declared immediately following <code>&lt;table&gt;</code> before any rows!</strong></li>
+        <li><code>&lt;thead&gt;</code>: Encloses header rows with <code>&lt;th&gt;</code> cells (bold and centered by default).</li>
+        <li><code>&lt;tbody&gt;</code>: Encloses data rows with <code>&lt;td&gt;</code> cells.</li>
+        <li><code>&lt;tfoot&gt;</code>: Encloses summary footer rows.</li>
+        <li><code>colspan="N"</code>: Merges N columns horizontally.</li>
+        <li><code>rowspan="N"</code>: Merges N rows vertically.</li>
     </ul>
 </div>
-
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Past Paper Alert &amp; Traps</span>
-        <span class="file-badge">Guaranteed 25-Mark Drawing Grid (Q2)</span>
-    </div>
-    <p><strong>Past Paper Question Trap (AY21 Q2 &amp; AY22 Q2):</strong> You are given an HTML table and required to sketch the browser output grid:</p>
-    <ul>
-        <li><strong>The TFOOT Placement Gotcha:</strong> In HTML specifications, <code>&lt;tfoot&gt;</code> can be authored physically above <code>&lt;tbody&gt;</code> in the raw code. However, the browser <strong>ALWAYS renders <code>&lt;tfoot&gt;</code> at the absolute bottom</strong>! If you draw the footer in the middle of the table, you lose all marks.</li>
-        <li><strong>Subsequent Row Cell Counts:</strong> When a cell in row 1 has <code>rowspan="3"</code>, row 2 and row 3 will have one less <code>&lt;td&gt;</code> tag in their markup because the spanned cell physically occupies that slot!</li>
-    </ul>
+    <div class="box-header"><span class="box-tag">Past Paper Alert</span><span class="file-badge">Guaranteed 25M Drawing Question (Q2)</span></div>
+    <p><strong>The TFOOT Ordering Gotcha:</strong> In HTML specifications, <code>&lt;tfoot&gt;</code> can be written physically above <code>&lt;tbody&gt;</code>. However, the browser <strong>always renders <code>&lt;tfoot&gt;</code> at the absolute bottom</strong>! When sketching table grids on the exam paper, always draw the footer at the bottom.</p>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/admin.php (Lines 136-155)</span>
-    </div>
-    <p>In <code>public/admin.php</code>, we rendered the System Report table using strict semantic tags:</p>
-    <pre><code>136: &lt;table class="stats-table"&gt;
-137:     &lt;thead&gt;
-138:         &lt;tr&gt;
-139:             &lt;th&gt;Total Users&lt;/th&gt;
-140:             &lt;th&gt;Students&lt;/th&gt;
-141:             &lt;th&gt;Admin / Registrar&lt;/th&gt;
-142:             &lt;th&gt;Scholarships&lt;/th&gt;
-143:             &lt;th&gt;Applications&lt;/th&gt;
-144:         &lt;/tr&gt;
-145:     &lt;/thead&gt;
-146:     &lt;tbody&gt;
-147:         &lt;tr&gt;
-148:             &lt;td&gt;&lt;?php echo $stats['total_users']; ?&gt;&lt;/td&gt;
-149:             &lt;td&gt;&lt;?php echo $stats['students']; ?&gt;&lt;/td&gt;
-150:             &lt;td&gt;&lt;?php echo $stats['staff']; ?&gt;&lt;/td&gt;
-151:             &lt;td&gt;&lt;?php echo $stats['scholarships']; ?&gt;&lt;/td&gt;
-152:             &lt;td&gt;&lt;?php echo $stats['applications']; ?&gt;&lt;/td&gt;
-153:         &lt;/tr&gt;
-154:     &lt;/tbody&gt;
-155: &lt;/table&gt;</code></pre>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/admin.php (Lines 136-155 &amp; 257)</span></div>
+    <p>In <code>public/admin.php</code> line 136, the System Report table is structured with <code>&lt;thead&gt;</code> and <code>&lt;tbody&gt;</code>. Line 257 demonstrates <code>&lt;td colspan="5"&gt;No applications yet.&lt;/td&gt;</code> when no records exist.</p>
 </div>
 
 <hr>
-
-<!-- SECTION 7 -->
-<div id="sec7" class="section-anchor"></div>
-<h2 class="topic-title">7. HTML Forms, Input Types &amp; Readonly Architecture</h2>
+<div id="sec12" class="section-anchor"></div>
+<h2 class="topic-title">12. Forms &amp; Encoding Types (Enctype)</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Form Mechanics &amp; Enctypes</span>
-    </div>
-    <p>Forms transmit user data across HTTP to a server processing script:</p>
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&lt;form action method enctype&gt;</span></div>
+    <p>Forms submit client inputs across HTTP:</p>
     <ul>
-        <li><code>&lt;form action="home.php" method="POST" name="appForm" onsubmit="return checkApplication()"&gt;</code></li>
-        <li><strong>Form Enctypes:</strong>
+        <li><code>action</code>: Target destination script URL.</li>
+        <li><code>method="GET"</code>: Appends form data to the URL query string (<code>?key=val</code>). Visible, cached, bookmarkable, limited to ~2048 characters. Unsafe for credentials!</li>
+        <li><code>method="POST"</code>: Packages data within the HTTP request body. Invisible in URL bar, unbookmarkable, handles arbitrary payload size up to <code>post_max_size</code>.</li>
+        <li><strong>Enctype Encoding Types:</strong>
             <ul>
-                <li><code>application/x-www-form-urlencoded</code>: Default URL-encoded payload.</li>
-                <li><code>multipart/form-data</code>: <strong>Mandatory whenever uploading files</strong> (<code>&lt;input type="file"&gt;</code>).</li>
-                <li><code>text/plain</code>: Raw unencoded text (used with <code>action="mailto:..."</code>).</li>
-            </ul>
-        </li>
-        <li><code>&lt;fieldset&gt;</code> &amp; <code>&lt;legend&gt;</code>: Encapsulates themed form subsections with an accessible outline and caption.</li>
-        <li><strong>The Crucial Difference: <code>readonly</code> vs <code>disabled</code></strong>:
-            <ul>
-                <li><code>readonly</code>: Prevents user modification in browser UI, but <strong>IS submitted</strong> in the HTTP request payload!</li>
-                <li><code>disabled</code>: Greys out the input, prevents user focus, and <strong>is completely excluded</strong> from the HTTP request payload!</li>
+                <li><code>application/x-www-form-urlencoded</code>: Default URL-encoded string.</li>
+                <li><code>multipart/form-data</code>: <strong>Mandatory whenever uploading files</strong> via <code>&lt;input type="file"&gt;</code>. Transmits data in binary chunks.</li>
+                <li><code>text/plain</code>: Unencoded raw text (used with <code>action="mailto:..."</code>).</li>
             </ul>
         </li>
     </ul>
 </div>
-
 <div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">Codebase Implementation</span>
-        <span class="file-badge">public/home.php (Lines 117-172)</span>
-    </div>
-    <p>In <code>public/home.php</code>, we implemented multiple fieldsets with read-only fields populated from the database:</p>
-    <pre><code>117: &lt;fieldset&gt;
-118:     &lt;legend&gt;Personal Information&lt;/legend&gt;
-119:     &lt;div class="form-group"&gt;
-120:         &lt;label&gt;Username&lt;/label&gt;
-121:         &lt;input type="text" name="username_display" value="&lt;?php echo htmlspecialchars($username); ?&gt;" class="input-readonly" readonly&gt;
-122:     &lt;/div&gt;
-123:     &lt;div class="form-group"&gt;
-124:         &lt;label&gt;Full Name&lt;/label&gt;
-125:         &lt;input type="text" name="full_name" value="&lt;?php echo htmlspecialchars($userProfile['full_name']); ?&gt;" required&gt;
-126:     &lt;/div&gt;
-...
-166: &lt;fieldset&gt;
-167:     &lt;legend&gt;Academic Information&lt;/legend&gt;
-168:     &lt;div class="form-group"&gt;
-169:         &lt;label&gt;Current &lt;abbr title="Grade Point Average"&gt;GPA&lt;/abbr&gt; (0.00 - 4.00)&lt;/label&gt;
-170:         &lt;input type="number" step="0.01" min="0" max="4.0" name="gpa" value="&lt;?php echo htmlspecialchars($userProfile['gpa']); ?&gt;"&gt;
-171:     &lt;/div&gt;
-172: &lt;/fieldset&gt;</code></pre>
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/login.php (Line 43) &amp; public/signup.php (Line 47)</span></div>
+    <p>In <code>public/login.php</code> line 43, we strictly specify <code>method="POST"</code>: <code>&lt;form name="loginForm" action="login.php" method="POST" onsubmit="return checkLogin()"&gt;</code>. This ensures passwords are not exposed in server logs or browser history.</p>
 </div>
 
+<hr>
+<div id="sec13" class="section-anchor"></div>
+<h2 class="topic-title">13. Form Controls &amp; Fieldsets Grouping</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">&lt;fieldset&gt;, &lt;legend&gt;, &lt;input&gt;, &lt;select&gt;, &lt;textarea&gt;</span></div>
+    <p>HTML form controls capture diverse user inputs:</p>
+    <ul>
+        <li><code>&lt;fieldset&gt;</code> &amp; <code>&lt;legend&gt;</code>: Visually and programmatically groups related form inputs with a captioned border.</li>
+        <li><code>&lt;input type="..."&gt;</code>: <code>text</code>, <code>password</code>, <code>email</code>, <code>number</code>, <code>date</code>, <code>checkbox</code>, <code>radio</code>, <code>hidden</code>, <code>submit</code>, <code>reset</code>.</li>
+        <li><code>&lt;select name="..."&gt;</code>: Dropdown menu with <code>&lt;option value="..." selected&gt;</code> items. Supports <code>multiple</code> and <code>size="N"</code> to display as list box.</li>
+        <li><code>&lt;textarea name="..." rows="5" cols="40"&gt;</code>: Multi-line text input.</li>
+    </ul>
+</div>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Codebase Implementation</span><span class="file-badge">public/home.php (Lines 117-172)</span></div>
+    <p>In <code>public/home.php</code> lines 117-190, our application form is structured into three clean fieldsets: Personal Information, Academic Information, and Additional Information.</p>
+</div>
+
+<hr>
+<div id="sec14" class="section-anchor"></div>
+<h2 class="topic-title">14. Input Constraints &amp; Readonly Form Flow</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory</span><span class="file-badge">readonly vs disabled Constraints</span></div>
+    <table class="study-table">
+        <thead>
+            <tr><th>Constraint Attribute</th><th>UI Appearance</th><th>User Modifiable?</th><th>Submitted in HTTP POST?</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>readonly</code></td><td>Standard input (or styled via CSS)</td><td>No (locked)</td><td><strong>YES (Transmitted in POST payload!)</strong></td></tr>
+            <tr><td><code>disabled</code></td><td>Greyed out</td><td>No (inactive)</td><td><strong>NO (Completely omitted from POST!)</strong></td></tr>
+        </tbody>
+    </table>
+    <p>Other HTML5 constraints: <code>required</code> (blocks submit if empty), <code>min</code>, <code>max</code>, <code>step</code> (numerical/date limits), <code>pattern="[A-Za-z]{3}"</code> (regex format).</p>
+</div>
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Defense Master Q&amp;A</span>
-        <span class="file-badge">The Readonly Database Flow</span>
-    </div>
-    <p><strong>Examiner:</strong> "Explain step-by-step how your code reads data from the database and renders it as read-only in the application form."</p>
+    <div class="box-header"><span class="box-tag">Viva Defense Master Q&amp;A</span><span class="file-badge">Crucial Examiner Question</span></div>
+    <p><strong>Examiner:</strong> "How do you fetch information from the database and make it visible in the form as readonly?"</p>
     <p><strong>Candidate Answer:</strong>
     <ol>
-        <li><strong>Query Database:</strong> In <code>public/home.php</code> lines 73-75, when a student accesses the form, we query the <code>students</code> table using a PDO prepared statement: <code>$profStmt = $conn-&gt;prepare("SELECT ... FROM students WHERE user_id = ?"); $profStmt-&gt;execute([$_SESSION['user_id']]);</code>.</li>
-        <li><strong>Store Associative Array:</strong> We fetch the row into <code>$userProfile = $profStmt-&gt;fetch();</code>.</li>
-        <li><strong>Populate Form Value:</strong> In line 121, we echo the username into the input's <code>value</code> attribute: <code>value="&lt;?php echo htmlspecialchars($username); ?&gt;"</code>.</li>
-        <li><strong>Lock Field:</strong> We add the boolean HTML attribute <code>readonly</code> and apply the CSS class <code>input-readonly</code>. This displays the existing profile value to the applicant, prevents them from tampering with it, while guaranteeing the value transmits in the POST body."</li>
+        <li>Query the database: In <code>public/home.php</code> lines 73-75, we query student profile details using PDO: <code>$profStmt = $conn-&gt;prepare("SELECT ... FROM students WHERE user_id = ?"); $profStmt-&gt;execute([$_SESSION['user_id']]);</code>.</li>
+        <li>Fetch row: <code>$userProfile = $profStmt-&gt;fetch();</code>.</li>
+        <li>Echo into value attribute: In line 121, we populate the input: <code>value="&lt;?php echo htmlspecialchars($username); ?&gt;"</code>.</li>
+        <li>Apply <code>readonly</code>: We append the boolean attribute <code>readonly</code> and CSS class <code>input-readonly</code>. This prevents applicant editing while guaranteeing the field transmits securely in the POST payload."</li>
     </ol>
     </p>
 </div>
 
 <hr>
-
-<!-- SECTION 8 -->
-<div id="sec8" class="section-anchor"></div>
-<h2 class="topic-title">8. Framesets, IFrames &amp; Media Directives</h2>
-
-<div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Syllabus Theory</span>
-        <span class="file-badge">Window Targeting &amp; Inline Frames</span>
-    </div>
-    <p><strong>Frameset Rules (Legacy Multi-Frame Architecture):</strong></p>
-    <ul>
-        <li><code>&lt;frameset&gt;</code> <strong>replaces the <code>&lt;body&gt;</code> tag entirely</strong>. A document cannot have both <code>&lt;frameset&gt;</code> and <code>&lt;body&gt;</code> (except inside <code>&lt;noframes&gt;</code>).</li>
-        <li>Splitting layout: <code>&lt;frameset rows="20%, 80%"&gt;</code> or <code>&lt;frameset cols="250, *"&gt;</code>.</li>
-        <li><strong>Reserved Target Frame Names:</strong>
-            <ul>
-                <li><code>_self</code>: Default. Loads target into the current frame.</li>
-                <li><code>_blank</code>: Loads target into an entirely new browser tab/window.</li>
-                <li><code>_parent</code>: Breaks out one level into the immediate parent frameset.</li>
-                <li><code>_top</code>: Breaks out of all nested framesets to take over the full window.</li>
-            </ul>
-        </li>
-        <li><strong>Inline Frames (<code>&lt;iframe&gt;</code>):</strong> Embedded directly inside normal <code>&lt;body&gt;</code> to load sandboxed child documents: <code>&lt;iframe src="help.php" width="600" height="400" title="Help Frame"&gt;&lt;/iframe&gt;</code>.</li>
-    </ul>
-</div>
 
     </main>
 </body>

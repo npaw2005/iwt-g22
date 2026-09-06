@@ -21,143 +21,93 @@
 <a href="sql.html" class="nav-item ">🗄️ 5. SQL & Relational DB</a>
 <a href="viva.html" class="nav-item active">🎓 6. Viva Defense & Q&A</a>
 <div class="sub-nav">
-  <a href="#sec1">1. Viva Strategy & Examiner Mindset</a>
-  <a href="#sec2">2. End-to-End Request Lifecycle</a>
-  <a href="#sec3">3. Top 20 Examiner Q&A</a>
-  <a href="#sec4">4. Live Coding Defense Challenges</a>
+  <a href="#sec1">1. Viva Strategy &amp; Examiner Psychology</a>
+  <a href="#sec2">2. End-to-End System Request Lifecycle</a>
+  <a href="#sec3">3. Top 20 Examiner Defense Questions &amp; Model Answers</a>
+  <a href="#sec4">4. Live Hands-On Coding Defense Challenges</a>
 </div>
 
         </nav>
     </aside>
     <main class="main-wrapper">
-        
-<div class="hero-banner">
-    <h1>6. Viva Defense Master Blueprint &amp; Live Q&amp;A Scenarios</h1>
-    <p>The ultimate preparation guide for the <strong>Scholarship Management System</strong> viva session. Master examiner psychology, request lifecycles, top 20 defense questions with model answers, and step-by-step live coding challenge walkthroughs.</p>
-</div>
-
-<!-- SECTION 1 -->
-<div id="sec1" class="section-anchor"></div>
+        <div id="sec1" class="section-anchor"></div>
 <h2 class="topic-title">1. Viva Strategy &amp; Examiner Psychology</h2>
 
 <div class="box box-concept">
-    <div class="box-header">
-        <span class="box-tag">Strategic Mindset</span>
-        <span class="file-badge">What Examiners Are Testing</span>
-    </div>
-    <p>In a project viva, the examiner is NOT merely checking if your web system works. They are rigorously verifying <strong>code ownership, architectural understanding, and security awareness</strong>:</p>
-    <ul>
-        <li><strong>Authenticity &amp; Code Ownership:</strong> Did you write this code yourself, or did someone else do it? Examiners test this by pointing to a specific line and asking, <em>"Why did you write this here?"</em> or asking you to make a live change on the spot.</li>
-        <li><strong>Data Flow Understanding:</strong> Can you explain how data travels from an HTML form element through the JavaScript event layer, across the HTTP network payload, into PHP superglobals, and down to MySQL disk storage?</li>
-        <li><strong>Security &amp; Vulnerability Defenses:</strong> Do you know why raw queries are dangerous (SQL Injection) and why unescaped strings in HTML are dangerous (XSS)?</li>
-        <li><strong>The Golden Rule:</strong> Never answer with <em>"It just worked"</em> or <em>"I found it online"</em>. Always state the architectural principle (e.g. <em>"We used PDO prepared statements to decouple the SQL command structure from user data, guaranteeing mathematical immunity from SQL injection attacks"</em>).</li>
-    </ul>
-</div>
-
-<hr>
-
-<!-- SECTION 2 -->
-<div id="sec2" class="section-anchor"></div>
-<h2 class="topic-title">2. Complete System Request Lifecycle</h2>
-
-<div class="box box-codebase">
-    <div class="box-header">
-        <span class="box-tag">End-to-End Trace</span>
-        <span class="file-badge">From Browser Click to MySQL Execution</span>
-    </div>
-    <p>When an examiner asks: <em>"Walk me through what happens when a student clicks 'Submit Application' in your project,"</em> give this exact 6-step breakdown:</p>
+    <div class="box-header"><span class="box-tag">Strategic Mindset</span><span class="file-badge">Examiner Evaluation Rubric</span></div>
+    <p>In a project viva, the examiner is NOT evaluating whether your system has flashy graphics. They are evaluating four core competencies:</p>
     <ol>
-        <li><strong>Client Event Interception (DOM Level 0):</strong>
-            <br>In <code>public/home.php</code> line 113, the form's <code>onsubmit="return checkApplication()"</code> intercepts the click. The browser executes JavaScript.
-            <br>Lines 292-353 validate all fields (non-empty name, date of birth not in the future, 12-digit numeric NIC check, GPA between 0.00 and 4.00, and testimonial checkbox checked).
-            <br>If any condition fails, an <code>alert()</code> is displayed and JS returns <code>false</code>, aborting the HTTP request.
-        </li>
-        <li><strong>HTTP POST Transmission:</strong>
-            <br>If JS returns <code>true</code>, the browser serializes all named input values into an HTTP POST payload and dispatches an HTTP request to <code>home.php</code>.
-        </li>
-        <li><strong>Server Execution &amp; Session Authentication:</strong>
-            <br>Apache receives the request and invokes the PHP engine.
-            <br>In lines 2-3, <code>session_start()</code> loads the student's authenticated user ID, and <code>require_once '../config/db.php'</code> establishes the persistent PDO database connection.
-        </li>
-        <li><strong>Duplicate Check (Business Logic):</strong>
-            <br>In lines 36-38, PHP checks if this student has already applied for this scholarship:
-            <code>$check = $conn-&gt;prepare("SELECT COUNT(*) FROM student_scholarships WHERE student_id = ? AND scholarship_id = ?");</code>.
-            <br>If count &gt; 0, an alert is set and submission halts.
-        </li>
-        <li><strong>Atomic Database Persistence:</strong>
-            <br>If valid, lines 48-53 update or insert the student's personal profile into the <code>students</code> table.
-            <br>Then line 55 inserts the application record into the <code>student_scholarships</code> table using a prepared statement with bound parameters.
-        </li>
-        <li><strong>Dynamic Response Generation:</strong>
-            <br>PHP queries the updated applications table, renders the HTML markup with the new record, applies the external CSS stylesheet, and sends the rendered HTML back to the browser.
-        </li>
+        <li><strong>Code Ownership &amp; Authorship:</strong> Did you write this code yourself? Can you explain any arbitrary line selected by the examiner without hesitation?</li>
+        <li><strong>Data Flow Understanding:</strong> Can you trace the exact journey of a variable from an HTML form through JavaScript, across HTTP headers, into PHP superglobals, down into MySQL disk storage, and back?</li>
+        <li><strong>Architectural &amp; Security Justifications:</strong> Can you defend why you used PDO instead of raw queries, why 3NF was chosen, and how you stopped SQL Injection and XSS?</li>
+        <li><strong>Live Coding Agility:</strong> Can you open the source code in your editor and perform a live modification requested by the examiner within 60 seconds?</li>
     </ol>
 </div>
 
 <hr>
+<div id="sec2" class="section-anchor"></div>
+<h2 class="topic-title">2. End-to-End System Request Lifecycle</h2>
 
-<!-- SECTION 3 -->
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Architecture Walkthrough</span><span class="file-badge">From Click to Database Storage</span></div>
+    <p>When the examiner asks: <em>"Walk me through what happens when a student clicks 'Submit Application',"</em> recite this exact 6-phase sequence:</p>
+    <ol>
+        <li><strong>Phase 1: DOM Event Interception (JavaScript):</strong> In <code>public/home.php</code> line 113, the form's <code>onsubmit="return checkApplication()"</code> catches the submission event. Lines 292-353 run client-side validation (non-empty fields, date not in future, 12-digit numeric NIC loop, GPA between 0.00 and 4.00, testimonial checkbox). If invalid, an <code>alert()</code> appears and JS returns <code>false</code>, aborting the HTTP request.</li>
+        <li><strong>Phase 2: HTTP POST Transmission:</strong> If valid, JS returns <code>true</code>. The browser serializes all named inputs into an HTTP POST request body and dispatches it across TCP/IP to Apache HTTPD on port 80.</li>
+        <li><strong>Phase 3: Server &amp; Session Authentication:</strong> Apache delegates the request to the PHP interpreter. In lines 2-3, <code>session_start()</code> reads the client's <code>PHPSESSID</code> cookie and verifies that <code>$_SESSION['role'] === 'student'</code>. <code>require_once '../config/db.php'</code> establishes the PDO connection.</li>
+        <li><strong>Phase 4: Duplicate Application Check:</strong> In lines 36-38, PHP checks if this student has already applied for this scholarship using:
+        <code>$check = $conn-&gt;prepare("SELECT COUNT(*) FROM student_scholarships WHERE student_id = ? AND scholarship_id = ?");</code>. If count &gt; 0, submission halts.</li>
+        <li><strong>Phase 5: Atomic Relational Database Persistence:</strong> Lines 48-53 update or insert the student's profile into the <code>students</code> table. Line 55 inserts the application record into the <code>student_scholarships</code> junction table using a prepared statement with bound parameters.</li>
+        <li><strong>Phase 6: HTML View Synthesis:</strong> PHP queries the updated records, wraps dynamic values in <code>htmlspecialchars()</code>, applies <code>style.css</code>, and sends the rendered HTML back to the browser for layout and painting.</li>
+    </ol>
+</div>
+
+<hr>
 <div id="sec3" class="section-anchor"></div>
 <h2 class="topic-title">3. Top 20 Examiner Defense Questions &amp; Model Answers</h2>
 
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Question 1 (Crucial!)</span>
-        <span class="file-badge">public/home.php Lines 73-82 &amp; 121</span>
-    </div>
-    <p><strong>Examiner:</strong> "How do you get information from the database and make it visible in the form as readonly?"</p>
-    <p><strong>Model Answer:</strong>
-    <br>"We achieve this in four distinct steps in <code>public/home.php</code>:
-    <br>1. In lines 73-75, when a logged-in student opens the application form, we query their existing bio-data from MySQL using PDO:
-    <code>$profStmt = $conn-&gt;prepare("SELECT ... FROM students WHERE user_id = ?"); $profStmt-&gt;execute([$_SESSION['user_id']]);</code>
-    <br>2. We extract the returned record into an associative array: <code>$userProfile = $profStmt-&gt;fetch();</code>.
+    <div class="box-header"><span class="box-tag">Viva Question 1 (Crucial!)</span><span class="file-badge">Read-only Database Flow</span></div>
+    <p><strong>Examiner:</strong> "How do you fetch information from the database and make it visible in the form as readonly?"</p>
+    <p><strong>Candidate Answer:</strong>
+    <br>"We achieve this in four steps in <code>public/home.php</code>:
+    <br>1. In lines 73-75, when a logged-in student accesses the form, we query their existing bio-data from MySQL using PDO: <code>$profStmt = $conn-&gt;prepare("SELECT ... FROM students WHERE user_id = ?"); $profStmt-&gt;execute([$_SESSION['user_id']]);</code>.
+    <br>2. We fetch the returned row into an associative array: <code>$userProfile = $profStmt-&gt;fetch();</code>.
     <br>3. In the HTML form line 121, we echo the database value directly inside the input's <code>value</code> attribute: <code>value="&lt;?php echo htmlspecialchars($username); ?&gt;"</code>.
-    <br>4. Finally, we append the boolean HTML attribute <code>readonly</code> (and our CSS class <code>input-readonly</code>). This ensures the user cannot edit their username, while guaranteeing that the value is still submitted in the HTTP POST payload (unlike the <code>disabled</code> attribute which omits the field from transmission)."</p>
+    <br>4. Finally, we append the boolean HTML attribute <code>readonly</code> (and our CSS class <code>input-readonly</code>). This ensures the user cannot edit the field, while guaranteeing that the value is still submitted in the HTTP POST payload (unlike the <code>disabled</code> attribute which omits the field from transmission)."</p>
 </div>
 
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Question 2</span>
-        <span class="file-badge">Security Architecture</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Viva Question 2</span><span class="file-badge">Security Architecture</span></div>
     <p><strong>Examiner:</strong> "What is SQL Injection, and how does your codebase prevent it?"</p>
-    <p><strong>Model Answer:</strong>
-    <br>"SQL Injection occurs when untrusted user input is concatenated directly into an SQL string (e.g. <code>SELECT * FROM users WHERE user = '$u' AND pass = '$p'</code>). An attacker entering <code>' OR '1'='1</code> can hijack the query logic to bypass authentication or drop tables.
-    <br>In our project, we completely eliminated this vulnerability across all files (e.g. <code>public/login.php</code> line 19, <code>public/admin.php</code> line 23) by exclusively using <strong>PDO Prepared Statements</strong> with parameter markers (<code>?</code>). The database pre-compiles the SQL query template first. When user inputs are supplied via <code>execute([$username])</code>, the database treats them strictly as passive data, rendering malicious SQL code execution impossible."</p>
+    <p><strong>Candidate Answer:</strong>
+    <br>"SQL Injection occurs when user input is concatenated directly into an SQL string (e.g. <code>WHERE user = '$u'</code>). An attacker entering <code>' OR '1'='1</code> alters query logic to bypass authentication.
+    <br>In our project, we completely eliminated this across all files (e.g. <code>public/login.php</code> line 19, <code>public/admin.php</code> line 23) by exclusively using <strong>PDO Prepared Statements</strong> with parameter markers (<code>?</code>). The database pre-compiles the SQL query template first. When user inputs are supplied via <code>execute([$username])</code>, the database engine treats them strictly as passive data, rendering SQL injection mathematically impossible."</p>
 </div>
 
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Question 3</span>
-        <span class="file-badge">Security Architecture</span>
-    </div>
-    <p><strong>Examiner:</strong> "What is Cross-Site Scripting (XSS), and where in your codebase did you protect against it?"</p>
-    <p><strong>Model Answer:</strong>
-    <br>"Cross-Site Scripting (XSS) occurs when malicious JavaScript code entered by a user (e.g. in a name or description field: <code>&lt;script&gt;stealCookies()&lt;/script&gt;</code>) is rendered by the server directly into the HTML page of other users, executing in their browser context.
-    <br>We prevent this by wrapping every dynamic database output in <code>htmlspecialchars()</code> (e.g. in <code>public/admin.php</code> line 174 and <code>public/applications.php</code> line 69). This sanitizes special HTML characters: <code>&lt;</code> becomes <code>&amp;lt;</code>, <code>&gt;</code> becomes <code>&amp;gt;</code>, and <code>&amp;</code> becomes <code>&amp;amp;</code>. The browser safely prints the string as harmless visible text instead of executing it as markup."</p>
+    <div class="box-header"><span class="box-tag">Viva Question 3</span><span class="file-badge">Security Architecture</span></div>
+    <p><strong>Examiner:</strong> "What is Cross-Site Scripting (XSS), and where did you protect against it?"</p>
+    <p><strong>Candidate Answer:</strong>
+    <br>"XSS occurs when malicious scripts entered by a user (e.g. <code>&lt;script&gt;steal()&lt;/script&gt;</code>) are rendered by the server directly into the HTML of other users, executing in their browser context.
+    <br>We prevent this by wrapping every dynamic database output in <code>htmlspecialchars()</code> (e.g. in <code>public/admin.php</code> line 174 and <code>public/applications.php</code> line 69). This converts <code>&lt;</code>, <code>&gt;</code>, <code>&amp;</code>, and <code>"</code> into safe HTML entities, forcing the browser to render strings harmlessly as plain text."</p>
 </div>
 
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Question 4</span>
-        <span class="file-badge">State Management</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Viva Question 4</span><span class="file-badge">State Management</span></div>
     <p><strong>Examiner:</strong> "Why did you use <code>session_start()</code> at the top of every page, and how does your Role-Based Access Control (RBAC) work?"</p>
-    <p><strong>Model Answer:</strong>
-    <br>"Because HTTP is inherently stateless, the server forgets who the client is between requests. Calling <code>session_start()</code> reads the client's <code>PHPSESSID</code> cookie and restores the server-side <code>$_SESSION</code> array.
-    <br>During login in <code>public/login.php</code> lines 24-26, upon successful password verification, we store <code>$_SESSION['user_id']</code> and <code>$_SESSION['role']</code>.
+    <p><strong>Candidate Answer:</strong>
+    <br>"Because HTTP is stateless, the server forgets client identity between requests. Calling <code>session_start()</code> reads the client's <code>PHPSESSID</code> cookie and restores the server-side <code>$_SESSION</code> array.
+    <br>During login in <code>public/login.php</code> lines 24-26, we store <code>$_SESSION['user_id']</code> and <code>$_SESSION['role']</code>.
     <br>In protected administrative files like <code>public/admin.php</code> lines 5-8 and <code>public/applications.php</code> lines 5-8, we check:
     <code>if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') { header('Location: home.php'); exit(); }</code>.
-    <br>If a student or unauthenticated guest attempts to access the admin URL directly, they are instantly redirected and execution halts via <code>exit()</code>."</p>
+    <br>If an unauthorized user attempts to access the admin URL directly, they are redirected and script execution halts via <code>exit()</code>."</p>
 </div>
 
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Question 5</span>
-        <span class="file-badge">Database Design &amp; Normalization</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Viva Question 5</span><span class="file-badge">Database Design</span></div>
     <p><strong>Examiner:</strong> "Explain your database normalization. How does your schema satisfy Third Normal Form (3NF)?"</p>
-    <p><strong>Model Answer:</strong>
+    <p><strong>Candidate Answer:</strong>
     <br>"Our schema in <code>schema.sql</code> is decomposed into 4 relations satisfying 3NF:
     <br>1. <strong>1NF:</strong> All attributes contain atomic values; there are no multivalued columns or repeating groups.
     <br>2. <strong>2NF:</strong> In the junction table <code>student_scholarships</code>, the composite primary key is <code>(student_id, scholarship_id)</code>. All descriptive attributes (e.g. <code>purpose</code>, <code>status</code>) functionally depend on the complete composite key, eliminating partial dependencies.
@@ -165,88 +115,64 @@
 </div>
 
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Question 6</span>
-        <span class="file-badge">schema.sql Lines 45-46</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Viva Question 6</span><span class="file-badge">schema.sql Line 46</span></div>
     <p><strong>Examiner:</strong> "What happens to student applications when a scholarship is deleted by the registrar?"</p>
-    <p><strong>Model Answer:</strong>
-    <br>"They are automatically deleted by the MySQL InnoDB engine. In <code>schema.sql</code> line 46, when defining the <code>student_scholarships</code> foreign key, we specified <code>FOREIGN KEY (scholarship_id) REFERENCES scholarships(id) ON DELETE CASCADE</code>. This guarantees referential integrity and prevents orphan child records from cluttering the database."</p>
+    <p><strong>Candidate Answer:</strong>
+    <br>"They are automatically deleted by the MySQL InnoDB engine. In <code>schema.sql</code> line 46, when defining the <code>student_scholarships</code> foreign key, we specified <code>FOREIGN KEY (scholarship_id) REFERENCES scholarships(id) ON DELETE CASCADE</code>. This guarantees referential integrity and prevents orphan child records."</p>
 </div>
 
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Question 7</span>
-        <span class="file-badge">public/applications.php Line 41</span>
-    </div>
-    <p><strong>Examiner:</strong> "Explain how your 4-table join works in <code>applications.php</code>. Why did you use a <code>LEFT JOIN</code> for the students table instead of an <code>INNER JOIN</code>?"</p>
-    <p><strong>Model Answer:</strong>
+    <div class="box-header"><span class="box-tag">Viva Question 7</span><span class="file-badge">public/applications.php Line 41</span></div>
+    <p><strong>Examiner:</strong> "Explain how your 4-table join works. Why did you use a <code>LEFT JOIN</code> for students instead of an <code>INNER JOIN</code>?"</p>
+    <p><strong>Candidate Answer:</strong>
     <br>"In line 41 of <code>public/applications.php</code>, we join <code>student_scholarships</code> with <code>users</code>, <code>students</code>, and <code>scholarships</code>.
     <br>We deliberately used a <code>LEFT JOIN</code> for <code>students</code> because if a newly registered student submits an application before completing every optional field in their student profile, an <code>INNER JOIN</code> would completely exclude and hide that application from the Registrar's dashboard! The <code>LEFT JOIN</code> ensures the application is always visible, displaying NULL for any uncompleted profile attributes."</p>
 </div>
 
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Question 8</span>
-        <span class="file-badge">public/admin.php Line 52</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Viva Question 8</span><span class="file-badge">public/admin.php Line 52</span></div>
     <p><strong>Examiner:</strong> "What safety checks prevent an administrator from deleting another administrator or locking the system?"</p>
-    <p><strong>Model Answer:</strong>
+    <p><strong>Candidate Answer:</strong>
     <br>"In <code>public/admin.php</code> lines 49-57, before executing any deletion query, we first query the user's role from the database:
     <code>$check = $conn-&gt;prepare("SELECT role FROM users WHERE id = ?"); $check-&gt;execute([$id]); $u = $check-&gt;fetch();</code>
     <br>We then explicitly check: <code>if ($u &amp;&amp; $u['role'] !== 'admin')</code>. If the target user is an administrator, the delete query is rejected and the system displays an alert: <em>'Cannot delete admin accounts.'</em>"</p>
 </div>
 
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Question 9</span>
-        <span class="file-badge">Client-Side Architecture</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Viva Question 9</span><span class="file-badge">Client-Side Architecture</span></div>
     <p><strong>Examiner:</strong> "Why is the <code>return</code> keyword compulsory in <code>&lt;form onsubmit='return checkApplication()'&gt;</code>?"</p>
-    <p><strong>Model Answer:</strong>
+    <p><strong>Candidate Answer:</strong>
     <br>"The inline <code>onsubmit</code> attribute expects an expression evaluating to a boolean that determines whether the browser's default form submission event should proceed. If you write <code>onsubmit='checkApplication()'</code> without <code>return</code>, the function executes and returns <code>false</code>, but the <code>onsubmit</code> handler itself returns <code>undefined</code>, which the browser treats as truthy and submits the form anyway! Writing <code>return checkApplication()</code> passes the boolean <code>false</code> directly to the browser, successfully cancelling the submission event."</p>
 </div>
 
 <div class="box box-viva">
-    <div class="box-header">
-        <span class="box-tag">Viva Question 10</span>
-        <span class="file-badge">JavaScript Algorithms</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Viva Question 10</span><span class="file-badge">JavaScript Algorithms</span></div>
     <p><strong>Examiner:</strong> "Why did you validate NIC numbers and dates using loops and character comparisons instead of regular expressions?"</p>
-    <p><strong>Model Answer:</strong>
+    <p><strong>Candidate Answer:</strong>
     <br>"In our course syllabus (IS1207), students are taught fundamental algorithmic string inspection using <code>length</code>, <code>charAt()</code>, <code>indexOf()</code>, and <code>split()</code> to demonstrate core procedural logic rather than delegating validation to regex engines. In <code>public/home.php</code> lines 334-339, we verify each character with <code>if (nic.charAt(i) &lt; '0' || nic.charAt(i) &gt; '9')</code>, strictly satisfying course guidelines."</p>
 </div>
 
 <hr>
-
-<!-- SECTION 4 -->
 <div id="sec4" class="section-anchor"></div>
-<h2 class="topic-title">4. Live Coding Defense Challenges (On-the-Spot Tasks)</h2>
+<h2 class="topic-title">4. Live Hands-On Coding Defense Challenges</h2>
 
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Live Task 1</span>
-        <span class="file-badge">Making a Field Read-Only</span>
-    </div>
-    <p><strong>Examiner Instruction:</strong> <em>"Open <code>public/home.php</code> and make the student's NIC field read-only right now."</em></p>
+    <div class="box-header"><span class="box-tag">Live Task 1</span><span class="file-badge">Making an Input Read-Only</span></div>
+    <p><strong>Examiner Instruction:</strong> <em>"Open <code>public/home.php</code> and make the student's NIC field read-only right now in front of me."</em></p>
     <p><strong>Exact Code Action:</strong> Navigate to line 150 of <code>public/home.php</code>. Change:
     <pre><code>&lt;!-- BEFORE --&gt;
 &lt;input type="text" name="nic" value="&lt;?php echo htmlspecialchars($userProfile['nic']); ?&gt;"&gt;
 
-&lt;!-- AFTER (Add readonly attribute &amp; input-readonly class) --&gt;
+&lt;!-- AFTER (Append readonly and input-readonly class) --&gt;
 &lt;input type="text" name="nic" value="&lt;?php echo htmlspecialchars($userProfile['nic']); ?&gt;" class="input-readonly" readonly&gt;</code></pre>
-    Save the file, refresh the browser, and demonstrate to the examiner that the field is now greyed out and cannot be edited, but will still submit to PHP on POST!</p>
+    Save the file, refresh the browser, and demonstrate that the field is locked from user editing, but still submits in POST!</p>
 </div>
 
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Live Task 2</span>
-        <span class="file-badge">Adding a Confirmation Dialog</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Live Task 2</span><span class="file-badge">Adding Action Confirmation</span></div>
     <p><strong>Examiner Instruction:</strong> <em>"Add a confirmation prompt before a student submits their application."</em></p>
-    <p><strong>Exact Code Action:</strong> Navigate to line 113 of <code>public/home.php</code> or the submit button. In <code>checkApplication()</code> line 352, change:
-    <pre><code>// In checkApplication() right before 'return true;'
-if (!confirm("Are you sure you want to submit this application? You cannot edit it later.")) {
+    <p><strong>Exact Code Action:</strong> Open <code>public/home.php</code> line 352. In <code>checkApplication()</code> right before <code>return true;</code>, insert:
+    <pre><code>if (!confirm("Are you sure you want to submit this application? You cannot edit it later.")) {
     return false;
 }
 return true;</code></pre>
@@ -254,14 +180,10 @@ return true;</code></pre>
 </div>
 
 <div class="box box-exam">
-    <div class="box-header">
-        <span class="box-tag">Live Task 3</span>
-        <span class="file-badge">Adding an SQL Filter</span>
-    </div>
+    <div class="box-header"><span class="box-tag">Live Task 3</span><span class="file-badge">Adding an SQL Filter</span></div>
     <p><strong>Examiner Instruction:</strong> <em>"Modify the Registrar view in <code>applications.php</code> to only show 'pending' applications."</em></p>
     <p><strong>Exact Code Action:</strong> Open <code>public/applications.php</code> line 41. Locate the SQL query and append <code>WHERE ss.status = 'pending'</code> right before <code>ORDER BY</code>:
-    <pre><code>// Line 41 in public/applications.php
-$stmt = $conn-&gt;query("SELECT ss.*, u.username, ... 
+    <pre><code>$stmt = $conn-&gt;query("SELECT ss.*, u.username, ... 
     FROM student_scholarships ss 
     INNER JOIN users u ON ss.student_id = u.id 
     LEFT JOIN students st ON u.id = st.user_id 
@@ -270,6 +192,8 @@ $stmt = $conn-&gt;query("SELECT ss.*, u.username, ...
     ORDER BY ss.applied_at DESC");</code></pre>
     Save and refresh.</p>
 </div>
+
+<hr>
 
     </main>
 </body>
