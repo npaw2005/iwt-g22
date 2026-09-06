@@ -4,58 +4,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML - HyperText Markup Language - Study Guide</title>
+    <title>1. HTML Mastery - Comprehensive Study Guide</title>
     <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .concept-box { background-color: #1e1e1e; border-left: 4px solid #bb86fc; padding: 15px; margin-bottom: 20px; border-radius: 0 5px 5px 0; }
+        .code-example { margin-bottom: 20px; }
+        .project-context { background-color: #1a237e; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #64b5f6; }
+        .project-context h3 { color: #90caf9; margin-top: 0; }
+        .past-paper-trap { background-color: #420b0b; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #ff5252; }
+        .past-paper-trap h3 { color: #ff8a80; margin-top: 0; }
+        hr { border: 0; height: 1px; background: #333; margin: 40px 0; }
+    </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>Study Guide</h2>
         <ul>
             <li><a href="index.html">Home / Intro</a></li>
-            <li><a href="html.html">HTML</a></li>
-            <li><a href="css.html">CSS</a></li>
-            <li><a href="js.html">JavaScript</a></li>
-            <li><a href="php.html">PHP</a></li>
-            <li><a href="sql.html">SQL</a></li>
-            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+            <li><a href="html.html">1. HTML Mastery</a></li>
+            <li><a href="css.html">2. CSS & Layouts</a></li>
+            <li><a href="js.html">3. JavaScript Details</a></li>
+            <li><a href="php.html">4. PHP & Backend</a></li>
+            <li><a href="sql.html">5. SQL & Databases</a></li>
+            <li><a href="viva.html">6. Viva Defense</a></li>
         </ul>
     </div>
     <div class="content">
-        <h1>HTML - HyperText Markup Language</h1>
+        <h1>1. HTML Mastery</h1>
         
+<h2>1. Basic Structure & Metadata</h2>
 <div class="concept-box">
-    <h3>Concept: HTML Forms & Inputs</h3>
-    <p>Forms are used to collect user input. The syllabus focuses on standard attributes like <code>action</code>, <code>method</code>, and <code>name</code>. In paper exams, you are frequently asked to write HTML for a basic registration or login form.</p>
+    <p>Every HTML document requires a foundational structure: <code>&lt;!DOCTYPE html&gt;</code>, <code>&lt;html&gt;</code>, <code>&lt;head&gt;</code>, and <code>&lt;body&gt;</code>. Metadata, titles, and stylesheet links MUST go inside the <code>&lt;head&gt;</code>.</p>
 </div>
+<div class="past-paper-trap">
+    <h3>Past Paper Trap: Invalid Metadata Placement</h3>
+    <p>Exams frequently present snippets with <code>&lt;meta&gt;</code> tags or <code>&lt;link rel="stylesheet"&gt;</code> placed inside the <code>&lt;body&gt;</code> and ask you to correct it. Always move these to the <code>&lt;head&gt;</code>.</p>
+</div>
+<div class="project-context">
+    <h3>Project Context: <code>includes/header.php</code></h3>
+    <p>In our project, we centralized this structure in <code>header.php</code>. This file contains the <code>&lt;!DOCTYPE html&gt;</code>, sets the <code>&lt;meta charset="UTF-8"&gt;</code>, and links our CSS. This demonstrates modularity—we write the structure once and include it everywhere.</p>
+</div>
+<hr>
 
+<h2>2. Forms and Input Handling</h2>
+<div class="concept-box">
+    <p>Forms are the primary way users interact with PHP. You must know attributes like <code>action</code> (where data is sent) and <code>method</code> (GET vs POST). Every input must have a <code>name</code> attribute to be accessible by PHP and JS.</p>
+</div>
 <div class="code-example">
-    <h4>General Code Example (Exam Style)</h4>
-    <pre><code>&lt;form action="process.php" method="POST" name="loginForm"&gt;
-    &lt;label for="user"&gt;Username:&lt;/label&gt;
-    &lt;input type="text" id="user" name="username" required&gt;
-    
-    &lt;input type="submit" value="Login"&gt;
+    <pre><code>&lt;form action="process.php" method="POST" name="registrationForm"&gt;
+    &lt;input type="text" name="username" required&gt;
+    &lt;input type="password" name="pwd"&gt;
+    &lt;button type="submit"&gt;Register&lt;/button&gt;
 &lt;/form&gt;</code></pre>
 </div>
-
 <div class="project-context">
-    <h3>Project Context: Where is this used?</h3>
-    <p><strong>File:</strong> <code>public/login.php</code></p>
-    <p><strong>Explanation:</strong> In our Scholarship System, we use this exact structure for the login and signup pages. For example, in <code>signup.php</code>, we use a <code>&lt;form&gt;</code> tag with <code>method="POST"</code> and an <code>onsubmit</code> attribute to trigger JavaScript validation before the data is sent to PHP.</p>
-    <pre><code>&lt;form name="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()"&gt;
-    &lt;input type="text" name="username"&gt;
-&lt;/form&gt;</code></pre>
+    <h3>Project Context: <code>public/signup.php</code> & <code>public/login.php</code></h3>
+    <p>We use robust HTML forms for our authentication. In <code>signup.php</code>, we use <code>method="POST"</code> because we are transmitting passwords, which should never be sent via GET (as GET puts data in the URL). Our inputs all have <code>name</code> attributes matching exactly what PHP expects in <code>$_POST['username']</code>.</p>
 </div>
+<hr>
 
+<h2>3. Semantic Tables & Spans</h2>
 <div class="concept-box">
-    <h3>Concept: Semantic Tables</h3>
-    <p>Tables are used to display tabular data using <code>&lt;table&gt;</code>, <code>&lt;tr&gt;</code>, <code>&lt;th&gt;</code>, and <code>&lt;td&gt;</code>. They are heavily tested in exams for displaying database results.</p>
+    <p>Tables use <code>&lt;table&gt;</code>, <code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>, <code>&lt;tfoot&gt;</code>, <code>&lt;tr&gt;</code>, <code>&lt;th&gt;</code>, and <code>&lt;td&gt;</code>. Exams heavily focus on merging cells using <code>rowspan</code> and <code>colspan</code>.</p>
 </div>
-
+<div class="past-paper-trap">
+    <h3>Past Paper Trap: Grid Drawing & TFOOT Rendering</h3>
+    <p>Exams often ask you to sketch a table output. Remember: Even if <code>&lt;tfoot&gt;</code> is written BEFORE <code>&lt;tbody&gt;</code> in the HTML, the browser will ALWAYS render the footer at the very bottom of the table.</p>
+</div>
 <div class="project-context">
-    <h3>Project Context: Where is this used?</h3>
-    <p><strong>File:</strong> <code>public/admin.php</code> (Lines 217+)</p>
-    <p><strong>Explanation:</strong> We used tables to create the "System Report" and "Scholarship Applications" lists. We loop through database records using PHP and echo out <code>&lt;tr&gt;</code> and <code>&lt;td&gt;</code> tags to build the table dynamically.</p>
+    <h3>Project Context: <code>public/admin.php</code></h3>
+    <p>We use data tables heavily in the admin dashboard (e.g., "System Report"). We loop over database results and generate <code>&lt;tr&gt;</code> rows dynamically. If asked in the viva why we didn't use `div`s for the report, you can explain that <strong>tabular data</strong> strictly belongs in <code>&lt;table&gt;</code> tags for semantic correctness according to HTML standards.</p>
+</div>
+<hr>
+
+<h2>4. Hyperlinks & Image Maps</h2>
+<div class="concept-box">
+    <p>Anchor tags <code>&lt;a href="..."&gt;</code> link pages. Image maps allow clicking different regions of a single image.</p>
+</div>
+<div class="past-paper-trap">
+    <h3>Past Paper Trap: Anchor Attributes & Map Syntax</h3>
+    <p>Exams will try to trick you with <code>&lt;a src="..."&gt;</code> (wrong, should be <code>href</code>). For Image Maps, you MUST know the syntax: <code>&lt;img src="x.jpg" usemap="#mapname"&gt;</code> and <code>&lt;map name="mapname"&gt; &lt;area shape="rect" coords="..." href="..."&gt; &lt;/map&gt;</code>. Forgetting the <code>#</code> in usemap is a guaranteed lost mark.</p>
 </div>
 
     </div>

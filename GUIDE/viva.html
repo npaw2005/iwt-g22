@@ -4,59 +4,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Viva & Q&A Prep - Study Guide</title>
+    <title>6. Viva Defense - Comprehensive Study Guide</title>
     <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .concept-box { background-color: #1e1e1e; border-left: 4px solid #bb86fc; padding: 15px; margin-bottom: 20px; border-radius: 0 5px 5px 0; }
+        .code-example { margin-bottom: 20px; }
+        .project-context { background-color: #1a237e; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #64b5f6; }
+        .project-context h3 { color: #90caf9; margin-top: 0; }
+        .past-paper-trap { background-color: #420b0b; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #ff5252; }
+        .past-paper-trap h3 { color: #ff8a80; margin-top: 0; }
+        hr { border: 0; height: 1px; background: #333; margin: 40px 0; }
+    </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>Study Guide</h2>
         <ul>
             <li><a href="index.html">Home / Intro</a></li>
-            <li><a href="html.html">HTML</a></li>
-            <li><a href="css.html">CSS</a></li>
-            <li><a href="js.html">JavaScript</a></li>
-            <li><a href="php.html">PHP</a></li>
-            <li><a href="sql.html">SQL</a></li>
-            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+            <li><a href="html.html">1. HTML Mastery</a></li>
+            <li><a href="css.html">2. CSS & Layouts</a></li>
+            <li><a href="js.html">3. JavaScript Details</a></li>
+            <li><a href="php.html">4. PHP & Backend</a></li>
+            <li><a href="sql.html">5. SQL & Databases</a></li>
+            <li><a href="viva.html">6. Viva Defense</a></li>
         </ul>
     </div>
     <div class="content">
-        <h1>Viva & Q&A Prep</h1>
+        <h1>6. Viva Defense</h1>
         
+<h2>Viva Defense Q&A: Master the Codebase</h2>
+
 <div class="concept-box">
-    <h3>Viva Question 1: How do you get information from the database and make it visible in a form as read-only?</h3>
-    <p><strong>Answer:</strong> First, you use a <code>SELECT</code> query to fetch the specific record based on an ID passed via <code>$_GET</code>. You fetch the row as an associative array. Then, inside your HTML form, you use PHP's <code>echo</code> to print the database value inside the <code>value="..."</code> attribute of the input. Finally, you add the <code>readonly</code> attribute to the HTML input tag to prevent the user from typing in it.</p>
-</div>
-
-<div class="project-context">
-    <h3>Project Context: Code Example</h3>
-    <p><strong>File:</strong> <code>public/admin.php</code> (Lines 62 & 109)</p>
-    <pre><code>&lt;?php
-// 1. Fetch data
-$stmt = $conn-&gt;prepare("SELECT * FROM users WHERE id = ?");
-$stmt-&gt;execute([$id]);
-$editUser = $stmt-&gt;fetch();
-?&gt;
-
-&lt;!-- 2. Display in form (with readonly example) --&gt;
-&lt;input type="text" name="username" value="&lt;?php echo htmlspecialchars($editUser['username']); ?&gt;" readonly&gt;
-</code></pre>
-    <p><strong>Note:</strong> In our actual code, the field isn't read-only because the admin needs to edit it, but adding <code>readonly</code> to the tag is all it takes to lock it down while still submitting the data via POST!</p>
+    <h3>Q1: How do you get information from the database and make it visible in a form as read-only?</h3>
+    <p><strong>Examiner Goal:</strong> Testing if you understand the flow of data from DB -> PHP -> HTML.</p>
+    <p><strong>Answer & Codebase Link:</strong> "First, we execute a SELECT query (e.g., in <code>admin.php</code> line 62, we fetch the user by ID). We fetch the result into an associative array <code>$editUser</code>. Next, inside the HTML form, we populate the input by echoing the value: <code>&lt;input type='text' value='&lt;?php echo $editUser['username']; ?&gt;' readonly&gt;</code>. Adding the <code>readonly</code> HTML attribute locks the field from user input while still allowing it to be submitted via POST."</p>
 </div>
 
 <div class="concept-box">
-    <h3>Viva Question 2: Why do we use <code>htmlspecialchars()</code> when printing data from the database?</h3>
-    <p><strong>Answer:</strong> It converts special characters to HTML entities (e.g., <code>&lt;</code> becomes <code>&amp;lt;</code>). This prevents Cross-Site Scripting (XSS) attacks. If a user entered malicious JavaScript as their name, <code>htmlspecialchars()</code> ensures it is printed as harmless text rather than executed by the browser.</p>
+    <h3>Q2: Why did you use <code>session_start()</code> on every page, and how does your login work?</h3>
+    <p><strong>Examiner Goal:</strong> Testing state management understanding.</p>
+    <p><strong>Answer & Codebase Link:</strong> "HTTP is stateless. We use PHP sessions to remember the user. In <code>login.php</code>, upon verifying the password against the DB, we set <code>$_SESSION['user_id'] = $user['id']</code> and <code>$_SESSION['role'] = $user['role']</code>. At the top of <code>admin.php</code> or <code>applications.php</code>, we check if <code>$_SESSION['role']</code> matches the required role. If it doesn't, we redirect them away using the <code>header()</code> function. This secures the system."</p>
 </div>
 
 <div class="concept-box">
-    <h3>Viva Question 3: How does your login system remember who is logged in across different pages?</h3>
-    <p><strong>Answer:</strong> We use PHP Sessions. At the top of every page, we call <code>session_start()</code>. When a user logs in successfully, we store their ID and role in the <code>$_SESSION</code> superglobal array (e.g., <code>$_SESSION['role'] = 'admin'</code>). On other pages, we check if those session variables exist; if not, we use <code>header("Location: login.php")</code> to kick them out.</p>
+    <h3>Q3: Why did you use <code>require_once '../config/db.php'</code> instead of <code>include</code>?</h3>
+    <p><strong>Examiner Goal:</strong> Testing error handling knowledge.</p>
+    <p><strong>Answer & Codebase Link:</strong> "If a database connection fails, the rest of the application cannot function securely. <code>include</code> only throws a warning and continues executing the script, which could lead to severe errors or data leaks. <code>require_once</code> throws a fatal error and halts execution, which is much safer. The `_once` suffix ensures we don't accidentally declare the database connection twice, which would crash the app."</p>
 </div>
 
 <div class="concept-box">
-    <h3>Viva Question 4: What is the difference between <code>include</code> and <code>require_once</code>?</h3>
-    <p><strong>Answer:</strong> If an <code>include</code> fails (file missing), the script continues with a warning. If a <code>require</code> fails, it throws a fatal error and stops the script. <code>require_once</code> ensures the file is included exactly one time, preventing redeclaration errors (which is why we use it for <code>db.php</code> and headers).</p>
+    <h3>Q4: How did you prevent SQL Injection in your project?</h3>
+    <p><strong>Examiner Goal:</strong> Security basics.</p>
+    <p><strong>Answer & Codebase Link:</strong> "In all our forms, like <code>signup.php</code> and the application submission in <code>home.php</code>, we used PDO Prepared Statements. Instead of inserting variables directly into the SQL string (which can be hijacked), we use placeholders <code>VALUES (?, ?)</code> and bind the variables during execution. This separates the query logic from the data."</p>
+</div>
+
+<div class="concept-box">
+    <h3>Q5: How does your JavaScript form validation connect with your PHP backend?</h3>
+    <p><strong>Examiner Goal:</strong> Understanding client vs server architecture.</p>
+    <p><strong>Answer & Codebase Link:</strong> "They act as two layers of defense. In <code>admin.php</code>, we use DOM Level 0 JavaScript (<code>onsubmit="return checkAddUser()"</code>) to check for empty fields instantly on the client side without reloading the page. However, JavaScript can be bypassed by the user. If the JS returns true, the form is submitted to the PHP backend, which securely interacts with the database."</p>
 </div>
 
     </div>

@@ -4,97 +4,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JavaScript - Study Guide</title>
+    <title>3. JavaScript Details - Comprehensive Study Guide</title>
     <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .concept-box { background-color: #1e1e1e; border-left: 4px solid #bb86fc; padding: 15px; margin-bottom: 20px; border-radius: 0 5px 5px 0; }
+        .code-example { margin-bottom: 20px; }
+        .project-context { background-color: #1a237e; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #64b5f6; }
+        .project-context h3 { color: #90caf9; margin-top: 0; }
+        .past-paper-trap { background-color: #420b0b; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #ff5252; }
+        .past-paper-trap h3 { color: #ff8a80; margin-top: 0; }
+        hr { border: 0; height: 1px; background: #333; margin: 40px 0; }
+    </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>Study Guide</h2>
         <ul>
             <li><a href="index.html">Home / Intro</a></li>
-            <li><a href="html.html">HTML</a></li>
-            <li><a href="css.html">CSS</a></li>
-            <li><a href="js.html">JavaScript</a></li>
-            <li><a href="php.html">PHP</a></li>
-            <li><a href="sql.html">SQL</a></li>
-            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+            <li><a href="html.html">1. HTML Mastery</a></li>
+            <li><a href="css.html">2. CSS & Layouts</a></li>
+            <li><a href="js.html">3. JavaScript Details</a></li>
+            <li><a href="php.html">4. PHP & Backend</a></li>
+            <li><a href="sql.html">5. SQL & Databases</a></li>
+            <li><a href="viva.html">6. Viva Defense</a></li>
         </ul>
     </div>
     <div class="content">
-        <h1>JavaScript</h1>
+        <h1>3. JavaScript Details</h1>
         
+<h2>1. DOM Level 0 Access</h2>
 <div class="concept-box">
-    <h3>Concept: DOM Level 0 Form Access</h3>
-    <p>The syllabus specifically teaches accessing form elements using the older DOM Level 0 approach (<code>document.formName.inputName.value</code>) rather than modern methods like <code>document.getElementById()</code>. Variables are declared with <code>var</code>, and functions use the <code>function</code> keyword (no ES6 arrow functions).</p>
+    <p>The syllabus exclusively teaches DOM access via the document hierarchy. Modern <code>document.getElementById()</code> is completely ignored in favor of <code>document.formName.elementName.value</code>.</p>
 </div>
-
-<div class="code-example">
-    <h4>General Code Example (Exam Style)</h4>
-    <pre><code>function validateForm() {
-    var u = document.loginForm.username.value;
-    if (u == "") {
-        alert("Username is required");
-        return false;
-    }
-    return true;
-}</code></pre>
-</div>
-
 <div class="project-context">
-    <h3>Project Context: Where is this used?</h3>
-    <p><strong>File:</strong> <code>public/admin.php</code> (Lines 264+)</p>
-    <p><strong>Explanation:</strong> In the admin panel, we use this exact method to validate the Add User form before it is sent to the server. We trigger it using <code>&lt;form onsubmit="return checkAddUser()" name="addUserForm"&gt;</code>.</p>
-    <pre><code>function checkAddUser() {
-    var username = document.addUserForm.username.value;
-    if (username == "") {
-        alert("Please enter a username.");
-        return false;
-    }
-    return true;
-}</code></pre>
+    <h3>Project Context: <code>public/admin.php</code></h3>
+    <p>When the admin creates a new user, we intercept the submission using <code>&lt;form onsubmit="return checkAddUser()" name="addUserForm"&gt;</code>. Inside the JS, we write <code>var username = document.addUserForm.username.value;</code>. If it is empty, we `return false` to stop the PHP execution entirely, saving server resources.</p>
 </div>
+<hr>
 
-<div class="concept-box">
-    <h3>Concept: Dialog Boxes</h3>
-    <p>JavaScript provides three native dialog boxes: <code>alert()</code> (for messages), <code>confirm()</code> (for OK/Cancel boolean responses), and <code>prompt()</code> (for user input).</p>
-</div>
-
-<div class="project-context">
-    <h3>Project Context: Where is this used?</h3>
-    <p><strong>File:</strong> <code>public/applications.php</code> (Line 146)</p>
-    <p><strong>Explanation:</strong> We use <code>confirm()</code> directly in the HTML <code>onclick</code> attribute to prevent registrars from accidentally deleting or approving an application without verifying.</p>
-    <pre><code>&lt;button type="submit" onclick="return confirm('Approve this application?')"&gt;Approve&lt;/button&gt;</code></pre>
-</div>
-
-<div class="concept-box">
-    <h3>Concept: Email Validation (Algorithmic, No Regex)</h3>
-    <p>The syllabus specifically tests your ability to validate an email using string methods (<code>indexOf</code> and <code>lastIndexOf</code>) rather than modern Regular Expressions.</p>
-</div>
-
-<div class="code-example">
-    <h4>General Code Example (Exam Style)</h4>
+<h2>2. Form Validation: Algorithmic Email Validation</h2>
+<div class="past-paper-trap">
+    <h3>Past Paper Trap: Email Validation without Regex</h3>
+    <p>You will lose marks if you use Regular Expressions in exams. You must use <code>indexOf</code> and <code>lastIndexOf</code>.</p>
     <pre><code>function validateEmail() {
-    var emailID = document.myForm.EMail.value;
-    var atpos = emailID.indexOf("@");
-    var dotpos = emailID.lastIndexOf(".");
-
-    // '@' must not be first char, and '.' must be at least 2 chars after '@'
-    if (atpos &lt; 1 || (dotpos - atpos &lt; 2)) {
-        alert("Please enter a valid email address");
+    var email = document.myForm.EMail.value;
+    var atpos = email.indexOf("@");
+    var dotpos = email.lastIndexOf(".");
+    // @ cannot be first (atpos < 1)
+    // . must be at least two chars after @ (dotpos - atpos < 2)
+    if (atpos < 1 || (dotpos - atpos < 2)) {
+        alert("Invalid email");
         return false;
     }
     return true;
 }</code></pre>
 </div>
+<hr>
 
-<div class="concept-box">
-    <h3>Concept: Type Coercion & Equality (== vs ===)</h3>
-    <p>A frequent exam question involves predicting the output of equality checks. You must know the difference between loose equality (<code>==</code>) which coerces types, and strict equality (<code>===</code>) which checks both type and value.</p>
+<h2>3. Type Coercion & Strict Equality</h2>
+<div class="past-paper-trap">
+    <h3>Past Paper Trap: <code>==</code> vs <code>===</code></h3>
+    <p>Exams ask for outputs of comparison scripts. <code>==</code> coerces types. <code>===</code> does not.</p>
     <ul>
-        <li><code>10 == "10"</code> &rarr; <strong>true</strong></li>
-        <li><code>10 === "10"</code> &rarr; <strong>false</strong></li>
+        <li><code>10 == "10"</code> is <strong>true</strong>.</li>
+        <li><code>10 === "10"</code> is <strong>false</strong> (Number vs String).</li>
+        <li><code>null == undefined</code> is <strong>true</strong>.</li>
     </ul>
 </div>
+<hr>
+
+<h2>4. Dialog Boxes & Page Redirection</h2>
+<div class="concept-box">
+    <p><code>alert("msg")</code> just shows text. <code>confirm("msg")</code> returns true/false. <code>prompt("msg")</code> returns user input.</p>
+</div>
+<div class="project-context">
+    <h3>Project Context: Safe Deletions</h3>
+    <p>In our project, when an admin clicks "Delete" on a user, we use an inline event: <code>&lt;a href="..." onclick="return confirm('Are you sure?')"&gt;</code>. If the admin clicks Cancel, JS returns false, the hyperlink event is cancelled, and the user is saved.</p>
+</div>
+<hr>
+
+<h2>5. Cookies Handling</h2>
+<div class="concept-box">
+    <p>You must know how to set and read cookies via <code>document.cookie</code>. To set an expiry, you manipulate a Date object.</p>
+    <pre><code>var now = new Date();
+now.setMonth(now.getMonth() + 1);
+document.cookie = "username=John;expires=" + now.toUTCString() + ";";</code></pre>
+</div>
+
     </div>
 </body>
 </html>

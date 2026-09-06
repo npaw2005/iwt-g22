@@ -4,63 +4,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SQL - Structured Query Language - Study Guide</title>
+    <title>5. SQL & Databases - Comprehensive Study Guide</title>
     <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .concept-box { background-color: #1e1e1e; border-left: 4px solid #bb86fc; padding: 15px; margin-bottom: 20px; border-radius: 0 5px 5px 0; }
+        .code-example { margin-bottom: 20px; }
+        .project-context { background-color: #1a237e; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #64b5f6; }
+        .project-context h3 { color: #90caf9; margin-top: 0; }
+        .past-paper-trap { background-color: #420b0b; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #ff5252; }
+        .past-paper-trap h3 { color: #ff8a80; margin-top: 0; }
+        hr { border: 0; height: 1px; background: #333; margin: 40px 0; }
+    </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>Study Guide</h2>
         <ul>
             <li><a href="index.html">Home / Intro</a></li>
-            <li><a href="html.html">HTML</a></li>
-            <li><a href="css.html">CSS</a></li>
-            <li><a href="js.html">JavaScript</a></li>
-            <li><a href="php.html">PHP</a></li>
-            <li><a href="sql.html">SQL</a></li>
-            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+            <li><a href="html.html">1. HTML Mastery</a></li>
+            <li><a href="css.html">2. CSS & Layouts</a></li>
+            <li><a href="js.html">3. JavaScript Details</a></li>
+            <li><a href="php.html">4. PHP & Backend</a></li>
+            <li><a href="sql.html">5. SQL & Databases</a></li>
+            <li><a href="viva.html">6. Viva Defense</a></li>
         </ul>
     </div>
     <div class="content">
-        <h1>SQL - Structured Query Language</h1>
+        <h1>5. SQL & Databases</h1>
         
+<h2>1. Data Definition Language (DDL) & Relational Links</h2>
 <div class="concept-box">
-    <h3>Concept: Data Definition Language (DDL) & Foreign Keys</h3>
-    <p>The syllabus requires you to write <code>CREATE TABLE</code> statements, specifically focusing on Primary Keys (<code>AUTO_INCREMENT</code>) and Foreign Keys linking parent and child tables.</p>
+    <p>Writing perfect <code>CREATE TABLE</code> statements from scratch is mandatory for Q4 in the exam. You must know how to define <code>AUTO_INCREMENT PRIMARY KEY</code> and link tables with <code>FOREIGN KEY (col) REFERENCES other_table(col)</code>.</p>
 </div>
-
-<div class="code-example">
-    <h4>General Code Example (Exam Style)</h4>
-    <pre><code>CREATE TABLE enrollments (
-    enroll_id INT AUTO_INCREMENT PRIMARY KEY,
-    student_id INT,
-    course_id INT,
-    FOREIGN KEY (student_id) REFERENCES students(student_id)
-);</code></pre>
-</div>
-
 <div class="project-context">
-    <h3>Project Context: Where is this used?</h3>
-    <p><strong>File:</strong> <code>schema.sql</code></p>
-    <p><strong>Explanation:</strong> Our project uses this exact pattern extensively. The <code>student_scholarships</code> table uses a composite primary key and foreign keys to link to the <code>users</code> and <code>scholarships</code> tables. We also use <code>ON DELETE CASCADE</code> which ensures that if a scholarship is deleted, all applications for it are also automatically deleted.</p>
-    <pre><code>CREATE TABLE student_scholarships (
-    student_id INT NOT NULL,
-    scholarship_id INT NOT NULL,
-    PRIMARY KEY (student_id, scholarship_id),
-    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE
-);</code></pre>
+    <h3>Project Context: <code>schema.sql</code> Normalization</h3>
+    <p>Our project is highly normalized. The <code>student_scholarships</code> table acts as a Junction Table connecting <code>users</code> and <code>scholarships</code>. This resolves a Many-to-Many relationship (Students can apply to many scholarships, Scholarships have many applicants). We used <code>ON DELETE CASCADE</code> so orphan data is automatically cleaned up by MySQL.</p>
 </div>
+<hr>
 
+<h2>2. PHP Database Execution (Prepared Statements)</h2>
 <div class="concept-box">
-    <h3>Concept: Database Connection & Prepared Statements</h3>
-    <p>Exams test modular architecture (splitting config into <code>value.php</code> and <code>con.php</code>). They also test CRUD operations using MySQLi prepared statements (<code>prepare()</code>, <code>bind_param()</code>, <code>execute()</code>) or PDO.</p>
+    <p>The syllabus requires you to connect to the database, write a query, execute it, and fetch the results using procedural or OOP methods.</p>
 </div>
-
 <div class="project-context">
-    <h3>Project Context: Where is this used?</h3>
-    <p><strong>File:</strong> <code>config/db.php</code> & <code>public/admin.php</code></p>
-    <p><strong>Explanation:</strong> We implement this modular architecture. <code>config/db.php</code> holds our PDO connection string. In <code>admin.php</code>, when adding a user, we use a prepared statement to prevent SQL injection, which perfectly mirrors the exam requirements.</p>
-    <pre><code>$stmt = $conn->prepare("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)");
-$stmt->execute([$username, $password, $email, $role]);</code></pre>
+    <h3>Project Context: <code>admin.php</code> Statistics</h3>
+    <p>To generate the "System Report", we execute <code>SELECT COUNT(*) FROM scholarships</code> using PHP PDO. We use prepared statements everywhere (e.g. <code>$stmt = $conn->prepare("INSERT..."); $stmt->execute([...]);</code>) to prevent SQL Injection attacks. If asked in the viva why we used `prepare()` instead of `query()`, explain it protects the database from malicious user inputs.</p>
+</div>
+<hr>
+
+<h2>3. Complex Joins</h2>
+<div class="concept-box">
+    <p>You must know how to retrieve related data across multiple tables using <code>INNER JOIN</code>.</p>
+</div>
+<div class="project-context">
+    <h3>Project Context: The Registrar Dashboard</h3>
+    <p>In <code>applications.php</code>, we run a complex join: <code>SELECT ss.*, u.username, s.name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id INNER JOIN scholarships s ON ss.scholarship_id = s.id</code>. This brings together the application data, the student's name, and the scholarship's title into a single, highly efficient result set.</p>
 </div>
 
     </div>

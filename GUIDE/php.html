@@ -4,69 +4,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHP - Hypertext Preprocessor - Study Guide</title>
+    <title>4. PHP & Backend - Comprehensive Study Guide</title>
     <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .concept-box { background-color: #1e1e1e; border-left: 4px solid #bb86fc; padding: 15px; margin-bottom: 20px; border-radius: 0 5px 5px 0; }
+        .code-example { margin-bottom: 20px; }
+        .project-context { background-color: #1a237e; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #64b5f6; }
+        .project-context h3 { color: #90caf9; margin-top: 0; }
+        .past-paper-trap { background-color: #420b0b; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #ff5252; }
+        .past-paper-trap h3 { color: #ff8a80; margin-top: 0; }
+        hr { border: 0; height: 1px; background: #333; margin: 40px 0; }
+    </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>Study Guide</h2>
         <ul>
             <li><a href="index.html">Home / Intro</a></li>
-            <li><a href="html.html">HTML</a></li>
-            <li><a href="css.html">CSS</a></li>
-            <li><a href="js.html">JavaScript</a></li>
-            <li><a href="php.html">PHP</a></li>
-            <li><a href="sql.html">SQL</a></li>
-            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+            <li><a href="html.html">1. HTML Mastery</a></li>
+            <li><a href="css.html">2. CSS & Layouts</a></li>
+            <li><a href="js.html">3. JavaScript Details</a></li>
+            <li><a href="php.html">4. PHP & Backend</a></li>
+            <li><a href="sql.html">5. SQL & Databases</a></li>
+            <li><a href="viva.html">6. Viva Defense</a></li>
         </ul>
     </div>
     <div class="content">
-        <h1>PHP - Hypertext Preprocessor</h1>
+        <h1>4. PHP & Backend</h1>
         
+<h2>1. Superglobals & State Management</h2>
 <div class="concept-box">
-    <h3>Concept: Superglobals ($_POST, $_GET, $_SESSION)</h3>
-    <p>PHP uses superglobals to collect form data and manage user state. The syllabus emphasizes using <code>$_POST</code> for secure form submissions (like login) and <code>$_GET</code> for URL parameters. <code>$_SESSION</code> is critical for maintaining a logged-in state.</p>
+    <p>PHP uses <code>$_GET</code> (URL query parameters), <code>$_POST</code> (form data), and <code>$_SESSION</code> (server-side cross-page state).</p>
 </div>
-
-<div class="code-example">
-    <h4>General Code Example (Exam Style)</h4>
-    <pre><code>&lt;?php
-session_start();
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $user = $_POST['username'];
-    $_SESSION['user'] = $user;
-    header("Location: dashboard.php");
-}
-?&gt;</code></pre>
-</div>
-
 <div class="project-context">
-    <h3>Project Context: Where is this used?</h3>
-    <p><strong>File:</strong> <code>public/login.php</code> (Lines 2-25)</p>
-    <p><strong>Explanation:</strong> In our project, we use <code>session_start()</code> at the very top of every PHP file. In <code>login.php</code>, we check <code>if ($_SERVER['REQUEST_METHOD'] === 'POST')</code> to see if the user clicked login. We then capture <code>$_POST['username']</code> and if the database match is successful, we set <code>$_SESSION['user_id'] = $user['id']</code>.</p>
+    <h3>Project Context: <code>public/applications.php</code> Detail View</h3>
+    <p>In our registrar dashboard, we implemented a detailed view for applications using <code>$_GET</code>. We generate links like <code>?view_sid=4&view_sch=1</code>. The PHP script then checks <code>if (isset($_GET['view_sid']))</code>, extracts the ID, and fetches the full application. This strictly adheres to the syllabus teachings on GET parameters.</p>
 </div>
+<hr>
 
+<h2>2. Backend Architecture: Database Inclusion</h2>
 <div class="concept-box">
-    <h3>Concept: Array Mechanics & References</h3>
-    <p>Past papers frequently ask you to predict the output of array assignments (e.g., implicit indexing where <code>$arr[] = 56</code> assigns to the next available integer key) and the <strong>foreach reference leak</strong> gotcha (<code>foreach($arr as &$val)</code>).</p>
+    <p>Exams test modularity: putting database credentials in one file and the connection logic in another. They also test <code>include</code> vs <code>require</code>. (Require throws a fatal error and stops script execution if missing).</p>
 </div>
+<div class="project-context">
+    <h3>Project Context: <code>config/db.php</code></h3>
+    <p>We centralized our database connection in <code>db.php</code>. Every file uses <code>require_once '../config/db.php';</code>. This ensures that if the database file is missing or broken, the script halts immediately, preventing the display of half-rendered pages with sensitive variable leaks.</p>
+</div>
+<hr>
 
-<div class="code-example">
-    <h4>General Code Example (Exam Style)</h4>
-    <pre><code>&lt;?php
-$nums = [1, 2, 3];
+<h2>3. Array Mechanics & Foreach Reference Leaks</h2>
+<div class="past-paper-trap">
+    <h3>Past Paper Trap: The <code>&</code> Reference Leak</h3>
+    <p>A classic 10-mark exam trap involves passing values by reference in a foreach loop.</p>
+    <pre><code>$nums = [1, 2, 3];
 foreach ($nums as &$n) { $n *= 2; }
-$n = 100; // This overwrites the last element!
-print_r($nums); // Output: [2, 4, 100]
-?&gt;</code></pre>
+$n = 100; // Because $n was a reference, this mutates the array!
+// $nums is now [2, 4, 100]</code></pre>
+    <p>Also remember array key casting: <code>$arr["2"] = "test";</code> will actually be cast to integer <code>$arr[2]</code>.</p>
 </div>
+<hr>
 
-<div class="concept-box">
-    <h3>Concept: PHP & Server Configuration</h3>
-    <p>Exams test your knowledge of Apache vs PHP configuration directives.</p>
+<h2>4. Server Configuration Classification</h2>
+<div class="past-paper-trap">
+    <h3>Past Paper Trap: httpd.conf vs php.ini</h3>
+    <p>You must know which directives belong to which server config file:</p>
     <ul>
-        <li><strong>Apache (httpd.conf):</strong> ServerRoot, DocumentRoot, LoadModule, PHPIniDir</li>
-        <li><strong>PHP (php.ini):</strong> upload_max_filesize, display_errors</li>
+        <li><strong>Apache (httpd.conf):</strong> <code>ServerRoot</code>, <code>DocumentRoot</code>, <code>LoadModule</code>, <code>PHPIniDir</code></li>
+        <li><strong>PHP (php.ini):</strong> <code>upload_max_filesize</code>, <code>display_errors</code></li>
     </ul>
 </div>
 

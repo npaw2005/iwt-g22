@@ -4,54 +4,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSS - Cascading Style Sheets - Study Guide</title>
+    <title>2. CSS & Layouts - Comprehensive Study Guide</title>
     <link rel="stylesheet" href="assets/style.css">
+    <style>
+        .concept-box { background-color: #1e1e1e; border-left: 4px solid #bb86fc; padding: 15px; margin-bottom: 20px; border-radius: 0 5px 5px 0; }
+        .code-example { margin-bottom: 20px; }
+        .project-context { background-color: #1a237e; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #64b5f6; }
+        .project-context h3 { color: #90caf9; margin-top: 0; }
+        .past-paper-trap { background-color: #420b0b; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #ff5252; }
+        .past-paper-trap h3 { color: #ff8a80; margin-top: 0; }
+        hr { border: 0; height: 1px; background: #333; margin: 40px 0; }
+    </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>Study Guide</h2>
         <ul>
             <li><a href="index.html">Home / Intro</a></li>
-            <li><a href="html.html">HTML</a></li>
-            <li><a href="css.html">CSS</a></li>
-            <li><a href="js.html">JavaScript</a></li>
-            <li><a href="php.html">PHP</a></li>
-            <li><a href="sql.html">SQL</a></li>
-            <li><a href="viva.html">Viva & Q&A Prep</a></li>
+            <li><a href="html.html">1. HTML Mastery</a></li>
+            <li><a href="css.html">2. CSS & Layouts</a></li>
+            <li><a href="js.html">3. JavaScript Details</a></li>
+            <li><a href="php.html">4. PHP & Backend</a></li>
+            <li><a href="sql.html">5. SQL & Databases</a></li>
+            <li><a href="viva.html">6. Viva Defense</a></li>
         </ul>
     </div>
     <div class="content">
-        <h1>CSS - Cascading Style Sheets</h1>
+        <h1>2. CSS & Layouts</h1>
         
+<h2>1. Selectors & Combinators (High Yield)</h2>
 <div class="concept-box">
-    <h3>Concept: CSS Selectors & Attributes</h3>
-    <p>The syllabus requires you to know Element, Class (.), ID (#), and attribute selectors (e.g., <code>input[type="text"]</code>).</p>
+    <p>Beyond basic `.class` and `#id`, exams heavily test how CSS traverses the HTML tree.</p>
+    <ul>
+        <li><strong>Descendant (Space):</strong> <code>div p</code> selects ALL p tags inside a div, no matter how deep.</li>
+        <li><strong>Child (<code>></code>):</strong> <code>div > p</code> selects only direct children. Nested p tags in a span are ignored.</li>
+        <li><strong>Adjacent Sibling (<code>+</code>):</strong> <code>div + p</code> selects the single p tag immediately following the div.</li>
+    </ul>
 </div>
-
-<div class="code-example">
-    <h4>General Code Example</h4>
-    <pre><code>/* Class Selector */
-.btn { background-color: blue; }
-
-/* Attribute Selector */
-input[type="password"] { border: 1px solid black; }</code></pre>
-</div>
-
 <div class="project-context">
-    <h3>Project Context: Where is this used?</h3>
-    <p><strong>File:</strong> <code>public/css/style.css</code></p>
-    <p><strong>Explanation:</strong> We styled our inputs explicitly using <code>input[type="text"], input[type="password"]</code> so that the styling only applies to text fields and not radio buttons or checkboxes. We used class selectors like <code>.btn</code> and <code>.btn-primary</code> to standardize button looks across the site without repeating code.</p>
+    <h3>Project Context: <code>public/css/style.css</code></h3>
+    <p>In our stylesheet, we use descendant selectors like <code>.navbar-brand a</code> to style links specifically inside the branding area without affecting global links. We also use pseudo-classes like <code>.btn:hover</code> to provide user feedback when hovering over buttons.</p>
 </div>
+<hr>
 
+<h2>2. Attribute Selectors</h2>
 <div class="concept-box">
-    <h3>Concept: Floating Layouts</h3>
-    <p>Because modern tools like Flexbox and Grid are out of scope, layouts in this syllabus rely on <code>float: left</code>, <code>float: right</code>, and <code>clear: both</code>.</p>
+    <p>Attribute selectors target elements based on their HTML attributes. Very common in exams:</p>
+    <ul>
+        <li><code>[class^="abc"]</code> : Starts with "abc"</li>
+        <li><code>[class*="abc"]</code> : Contains "abc"</li>
+        <li><code>[class$="abc"]</code> : Ends with "abc"</li>
+    </ul>
 </div>
-
 <div class="project-context">
-    <h3>Project Context: Where is this used?</h3>
-    <p><strong>File:</strong> <code>public/css/style.css</code></p>
-    <p><strong>Explanation:</strong> Our Navigation Bar (<code>.navbar</code>) uses floating. The brand logo (<code>.navbar-brand</code>) uses <code>float: left</code>, and the navigation links (<code>.nav-links a</code>) also use <code>float: left</code> so they sit horizontally next to each other. We use a clearing div (<code>.navbar-clear { clear: both; }</code>) at the end of the navbar to prevent the layout from collapsing.</p>
+    <h3>Project Context: Styling Form Inputs</h3>
+    <p>In our CSS, we use <code>input[type="text"], input[type="password"], select</code>. This ensures our styling applies ONLY to text fields and dropdowns, so if we add a radio button or checkbox later, it doesn't accidentally get a massive padding and a 100% width.</p>
+</div>
+<hr>
+
+<h2>3. Dropdown Menus & Hover States</h2>
+<div class="past-paper-trap">
+    <h3>Past Paper Trap: Dropdown CSS Construction</h3>
+    <p>A guaranteed 25-mark question is filling in blanks for a dropdown menu. The formula is always:</p>
+    <pre><code>.dropdown { display: inline-block; position: relative; }
+.dropdown-content { display: none; position: absolute; }
+.dropdown:hover .dropdown-content { display: block; }</code></pre>
+</div>
+<hr>
+
+<h2>4. SCSS & Preprocessors</h2>
+<div class="past-paper-trap">
+    <h3>Past Paper Trap: SCSS For Loops</h3>
+    <p>You must memorize SCSS variable declarations (<code>$primary-color: #333;</code>) and `@for` loops. The exam tests interpolation syntax: <code>@for $i from 1 through 3 { .col-#{$i} { width: ... } }</code>. Missing the <code>#{}</code> around the variable in class names is a failure.</p>
 </div>
 
     </div>
