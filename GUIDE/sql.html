@@ -1,66 +1,312 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5. SQL & Databases - Comprehensive Study Guide</title>
+    <title>SQL, Relational Databases & 3NF Architecture | IS1207 Complete Study Guide</title>
     <link rel="stylesheet" href="assets/style.css">
-    <style>
-        .concept-box { background-color: #1e1e1e; border-left: 4px solid #bb86fc; padding: 15px; margin-bottom: 20px; border-radius: 0 5px 5px 0; }
-        .code-example { margin-bottom: 20px; }
-        .project-context { background-color: #1a237e; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #64b5f6; }
-        .project-context h3 { color: #90caf9; margin-top: 0; }
-        .past-paper-trap { background-color: #420b0b; padding: 15px; border-radius: 5px; margin-bottom: 30px; border-left: 4px solid #ff5252; }
-        .past-paper-trap h3 { color: #ff8a80; margin-top: 0; }
-        hr { border: 0; height: 1px; background: #333; margin: 40px 0; }
-    </style>
 </head>
 <body>
-    <div class="sidebar">
-        <h2>Study Guide</h2>
-        <ul>
-            <li><a href="index.html">Home / Intro</a></li>
-            <li><a href="html.html">1. HTML Mastery</a></li>
-            <li><a href="css.html">2. CSS & Layouts</a></li>
-            <li><a href="js.html">3. JavaScript Details</a></li>
-            <li><a href="php.html">4. PHP & Backend</a></li>
-            <li><a href="sql.html">5. SQL & Databases</a></li>
-            <li><a href="viva.html">6. Viva Defense</a></li>
-        </ul>
-    </div>
-    <div class="content">
-        <h1>5. SQL & Databases</h1>
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>IS1207 Guide</h2>
+            <span class="badge">Syllabus + Past Papers + Codebase</span>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="index.html" class="nav-item ">🏠 Home & Overview</a>
+<a href="html.html" class="nav-item ">🌐 1. HTML Mastery</a>
+<a href="css.html" class="nav-item ">🎨 2. CSS & Layouts</a>
+<a href="js.html" class="nav-item ">⚡ 3. JavaScript & DOM</a>
+<a href="php.html" class="nav-item ">🐘 4. PHP & Backend</a>
+<a href="sql.html" class="nav-item active">🗄️ 5. SQL & Relational DB</a>
+<div class="sub-nav">
+  <a href="#sec1">1. Relational Theory & 3NF</a>
+  <a href="#sec2">2. DDL & Foreign Key CASCADE</a>
+  <a href="#sec3">3. DML CRUD & LIKE Operators</a>
+  <a href="#sec4">4. Aggregates & The HAVING Rule</a>
+  <a href="#sec5">5. Relational 4-Table Joins</a>
+</div>
+<a href="viva.html" class="nav-item ">🎓 6. Viva Defense & Q&A</a>
+
+        </nav>
+    </aside>
+    <main class="main-wrapper">
         
-<h2>1. Data Definition Language (DDL) & Relational Links</h2>
-<div class="concept-box">
-    <p>Writing perfect <code>CREATE TABLE</code> statements from scratch is mandatory for Q4 in the exam. You must know how to define <code>AUTO_INCREMENT PRIMARY KEY</code> and link tables with <code>FOREIGN KEY (col) REFERENCES other_table(col)</code>.</p>
-</div>
-<div class="project-context">
-    <h3>Project Context: <code>schema.sql</code> Normalization</h3>
-    <p>Our project is highly normalized. The <code>student_scholarships</code> table acts as a Junction Table connecting <code>users</code> and <code>scholarships</code>. This resolves a Many-to-Many relationship (Students can apply to many scholarships, Scholarships have many applicants). We used <code>ON DELETE CASCADE</code> so orphan data is automatically cleaned up by MySQL.</p>
-</div>
-<hr>
-
-<h2>2. PHP Database Execution (Prepared Statements)</h2>
-<div class="concept-box">
-    <p>The syllabus requires you to connect to the database, write a query, execute it, and fetch the results using procedural or OOP methods.</p>
-</div>
-<div class="project-context">
-    <h3>Project Context: <code>admin.php</code> Statistics</h3>
-    <p>To generate the "System Report", we execute <code>SELECT COUNT(*) FROM scholarships</code> using PHP PDO. We use prepared statements everywhere (e.g. <code>$stmt = $conn->prepare("INSERT..."); $stmt->execute([...]);</code>) to prevent SQL Injection attacks. If asked in the viva why we used `prepare()` instead of `query()`, explain it protects the database from malicious user inputs.</p>
-</div>
-<hr>
-
-<h2>3. Complex Joins</h2>
-<div class="concept-box">
-    <p>You must know how to retrieve related data across multiple tables using <code>INNER JOIN</code>.</p>
-</div>
-<div class="project-context">
-    <h3>Project Context: The Registrar Dashboard</h3>
-    <p>In <code>applications.php</code>, we run a complex join: <code>SELECT ss.*, u.username, s.name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id INNER JOIN scholarships s ON ss.scholarship_id = s.id</code>. This brings together the application data, the student's name, and the scholarship's title into a single, highly efficient result set.</p>
+<div class="hero-banner">
+    <h1>5. SQL, Relational Databases &amp; 3NF Architecture</h1>
+    <p>Comprehensive topic-by-topic analysis of the SQL syllabus (151 slides) and Database Concepts (109 slides), 3NF normalization, DDL schema construction with foreign keys, DML CRUD queries, aggregate calculations, and 4-table joins from <strong>schema.sql</strong> and <strong>public/applications.php</strong>.</p>
 </div>
 
+<!-- SECTION 1 -->
+<div id="sec1" class="section-anchor"></div>
+<h2 class="topic-title">1. Relational Theory, Key Hierarchy &amp; 3NF Normalization</h2>
+
+<div class="box box-concept">
+    <div class="box-header">
+        <span class="box-tag">Syllabus Theory</span>
+        <span class="file-badge">Database Concepts.pdf Curriculum</span>
     </div>
+    <p>In relational database design (E.F. Codd, 1970), data is structured into two-dimensional relations (tables) governed by strict mathematical keys and integrity constraints:</p>
+    <ul>
+        <li><strong>Super Key:</strong> Any attribute combination that uniquely identifies a row.</li>
+        <li><strong>Candidate Key:</strong> A minimal super key containing zero redundant attributes.</li>
+        <li><strong>Primary Key:</strong> The chosen candidate key (enforces entity integrity: unique and never <code>NULL</code>).</li>
+        <li><strong>Composite Primary Key:</strong> A primary key formed by combining two or more columns (e.g. <code>student_scholarships(student_id, scholarship_id)</code>).</li>
+        <li><strong>Foreign Key:</strong> An attribute in a child table referencing a primary key in a parent table, enforcing referential integrity.</li>
+    </ul>
+
+    <p><strong>Database Normalization &amp; Anomaly Elimination:</strong></p>
+    <table class="study-table">
+        <thead>
+            <tr>
+                <th>Normal Form</th>
+                <th>Core Requirement</th>
+                <th>Anomaly Eliminated</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>First Normal Form (1NF)</strong></td>
+                <td>All attributes must hold <strong>atomic</strong> values. No multivalued repeating groups (e.g. no comma-separated phone lists in a single cell).</td>
+                <td>Eliminates repeating data groups and indexing ambiguity.</td>
+            </tr>
+            <tr>
+                <td><strong>Second Normal Form (2NF)</strong></td>
+                <td>Must be in 1NF + <strong>No Partial Dependency</strong>. Every non-key column must depend on the <em>entire</em> candidate key, not a partial subset of a composite key.</td>
+                <td>Eliminates update and deletion anomalies on composite entities.</td>
+            </tr>
+            <tr>
+                <td><strong>Third Normal Form (3NF)</strong></td>
+                <td>Must be in 2NF + <strong>No Transitive Dependency</strong>. Non-key attributes must never depend on other non-key attributes ($X \to Y$ requires $X$ to be a super key).</td>
+                <td>Eliminates insertion and update anomalies across independent entities.</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="box box-codebase">
+    <div class="box-header">
+        <span class="box-tag">Codebase Implementation</span>
+        <span class="file-badge">schema.sql (Lines 4-47)</span>
+    </div>
+    <p>In our project, we decomposed the system into 4 distinct, fully normalized 3NF relations:</p>
+    <ol>
+        <li><code>users</code> (Primary Key: <code>id</code>): Holds authentication credentials (<code>username</code>, <code>password</code>, <code>role</code>, <code>email</code>).</li>
+        <li><code>students</code> (Primary Key: <code>user_id</code> referencing <code>users.id</code>): Holds extended applicant profile data. Satisfies 3NF because student bio data does not pollute the general authentication table.</li>
+        <li><code>scholarships</code> (Primary Key: <code>id</code>): Holds scholarship definitions (<code>name</code>, <code>description</code>, <code>deadline</code>).</li>
+        <li><code>student_scholarships</code> (Composite Primary Key: <code>student_id, scholarship_id</code>): A junction table resolving the Many-to-Many ($M:N$) relationship between students and scholarships.</li>
+    </ol>
+</div>
+
+<hr>
+
+<!-- SECTION 2 -->
+<div id="sec2" class="section-anchor"></div>
+<h2 class="topic-title">2. DDL Schema Definition &amp; Foreign Key Constraints</h2>
+
+<div class="box box-concept">
+    <div class="box-header">
+        <span class="box-tag">Syllabus Theory</span>
+        <span class="file-badge">CREATE TABLE &amp; Referential Actions</span>
+    </div>
+    <p>Data Definition Language (DDL) commands are <strong>auto-committed</strong> permanently by the database engine:</p>
+    <ul>
+        <li><code>CREATE TABLE table_name (col datatype [constraints], ...);</code></li>
+        <li><strong>Referential Actions on Delete:</strong>
+            <ul>
+                <li><code>ON DELETE CASCADE</code>: Deleting the parent record automatically deletes all referencing child records.</li>
+                <li><code>ON DELETE SET NULL</code>: Deleting the parent sets the child foreign key column to <code>NULL</code>.</li>
+                <li><code>ON DELETE RESTRICT</code> / <code>NO ACTION</code>: Prevents deletion of the parent if any child records reference it.</li>
+            </ul>
+        </li>
+        <li><strong><code>TRUNCATE TABLE</code> vs <code>DELETE FROM</code> (EXAM FAVORITE!):</strong>
+            <ul>
+                <li><code>TRUNCATE TABLE</code> is DDL; it wipes the entire table, cannot be rolled back, and <strong>resets the <code>AUTO_INCREMENT</code> counter to 1</strong>.</li>
+                <li><code>DELETE FROM</code> is DML; it deletes rows one-by-one, can be rolled back via transactions, and <strong>preserves the auto-increment counter</strong>.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header">
+        <span class="box-tag">Past Paper Alert &amp; Traps</span>
+        <span class="file-badge">AY22 Q4.I Exam Question (6 Marks)</span>
+    </div>
+    <p><strong>Past Paper Question:</strong> "Write the SQL statements to create the <code>students</code> and <code>enrollments</code> tables with primary keys, foreign keys, and auto-increment."</p>
+    <pre><code>CREATE TABLE students (
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    reg_date DATE NOT NULL
+);
+
+CREATE TABLE enrollments (
+    enroll_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    enroll_date DATE NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
+);</code></pre>
+</div>
+
+<div class="box box-codebase">
+    <div class="box-header">
+        <span class="box-tag">Codebase Implementation</span>
+        <span class="file-badge">schema.sql (Lines 36-47)</span>
+    </div>
+    <p>In our project, we constructed the junction table with dual foreign key cascade constraints:</p>
+    <pre><code>36: CREATE TABLE IF NOT EXISTS student_scholarships (
+37:     student_id INT NOT NULL,
+38:     scholarship_id INT NOT NULL,
+39:     purpose VARCHAR(255),
+40:     description TEXT,
+41:     testimonial_checked INT DEFAULT 0,
+42:     status VARCHAR(20) DEFAULT 'pending',
+43:     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+44:     PRIMARY KEY (student_id, scholarship_id),
+45:     FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+46:     FOREIGN KEY (scholarship_id) REFERENCES scholarships(id) ON DELETE CASCADE
+47: );</code></pre>
+</div>
+
+<hr>
+
+<!-- SECTION 3 -->
+<div id="sec3" class="section-anchor"></div>
+<h2 class="topic-title">3. DML CRUD Operations &amp; Pattern Matching (LIKE)</h2>
+
+<div class="box box-concept">
+    <div class="box-header">
+        <span class="box-tag">Syllabus Theory</span>
+        <span class="file-badge">SELECT, INSERT, UPDATE, DELETE</span>
+    </div>
+    <p>Data Manipulation Language (DML) manages table records:</p>
+    <ul>
+        <li><code>INSERT INTO table (cols) VALUES (vals);</code></li>
+        <li><code>UPDATE table SET col = val WHERE condition;</code> (Omitting <code>WHERE</code> updates all rows in the table!).</li>
+        <li><code>DELETE FROM table WHERE condition;</code> (Omitting <code>WHERE</code> deletes all rows!).</li>
+        <li><strong>Pattern Matching with <code>LIKE</code>:</strong>
+            <ul>
+                <li><code>%</code>: Wildcard representing zero, one, or multiple arbitrary characters. E.g. <code>WHERE name LIKE 'A%'</code> (starts with A); <code>LIKE '%tech%'</code> (contains tech).</li>
+                <li><code>_</code>: Wildcard representing exactly <strong>one single character</strong>. E.g. <code>WHERE code LIKE '_D%'</code> (second character is D).</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header">
+        <span class="box-tag">Past Paper Alert &amp; Traps</span>
+        <span class="file-badge">AY21 Q4.2 &amp; Q4.4 (6 Marks)</span>
+    </div>
+    <p><strong>Past Paper Question 1 (AY21 Q4.2):</strong> "Write an SQL statement to change the item name of 'KDH Tailight' to 'Tailight'."</p>
+    <pre><code>UPDATE items SET item_name = 'Tailight' WHERE item_name = 'KDH Tailight';</code></pre>
+
+    <p><strong>Past Paper Question 2 (AY21 Q4.4):</strong> "Write an SQL statement to remove all items where the name contains 'Aloweel'."</p>
+    <pre><code>DELETE FROM items WHERE item_name LIKE '%Aloweel%';</code></pre>
+</div>
+
+<div class="box box-codebase">
+    <div class="box-header">
+        <span class="box-tag">Codebase Implementation</span>
+        <span class="file-badge">public/applications.php (Line 33) &amp; public/admin.php (Line 53)</span>
+    </div>
+    <p>In <code>public/applications.php</code> line 33, registrar decision actions execute an exact status update:</p>
+    <pre><code>33: $stmt = $conn-&gt;prepare("UPDATE student_scholarships SET status = ? WHERE student_id = ? AND scholarship_id = ?");
+34: $stmt-&gt;execute([$status, $studentId, $scholarshipId]);</code></pre>
+    <p>In <code>public/admin.php</code> line 53, administrative account deletion executes:</p>
+    <pre><code>53: $conn-&gt;prepare("DELETE FROM users WHERE id = ?")-&gt;execute([$id]);</code></pre>
+</div>
+
+<hr>
+
+<!-- SECTION 4 -->
+<div id="sec4" class="section-anchor"></div>
+<h2 class="topic-title">4. Aggregate Functions, GROUP BY &amp; The HAVING Rule</h2>
+
+<div class="box box-concept">
+    <div class="box-header">
+        <span class="box-tag">Syllabus Theory</span>
+        <span class="file-badge">COUNT, SUM, AVG &amp; Aggregates</span>
+    </div>
+    <p>Aggregate functions compute a single summary scalar value across a column of data:</p>
+    <ul>
+        <li><code>COUNT(*)</code>: Returns total count of records including nulls.</li>
+        <li><code>COUNT(col)</code>: Returns count of non-null records.</li>
+        <li><code>SUM(col)</code>, <code>AVG(col)</code>, <code>MIN(col)</code>, <code>MAX(col)</code>.</li>
+        <li><code>GROUP BY</code>: Clusters rows with identical values into summary rows.</li>
+        <li><strong>The Fundamental HAVING Rule (Slide 69):</strong>
+            <br>In SQL, the <code>WHERE</code> clause <strong>cannot filter on aggregate functions</strong> because <code>WHERE</code> filters individual records <em>before</em> aggregation takes place. The <code>HAVING</code> clause was introduced specifically to filter grouped summary records <em>after</em> aggregation!
+            <pre><code>-- WRONG (Syntax Error in SQL)
+SELECT department, COUNT(*) FROM employees WHERE COUNT(*) > 5 GROUP BY department;
+
+-- CORRECT RE-WRITE
+SELECT department, COUNT(*) FROM employees GROUP BY department HAVING COUNT(*) > 5;</code></pre>
+        </li>
+    </ul>
+</div>
+
+<div class="box box-codebase">
+    <div class="box-header">
+        <span class="box-tag">Codebase Implementation</span>
+        <span class="file-badge">public/admin.php (Line 85) &amp; public/home.php (Line 36)</span>
+    </div>
+    <p>In <code>public/admin.php</code> line 85, the admin dashboard counts total scholarships:</p>
+    <pre><code>85: $stats['scholarships'] = $conn-&gt;query("SELECT COUNT(*) FROM scholarships")-&gt;fetchColumn();</code></pre>
+    <p>In <code>public/home.php</code> lines 36-38, duplicate application prevention executes via count:</p>
+    <pre><code>36: $check = $conn-&gt;prepare("SELECT COUNT(*) FROM student_scholarships WHERE student_id = ? AND scholarship_id = ?");
+37: $check-&gt;execute([$_SESSION['user_id'], $scholarshipId]);
+38: $alreadyApplied = $check-&gt;fetchColumn();</code></pre>
+</div>
+
+<hr>
+
+<!-- SECTION 5 -->
+<div id="sec5" class="section-anchor"></div>
+<h2 class="topic-title">5. Relational Joins &amp; Multi-Table Queries (INNER vs LEFT)</h2>
+
+<div class="box box-concept">
+    <div class="box-header">
+        <span class="box-tag">Syllabus Theory</span>
+        <span class="file-badge">INNER JOIN vs LEFT OUTER JOIN</span>
+    </div>
+    <p>Relational joins synthesize attributes from two or more tables linked by foreign keys:</p>
+    <ul>
+        <li><code>INNER JOIN</code>: Returns rows only where an exact matching key exists in <strong>both</strong> tables. Unmatched rows are discarded.</li>
+        <li><code>LEFT JOIN</code> (Left Outer Join): Returns <strong>all</strong> rows from the left table. If no match exists in the right table, columns from the right table evaluate to <code>NULL</code>.</li>
+        <li><strong>The $N - 1$ Join Condition Rule:</strong> To join $N$ relational tables without triggering a Cartesian Product, you must specify at least $N - 1$ distinct join predicates (<code>ON</code> conditions).</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header">
+        <span class="box-tag">Past Paper Alert &amp; Traps</span>
+        <span class="file-badge">AY21 Q4.7 3-Table Join (7 Marks)</span>
+    </div>
+    <pre><code>SELECT items.item_id, items.item_name, suppliers.supplier_name
+FROM items
+INNER JOIN item_supplier ON items.item_id = item_supplier.item_id
+INNER JOIN suppliers ON item_supplier.supplier_id = suppliers.supplier_id
+ORDER BY items.item_name ASC;</code></pre>
+</div>
+
+<div class="box box-codebase">
+    <div class="box-header">
+        <span class="box-tag">Codebase Implementation</span>
+        <span class="file-badge">public/applications.php (Line 41)</span>
+    </div>
+    <p>In our project, line 41 of <code>public/applications.php</code> executes an enterprise <strong>4-table relational join</strong> combining both <code>INNER JOIN</code> and <code>LEFT JOIN</code>:</p>
+    <pre><code>41: $stmt = $conn-&gt;query("SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, st.dob, st.gender, st.parents_income, st.parents_occupation, st.gpa, st.permanent_address, st.nic, st.contact_numbers, s.name AS scholarship_name 
+    FROM student_scholarships ss 
+    INNER JOIN users u ON ss.student_id = u.id 
+    LEFT JOIN students st ON u.id = st.user_id 
+    INNER JOIN scholarships s ON ss.scholarship_id = s.id 
+    ORDER BY ss.applied_at DESC");</code></pre>
+    <p><strong>Viva Code Defense:</strong> "We deliberately used a <code>LEFT JOIN</code> for the <code>students</code> table because if a student submitted an application before fully completing their optional profile details, an <code>INNER JOIN</code> would have completely hidden their application from the Registrar. The <code>LEFT JOIN</code> ensures the application remains visible even with partial profile data!"</p>
+</div>
+
+    </main>
 </body>
 </html>
