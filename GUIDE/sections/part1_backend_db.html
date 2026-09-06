@@ -1,0 +1,1750 @@
+<div class="hero-banner">
+
+    <h1>Part 1: Database Architecture, Backend &amp; Administration Specialist Guide</h1>
+
+    <p>Comprehensive line-by-line deconstruction, relational database modeling (3NF), PDO database abstraction, session lifecycle governance, and administrative RBAC orchestration for the UCSC IS1207 Web Technologies curriculum, examination traps, and viva defense.</p>
+
+</div>
+
+<div class="section-anchor" id="file-schema-sql"></div>
+<h2 class="topic-title" id="file-schema-sql">🗄️ File 1: schema.sql — Relational Database Architecture &amp; 3NF Design</h2>
+<p>The <code>schema.sql</code> script establishes the persistent data layer for the Scholarship Management System. Consisting of 60 lines of ANSI/ISO standard SQL, the script provides a comprehensive demonstration of Third Normal Form (3NF) relational architecture, entity-relationship integrity, surrogate and composite primary keys, cascading foreign key constraints, and dynamic seed data population.</p>
+<h3 class="sub-title">Segment 1.1: Database Creation &amp; Active Catalog Selection (Lines 1–3)</h3>
+<pre><code class="language-sql">CREATE DATABASE IF NOT EXISTS scholarship_db;
+USE scholarship_db;
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">schema.sql (Lines 1–3)</span></div>
+    <p><strong>Line 1: <code>CREATE DATABASE IF NOT EXISTS scholarship_db;</code></strong></p>
+    <ul>
+        <li><strong>Statement Classification:</strong> Data Definition Language (DDL) operation directed to the MySQL storage subsystem to allocate a dedicated database catalog named <code>scholarship_db</code>.</li>
+        <li><strong>Clause <code>IF NOT EXISTS</code>:</strong> Guarantees schema creation idempotency. In relational DBMS engines, attempting to create a pre-existing database triggers fatal exception <code>ERROR 1007 (HY000): Can't create database 'scholarship_db'; database exists</code>. The <code>IF NOT EXISTS</code> guard instructs the query parser to interrogate the system catalog (<code>information_schema.SCHEMATA</code>); if already present, execution continues gracefully with a non-fatal warning.</li>
+        <li><strong>Identifier <code>scholarship_db</code>:</strong> The logical namespace isolating table definitions, indexes, views, and authorization grants from concurrent database applications on the host server.</li>
+    </ul>
+    <p><strong>Line 2: <code>USE scholarship_db;</code></strong></p>
+    <ul>
+        <li><strong>Context Switch:</strong> Modifies the active catalog pointer for the client connection thread (updating the internal <code>DATABASE()</code> session variable). All subsequent unqualified relational identifiers (e.g., <code>users</code> instead of <code>scholarship_db.users</code>) are bound to this database context.</li>
+        <li><strong>Failure Scenario:</strong> Omitting this statement causes subsequent DDL commands to abort with <code>ERROR 1046 (3D000): No database selected</code>.</li>
+    </ul>
+    <p><strong>Line 3: Blank line.</strong> Syntactic whitespace separating top-level schema operations from relation construction.</p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">DDL Foundations &amp; Implicit Commits</span></div>
+    <p><strong>DDL (Data Definition Language) vs. DML (Data Manipulation Language):</strong></p>
+    <ul>
+        <li>In the UCSC IS1207 syllabus, SQL commands are strictly divided into sub-languages. DDL commands (<code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>, <code>TRUNCATE</code>) modify data dictionary metadata. In transactional storage engines (such as MySQL InnoDB), DDL statements trigger an <strong>implicit commit</strong>. Therefore, a <code>CREATE DATABASE</code> or <code>CREATE TABLE</code> operation cannot be rolled back via <code>ROLLBACK</code>.</li>
+        <li>Conversely, DML commands (<code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>, <code>SELECT</code>) manipulate tuples inside existing structures and support ACID rollbacks.</li>
+    </ul>
+    <p><strong>In-Scope vs. Out-of-Scope Compliance:</strong> This segment adheres strictly to ANSI SQL-92 standards supported across MySQL 5.7, 8.0, and MariaDB. Proprietary extensions such as stored procedures, triggers, or custom storage engines are deliberately avoided to maintain syllabus alignment.</p>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Past Paper Traps (2018–2023)</span></div>
+    <ul>
+        <li><strong>The Missing <code>USE</code> Statement Trap:</strong> In practical and written exams, students are frequently asked to construct a database followed by several tables. Omitting <code>USE database_name;</code> immediately invalidates subsequent table creation scripts with <code>ERROR 1046: No database selected</code>, leading to substantial deductions.</li>
+        <li><strong>Linux Case-Sensitivity Warning:</strong> On Linux servers where MySQL system variable <code>lower_case_table_names = 0</code>, database names are case-sensitive because they correspond directly to directory names on the ext4 file system. Running <code>USE Scholarship_DB;</code> on a database created as <code>scholarship_db</code> will fail with <code>ERROR 1049: Unknown database</code>.</li>
+        <li><strong>Missing Semicolon Delimiters:</strong> The MySQL CLI interprets input as a single streaming statement until encountering a semicolon (<code>;</code>). Omission of semicolons cascades syntax errors across all following blocks.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why is <code>IF NOT EXISTS</code> considered a best practice in migration scripts?</strong><br>
+    <em>Model Answer:</em> It provides idempotency. Idempotent scripts can be re-run safely multiple times during CI/CD deployments or automated environment setup without throwing fatal schema-creation collisions.</p>
+    
+    <p><strong>Viva Q2: Can a <code>CREATE DATABASE</code> statement be reversed with a transaction <code>ROLLBACK</code>?</strong><br>
+    <em>Model Answer:</em> No. In MySQL and standard relational engines, DDL operations execute an implicit commit, immediately updating the internal data dictionary and ending any active transaction block.</p>
+
+    <p><strong>Viva Q3: What is the underlying mechanism of the <code>USE</code> command?</strong><br>
+    <em>Model Answer:</em> It updates the connection thread state to treat the specified catalog as the default qualifier, resolving all subsequent table and index names against that schema without requiring explicit dot-notation prefixes.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: International Unicode Configuration</strong></p>
+        <p><em>Examiner Prompt:</em> "Modify Line 1 to explicitly enforce UTF-8 4-byte encoding and Sri Lankan Unicode collation so that Sinhala and Tamil student names are preserved correctly at the schema level."</p>
+        <p><strong>Before (schema.sql line 1):</strong></p>
+        <pre><code class="language-sql">CREATE DATABASE IF NOT EXISTS scholarship_db;</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-sql">CREATE DATABASE IF NOT EXISTS scholarship_db
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;</code></pre>
+        <p><em>Technical Explanation:</em> Default MySQL <code>latin1</code> or legacy 3-byte <code>utf8</code> replaces complex Sinhala/Tamil glyphs with question marks (<code>???</code>). Specifying <code>CHARACTER SET utf8mb4</code> allocates up to 4 bytes per codepoint, and <code>COLLATE utf8mb4_unicode_ci</code> enables linguistically accurate, case-insensitive sorting and comparisons.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 1.2: The Core Authentication Entity — users Table (Lines 4–12)</h3>
+<pre><code class="language-sql">CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT &#x27;student&#x27;,
+    email VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">schema.sql (Lines 4–12)</span></div>
+    <p><strong>Line 4: <code>CREATE TABLE IF NOT EXISTS users (</code></strong> Table declaration for the core authentication entity.</p>
+    <p><strong>Line 5: <code>id INT AUTO_INCREMENT PRIMARY KEY,</code></strong></p>
+    <ul>
+        <li><code>id</code>: Surrogate primary key for the relation.</li>
+        <li><code>INT</code>: 4-byte signed integer with a domain ranging from $-2,147,483,648$ to $+2,147,483,647$ ($2^{31}-1$).</li>
+        <li><code>AUTO_INCREMENT</code>: Engine-managed sequence generator that automatically yields monotonically increasing positive integers ($1, 2, 3, ...$) for new tuples.</li>
+        <li><code>PRIMARY KEY</code>: Enforces the Entity Integrity Constraint. In InnoDB, the primary key forms the clustered index, mandates non-nullability (<code>NOT NULL</code>), and guarantees global tuple uniqueness.</li>
+    </ul>
+    <p><strong>Line 6: <code>username VARCHAR(50) UNIQUE NOT NULL,</code></strong></p>
+    <ul>
+        <li><code>VARCHAR(50)</code>: Variable-length string holding up to 50 characters. Dynamic memory allocation minimizes storage overhead.</li>
+        <li><code>UNIQUE</code>: Secondary candidate key constraint. Creates a distinct B-Tree index preventing duplicate username registrations.</li>
+        <li><code>NOT NULL</code>: Prohibits null domain values.</li>
+    </ul>
+    <p><strong>Line 7: <code>password VARCHAR(255) NOT NULL,</code></strong></p>
+    <ul>
+        <li>Allocates 255 characters for credential storage. Sized specifically to store cryptographic password hashes (e.g., standard Bcrypt hashes from PHP <code>password_hash()</code> produce 60-character strings, while Argon2id produces up to 96 characters).</li>
+    </ul>
+    <p><strong>Line 8: <code>role VARCHAR(20) NOT NULL DEFAULT 'student',</code></strong></p>
+    <ul>
+        <li>Role-Based Access Control (RBAC) discriminator. Accepts roles <code>'admin'</code>, <code>'student'</code>, and <code>'registrar'</code>. <code>DEFAULT 'student'</code> enforces the principle of least privilege.</li>
+    </ul>
+    <p><strong>Line 9: <code>email VARCHAR(100),</code></strong> Optional contact email. Defaults to <code>NULL</code> because <code>NOT NULL</code> is omitted.</p>
+    <p><strong>Line 10: <code>created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP</code></strong> Temporal audit attribute automatically populated by the server clock at insertion.</p>
+    <p><strong>Lines 11–12: <code>);</code> and blank line.</strong></p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">Relational Keys &amp; 1NF Principles</span></div>
+    <p><strong>Relational Key Classification:</strong></p>
+    <ul>
+        <li><strong>Super Key:</strong> Any attribute set uniquely identifying a tuple: <code>{id}</code>, <code>{username}</code>, <code>{id, email}</code>, <code>{username, role}</code>.</li>
+        <li><strong>Candidate Key:</strong> A minimal super key (no proper subset is a super key). Here, <code>id</code> and <code>username</code> are both candidate keys.</li>
+        <li><strong>Primary Key:</strong> The chosen candidate key (<code>id</code>). A surrogate integer key is chosen over <code>username</code> because fixed 4-byte integers produce compact B-Tree nodes and faster join evaluations.</li>
+        <li><strong>Alternate Key:</strong> <code>username</code> (the unchosen candidate key enforced via <code>UNIQUE</code>).</li>
+    </ul>
+    <p><strong>First Normal Form (1NF) Compliance:</strong> All attributes contain strictly atomic, scalar values. No repeating groups or multivalued arrays exist.</p>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Past Paper Pitfalls (2019, 2021)</span></div>
+    <ul>
+        <li><strong>Password Truncation Vulnerability:</strong> A classic UCSC exam question: <em>"A developer declares <code>password VARCHAR(20)</code>. Why does secure login fail when integrating PHP <code>password_hash()</code>?"</em> Bcrypt hashes are exactly 60 characters. A <code>VARCHAR(20)</code> field silently truncates the hash to 20 characters! On subsequent verification, <code>password_verify()</code> fails every time, locking all users out.</li>
+        <li><strong>CHAR vs. VARCHAR Distinction:</strong> <code>CHAR(n)</code> allocates fixed disk space with right-padded spaces. <code>VARCHAR(n)</code> dynamically stores actual character bytes plus a 1-byte length prefix.</li>
+        <li><strong>Multiple PRIMARY KEY Syntax Error:</strong> Attempting to write <code>id INT PRIMARY KEY, username VARCHAR(50) PRIMARY KEY</code> triggers a fatal parser error. Only one primary key constraint can be defined per relation.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why did you choose an auto-increment integer ID instead of using <code>username</code> as the primary key?</strong><br>
+    <em>Model Answer:</em> While <code>username</code> is a valid natural key, an integer surrogate key provides superior relational performance. Integer comparisons in foreign key joins take 4 bytes per comparison, whereas string comparisons require variable-length character comparisons and larger B-Tree index memory footprints.</p>
+
+    <p><strong>Viva Q2: What is the difference between candidate keys and super keys in this table?</strong><br>
+    <em>Model Answer:</em> A super key is any attribute combination that uniquely identifies a row. A candidate key is a minimal super key containing zero extraneous attributes. Here, both <code>id</code> and <code>username</code> are candidate keys.</p>
+
+    <p><strong>Viva Q3: What happens if an INSERT statement omits values for <code>role</code> and <code>created_at</code>?</strong><br>
+    <em>Model Answer:</em> The MySQL storage engine automatically applies the default constraints: <code>role</code> is populated with <code>'student'</code> and <code>created_at</code> receives the current server timestamp via <code>CURRENT_TIMESTAMP</code>.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Account Deactivation State</strong></p>
+        <p><em>Examiner Prompt:</em> "Add a column to allow administrative suspension of user accounts without deleting their historical records."</p>
+        <p><strong>Before (schema.sql lines 8–10):</strong></p>
+        <pre><code class="language-sql">    role VARCHAR(20) NOT NULL DEFAULT 'student',
+    email VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-sql">    role VARCHAR(20) NOT NULL DEFAULT 'student',
+    email VARCHAR(100),
+    is_active TINYINT(1) NOT NULL DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP</code></pre>
+        <p><em>Technical Explanation:</em> <code>is_active TINYINT(1) DEFAULT 1</code> enables soft deactivation. Login queries can then check <code>WHERE username = ? AND is_active = 1</code>.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 1.3: Extended Student Profile — students Table &amp; 1:1 Referential Integrity (Lines 13–27)</h3>
+<pre><code class="language-sql">CREATE TABLE IF NOT EXISTS students (
+    user_id INT PRIMARY KEY,
+    full_name VARCHAR(150),
+    name_with_initials VARCHAR(100),
+    dob DATE,
+    gender VARCHAR(10),
+    parents_income FLOAT,
+    parents_occupation VARCHAR(150),
+    gpa FLOAT,
+    permanent_address TEXT,
+    nic VARCHAR(20),
+    contact_numbers VARCHAR(50),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">schema.sql (Lines 13–27)</span></div>
+    <p><strong>Line 13: <code>CREATE TABLE IF NOT EXISTS students (</code></strong> Table declaration for extended student biographical and academic metrics.</p>
+    <p><strong>Line 14: <code>user_id INT PRIMARY KEY,</code></strong></p>
+    <ul>
+        <li><strong>Dual-Role Architecture:</strong> Serves simultaneously as the table's <strong>Primary Key</strong> and the child side of a <strong>Foreign Key</strong>.</li>
+        <li>Because <code>user_id</code> is the primary key, uniqueness is strictly enforced. A user can possess at most ONE record in <code>students</code>, establishing a strict <strong>One-to-One (1:1)</strong> or <strong>One-to-Zero-or-One (1:0..1)</strong> relational cardinality.</li>
+    </ul>
+    <p><strong>Lines 15–24: Domain Attributes:</strong></p>
+    <ul>
+        <li><code>full_name VARCHAR(150), name_with_initials VARCHAR(100)</code>: Standard academic naming attributes.</li>
+        <li><code>dob DATE</code>: Date of birth stored in ISO 8601 format (<code>YYYY-MM-DD</code>). Consumes 3 bytes of disk storage.</li>
+        <li><code>gender VARCHAR(10)</code>: Categorical gender string (e.g., <code>'Male'</code>, <code>'Female'</code>).</li>
+        <li><code>parents_income FLOAT, gpa FLOAT</code>: Single-precision floating point attributes for monetary household income and academic GPA (0.00 to 4.00).</li>
+        <li><code>parents_occupation VARCHAR(150)</code>: Parent occupational descriptor.</li>
+        <li><code>permanent_address TEXT</code>: Variable-length LOB string holding up to 65,535 bytes of residential address text.</li>
+        <li><code>nic VARCHAR(20)</code>: Sri Lankan National Identity Card number.</li>
+        <li><code>contact_numbers VARCHAR(50)</code>: Telephone contact number string.</li>
+    </ul>
+    <p><strong>Line 25: <code>FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE</code></strong></p>
+    <ul>
+        <li><strong>Referential Integrity Constraint:</strong> Validates that every <code>user_id</code> corresponds to an existing <code>id</code> in <code>users</code>.</li>
+        <li><strong>Referential Action <code>ON DELETE CASCADE</code>:</strong> If a record in <code>users</code> is deleted, the database engine automatically cascades the deletion to remove the associated row in <code>students</code>, preventing orphan records.</li>
+    </ul>
+    <p><strong>Lines 26–27: <code>);</code> and blank line.</strong></p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">3NF Normalization &amp; Specialization/Generalization</span></div>
+    <p><strong>Why Decompose <code>users</code> and <code>students</code>? (Third Normal Form):</strong></p>
+    <ul>
+        <li>In this institutional system, users belong to different roles: Administrators, Registrars, and Students.</li>
+        <li>If student-specific attributes (<code>gpa</code>, <code>dob</code>, <code>parents_income</code>) were combined into the <code>users</code> table, every Administrator and Registrar record would contain NULL values across all these columns, causing substantial storage waste and null-attribute anomalies.</li>
+        <li>By modeling <code>students</code> as an extended entity (Specialization/Generalization), <strong>3NF</strong> is cleanly satisfied. Attributes that apply only to student profiles are isolated in their own relation.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Foreign Key Constraints &amp; Type Matching</span></div>
+    <ul>
+        <li><strong>Foreign Key Type Mismatch:</strong> The child column <code>students.user_id</code> MUST exactly match the parent column <code>users.id</code> in data type, width, and sign. If <code>users.id</code> is signed <code>INT</code> while <code>students.user_id</code> is declared as <code>INT UNSIGNED</code> or <code>BIGINT</code>, MySQL rejects the table with <code>ERROR 1215 (HY000): Cannot add foreign key constraint</code>.</li>
+        <li><strong>Missing <code>ON DELETE CASCADE</code>:</strong> Omitting the cascading action defaults to <code>RESTRICT</code>. In this scenario, running <code>DELETE FROM users WHERE id = 2;</code> fails with <code>ERROR 1451: Cannot delete or update a parent row: a foreign key constraint fails</code> because the child record in <code>students</code> blocks the deletion.</li>
+        <li><strong>Floating-Point Precision Trap:</strong> In past papers, examiners frequently highlight that monetary values should ideally use <code>DECIMAL(10,2)</code> rather than <code>FLOAT</code> to avoid IEEE 754 binary rounding inaccuracies.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: How does this table enforce a 1:1 relationship rather than a 1:N relationship?</strong><br>
+    <em>Model Answer:</em> In <code>students</code>, <code>user_id</code> is declared as the <code>PRIMARY KEY</code>. Since primary keys must be strictly unique, any <code>user_id</code> can appear at most once in <code>students</code>, guaranteeing a 1:1 cardinality with <code>users</code>.</p>
+
+    <p><strong>Viva Q2: What happens if an admin account is deleted from <code>users</code>? Does anything delete from <code>students</code>?</strong><br>
+    <em>Model Answer:</em> The MySQL engine searches the <code>students</code> table for a matching <code>user_id</code>. Since admin accounts do not have corresponding profile records in <code>students</code>, no rows are affected in <code>students</code>, and the deletion in <code>users</code> completes cleanly.</p>
+
+    <p><strong>Viva Q3: What is the difference between <code>ON DELETE CASCADE</code> and <code>ON DELETE SET NULL</code>?</strong><br>
+    <em>Model Answer:</em> <code>CASCADE</code> completely deletes the dependent child row. <code>SET NULL</code> retains the child row but updates the foreign key column to <code>NULL</code> (which is impossible here because <code>user_id</code> is the primary key and cannot accept nulls).</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: GPA Range Constraint</strong></p>
+        <p><em>Examiner Prompt:</em> "Add a SQL table constraint to Line 21 ensuring GPA values are strictly between 0.00 and 4.00."</p>
+        <p><strong>Before (schema.sql line 21):</strong></p>
+        <pre><code class="language-sql">    gpa FLOAT,</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-sql">    gpa FLOAT CHECK (gpa >= 0.00 AND gpa <= 4.00),</code></pre>
+        <p><em>Technical Explanation:</em> The ANSI SQL <code>CHECK</code> constraint validates domain integrity at the database engine level. In MySQL 8.0+, any insertion or update with GPA outside $[0.00, 4.00]$ is rejected with <code>Error 3819: Check constraint is violated</code>.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 1.4: Scholarship Master Catalog Entity — scholarships Table (Lines 28–35)</h3>
+<pre><code class="language-sql">CREATE TABLE IF NOT EXISTS scholarships (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    description TEXT,
+    deadline DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">schema.sql (Lines 28–35)</span></div>
+    <p><strong>Line 28: <code>CREATE TABLE IF NOT EXISTS scholarships (</code></strong> Table declaration for the scholarship master catalog entity.</p>
+    <p><strong>Line 29: <code>id INT AUTO_INCREMENT PRIMARY KEY,</code></strong> Surrogate primary key generating unique numeric IDs for each scholarship program.</p>
+    <p><strong>Line 30: <code>name VARCHAR(150) NOT NULL,</code></strong> Mandatory title of the scholarship award.</p>
+    <p><strong>Line 31: <code>description TEXT,</code></strong> Detailed text describing eligibility rules, prerequisites, and terms.</p>
+    <p><strong>Line 32: <code>deadline DATE,</code></strong> Application cutoff date in standard <code>YYYY-MM-DD</code> format.</p>
+    <p><strong>Line 33: <code>created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP</code></strong> Audit timestamp automatically generated upon record creation.</p>
+    <p><strong>Lines 34–35: <code>);</code> and blank line.</strong></p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">Master Entities &amp; BCNF Conformance</span></div>
+    <p><strong>Master Entity Design:</strong> The <code>scholarships</code> table acts as an independent master relation. It has zero foreign key dependencies on users or students. Its functional dependency set $F = {id ightarrow {name, description, deadline, created_at}}$ satisfies Boyce-Codd Normal Form (BCNF) because the determinant <code>id</code> is a superkey.</p>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Date Formatting &amp; Lexical Traps</span></div>
+    <ul>
+        <li><strong>Storing Dates in VARCHAR Fields:</strong> A notorious past-paper trap involves storing dates as <code>VARCHAR(10)</code> (e.g., <code>'25/12/2026'</code>). When evaluating queries with <code>WHERE deadline &gt; '01/01/2026'</code>, string lexical sorting causes incorrect comparisons! Using SQL native <code>DATE</code> guarantees accurate chronological sorting and compatibility with functions like <code>CURRENT_DATE</code> and <code>DATEDIFF()</code>.</li>
+        <li><strong>Missing <code>NOT NULL</code> on Mandatory Descriptors:</strong> In past paper marking schemes, omitting <code>NOT NULL</code> on primary business descriptors (such as <code>name</code>) results in lost marks because a scholarship entity cannot meaningfully exist without a title.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why is <code>deadline</code> typed as <code>DATE</code> instead of <code>VARCHAR</code>?</strong><br>
+    <em>Model Answer:</em> <code>DATE</code> enforces calendar integrity (preventing invalid dates like 2026-02-30), consumes only 3 bytes of disk storage, and enables direct temporal comparisons (e.g., <code>WHERE deadline >= CURRENT_DATE</code>).</p>
+
+    <p><strong>Viva Q2: How does <code>scholarships</code> link to applicants in this relational architecture?</strong><br>
+    <em>Model Answer:</em> It does not link directly to <code>students</code> or <code>users</code>. Because students and scholarships form a Many-to-Many relationship, direct foreign keys in either table would violate 1NF (repeating groups) or 2NF (partial dependencies). The connection is handled via the associative table <code>student_scholarships</code>.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Fixed-Point Grant Allocation Column</strong></p>
+        <p><em>Examiner Prompt:</em> "Add a column to represent the monetary value of each scholarship in Sri Lankan Rupees, supporting amounts up to 99,999,999.99."</p>
+        <p><strong>Before (schema.sql line 32):</strong></p>
+        <pre><code class="language-sql">    deadline DATE,</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-sql">    amount DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    deadline DATE,</code></pre>
+        <p><em>Technical Explanation:</em> <code>DECIMAL(10, 2)</code> stores exact base-10 representations, allocating 10 total digits with 2 decimal places, completely eliminating binary rounding issues associated with <code>FLOAT</code>.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 1.5: Associative Junction Entity — student_scholarships Table (Lines 36–48)</h3>
+<pre><code class="language-sql">CREATE TABLE IF NOT EXISTS student_scholarships (
+    student_id INT NOT NULL,
+    scholarship_id INT NOT NULL,
+    purpose VARCHAR(255),
+    description TEXT,
+    testimonial_checked INT DEFAULT 0,
+    status VARCHAR(20) DEFAULT &#x27;pending&#x27;,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (student_id, scholarship_id),
+    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (scholarship_id) REFERENCES scholarships(id) ON DELETE CASCADE
+);
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">schema.sql (Lines 36–48)</span></div>
+    <p><strong>Line 36: <code>CREATE TABLE IF NOT EXISTS student_scholarships (</code></strong> Junction table bridging applicants and scholarship grants.</p>
+    <p><strong>Lines 37–38: <code>student_id INT NOT NULL, scholarship_id INT NOT NULL,</code></strong> Foreign key attributes referencing the parent entities.</p>
+    <p><strong>Lines 39–43: Application Metadata Attributes:</strong></p>
+    <ul>
+        <li><code>purpose VARCHAR(255)</code>: Concise purpose statement for the application.</li>
+        <li><code>description TEXT</code>: Full justification or personal essay submitted by the student.</li>
+        <li><code>testimonial_checked INT DEFAULT 0</code>: Verification flag (0 = unverified, 1 = verified by administration).</li>
+        <li><code>status VARCHAR(20) DEFAULT 'pending'</code>: Workflow state (<code>'pending'</code>, <code>'approved'</code>, <code>'rejected'</code>).</li>
+        <li><code>applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP</code>: Submission timestamp.</li>
+    </ul>
+    <p><strong>Line 44: <code>PRIMARY KEY (student_id, scholarship_id),</code></strong></p>
+    <ul>
+        <li><strong>Composite Primary Key:</strong> Combines both foreign keys into a composite identifier. Guarantees that a student cannot submit duplicate applications for the same scholarship.</li>
+    </ul>
+    <p><strong>Lines 45–46: Dual Cascading Foreign Key Constraints:</strong></p>
+    <ul>
+        <li><code>FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE</code>: Ties the application to the user account; deleting the user automatically removes all their applications.</li>
+        <li><code>FOREIGN KEY (scholarship_id) REFERENCES scholarships(id) ON DELETE CASCADE</code>: Purges all associated applications if a scholarship is deleted from the catalog.</li>
+    </ul>
+    <p><strong>Lines 47–48: <code>);</code> and blank line.</strong></p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">M:N Resolution &amp; 2NF Verification</span></div>
+    <p><strong>Decomposition of Many-to-Many ($M:N$) Relationships:</strong></p>
+    <ul>
+        <li>In relational database theory, an $M:N$ relationship cannot be modeled directly with foreign keys in either table without violating 1NF (repeating groups) or introducing partial dependencies.</li>
+        <li>A bridge/junction table decomposes the $M:N$ relationship into two clean <strong>$1:N$</strong> relationships:
+            <br><code>users (1) &harr; (N) student_scholarships (N) &harr; (1) scholarships</code>.</li>
+    </ul>
+    <p><strong>2NF (Second Normal Form) Proof:</strong></p>
+    <ul>
+        <li>Candidate Key = Primary Key = <code>{student_id, scholarship_id}</code>.</li>
+        <li>Non-key attributes: <code>{purpose, description, testimonial_checked, status, applied_at}</code>.</li>
+        <li>Each non-key attribute describes the <em>specific application instance</em>. The <code>status</code> or <code>applied_at</code> timestamp depends on BOTH <em>who applied</em> (<code>student_id</code>) AND <em>what they applied for</em> (<code>scholarship_id</code>). Zero partial dependencies exist, verifying 2NF compliance.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Composite Key Syntax &amp; Partial Dependencies</span></div>
+    <ul>
+        <li><strong>Multiple PRIMARY KEY Clauses Syntax Error:</strong> Writing:
+        <br><code>student_id INT PRIMARY KEY, scholarship_id INT PRIMARY KEY</code>
+        <br>triggers fatal syntax error <code>ERROR 1068 (42000): Multiple primary key defined</code>. To define a composite primary key, the table-level constraint syntax <code>PRIMARY KEY (col1, col2)</code> is strictly required.</li>
+        <li><strong>Partial Dependency Trap:</strong> If an author adds <code>scholarship_name VARCHAR(150)</code> to this table, it creates a severe 2NF violation! <code>scholarship_name</code> depends solely on <code>scholarship_id</code> (a partial dependency). Examiners look for this specific error when grading normalization problems.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why did you choose a composite primary key instead of adding an auto-increment <code>id</code> column?</strong><br>
+    <em>Model Answer:</em> The composite primary key <code>(student_id, scholarship_id)</code> naturally enforces the business requirement that a student cannot submit duplicate applications for the same award at the DBMS engine level, while simultaneously indexing the combination for rapid lookups.</p>
+
+    <p><strong>Viva Q2: What happens if an administrator deletes a scholarship record from the system?</strong><br>
+    <em>Model Answer:</em> Due to <code>ON DELETE CASCADE</code> on line 46, all rows in <code>student_scholarships</code> referencing that <code>scholarship_id</code> are automatically and atomically purged by MySQL.</p>
+
+    <p><strong>Viva Q3: Prove that <code>student_scholarships</code> satisfies Second Normal Form (2NF).</strong><br>
+    <em>Model Answer:</em> 2NF requires 1NF and the absence of partial dependencies. All non-key attributes (such as <code>status</code> and <code>applied_at</code>) functionally depend on the complete composite primary key <code>{student_id, scholarship_id}</code>, not on any single sub-component.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Multi-Year Re-application Support</strong></p>
+        <p><em>Examiner Prompt:</em> "Currently, a student can apply to a scholarship only once in their lifetime. Modify the schema so a student can re-apply to the same scholarship in different academic years (e.g., '2025/2026')."</p>
+        <p><strong>Before (schema.sql lines 37–44):</strong></p>
+        <pre><code class="language-sql">    student_id INT NOT NULL,
+    scholarship_id INT NOT NULL,
+    ...
+    PRIMARY KEY (student_id, scholarship_id),</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-sql">    student_id INT NOT NULL,
+    scholarship_id INT NOT NULL,
+    academic_year VARCHAR(9) NOT NULL, -- e.g., '2025/2026'
+    ...
+    PRIMARY KEY (student_id, scholarship_id, academic_year),</code></pre>
+        <p><em>Technical Explanation:</em> Expanding the composite primary key to a 3-column composite key <code>(student_id, scholarship_id, academic_year)</code> allows the same student and scholarship combination to recur in subsequent academic years while still blocking duplicate submissions within the same year.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 1.6: DML Seed Data Population &amp; Dynamic Subquery Resolution (Lines 49–60)</h3>
+<pre><code class="language-sql">INSERT INTO users (username, password, role, email) VALUES
+(&#x27;admin&#x27;, &#x27;admin&#x27;, &#x27;admin&#x27;, &#x27;admin@example.com&#x27;),
+(&#x27;ucsc&#x27;, &#x27;ucsc&#x27;, &#x27;student&#x27;, &#x27;student@example.com&#x27;),
+(&#x27;registrar&#x27;, &#x27;registrar&#x27;, &#x27;registrar&#x27;, &#x27;registrar@example.com&#x27;);
+
+INSERT INTO students (user_id, full_name, name_with_initials, dob, gender, parents_income, parents_occupation, gpa, permanent_address, nic, contact_numbers) VALUES
+((SELECT id FROM users WHERE username=&#x27;ucsc&#x27;), &#x27;UCSC Student&#x27;, &#x27;U. Student&#x27;, &#x27;2000-01-01&#x27;, &#x27;Male&#x27;, 50000, &#x27;Teacher&#x27;, 3.5, &#x27;Colombo&#x27;, &#x27;123456789012&#x27;, &#x27;0771234567&#x27;);
+
+INSERT INTO scholarships (name, description, deadline) VALUES
+(&#x27;Academic Excellence Award&#x27;, &#x27;For students with a GPA of 3.5 or above. Covers tuition fees for one academic year.&#x27;, &#x27;2026-12-31&#x27;),
+(&#x27;Financial Assistance Grant&#x27;, &#x27;For students from low-income families. Requires proof of household income and a Grama Niladhari testimonial.&#x27;, &#x27;2026-12-31&#x27;),
+(&#x27;Sports Achievement Scholarship&#x27;, &#x27;For students who have represented the university or national teams in sports.&#x27;, &#x27;2026-12-31&#x27;);
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">schema.sql (Lines 49–60)</span></div>
+    <p><strong>Lines 49–52: Multi-Row <code>INSERT INTO users</code></strong></p>
+    <ul>
+        <li>Bulk inserts baseline user accounts for three distinct administrative and student roles:
+            <ol>
+                <li><code>admin</code>: Administrator account with role <code>'admin'</code>.</li>
+                <li><code>ucsc</code>: Student account with role <code>'student'</code>.</li>
+                <li><code>registrar</code>: Staff account with role <code>'registrar'</code>.</li>
+            </ol>
+        </li>
+        <li>Multi-row syntax executes as a single transactional statement, minimizing I/O overhead.</li>
+    </ul>
+    <p><strong>Lines 54–55: Dynamic Subquery Insertion into <code>students</code></strong></p>
+    <ul>
+        <li><code>(SELECT id FROM users WHERE username='ucsc')</code>: A scalar subquery that dynamically resolves the generated auto-increment primary key for user <code>'ucsc'</code>, completely avoiding hardcoded foreign key values.</li>
+        <li>Seeds complete student bio-data: Full name ('UCSC Student'), initials, birthdate ('2000-01-01'), gender, parental income (50,000 LKR), occupation, GPA (3.50), Colombo address, NIC, and mobile contact number.</li>
+    </ul>
+    <p><strong>Lines 57–60: Multi-Row <code>INSERT INTO scholarships</code></strong></p>
+    <ul>
+        <li>Populates three realistic university scholarship offerings with criteria and deadlines set to <code>'2026-12-31'</code>:
+            <ol>
+                <li><strong>Academic Excellence Award:</strong> For students with GPA &ge; 3.5.</li>
+                <li><strong>Financial Assistance Grant:</strong> Low-income assistance requiring proof of income.</li>
+                <li><strong>Sports Achievement Scholarship:</strong> National/university sports representation.</li>
+            </ol>
+        </li>
+    </ul>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">DML Syntax &amp; Scalar Subqueries</span></div>
+    <p><strong>Scalar Subquery in DML Operations:</strong></p>
+    <ul>
+        <li>A scalar subquery returns exactly one column and one row (a single scalar value).</li>
+        <li>Using scalar subqueries to resolve foreign keys is an essential database practice. It guarantees referential integrity across diverse execution environments where auto-increment counters might start at arbitrary offsets.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Foreign Key Violation on Data Insertion</span></div>
+    <ul>
+        <li><strong>Hardcoding Foreign Keys Trap:</strong> Writing <code>INSERT INTO students (user_id, ...) VALUES (2, ...)</code> fails catastrophically with <code>ERROR 1452: Cannot add or update a child row: a foreign key constraint fails</code> if user ID 2 was not generated. The dynamic subquery approach guarantees success.</li>
+        <li><strong>Insertion Order Dependency:</strong> DML seed scripts MUST respect the dependency DAG (Directed Acyclic Graph) of the relational schema. Parents (<code>users</code>) MUST be inserted before children (<code>students</code>). Inverting this order causes immediate foreign key constraint failures.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why did you use a subquery <code>(SELECT id FROM users WHERE username='ucsc')</code> on line 55?</strong><br>
+    <em>Model Answer:</em> To avoid hardcoding foreign key values. In relational databases, auto-increment sequences can fluctuate between installations. Querying the parent table by its unique candidate key guarantees accurate key resolution and prevents foreign key constraint violations.</p>
+
+    <p><strong>Viva Q2: What would happen if the <code>INSERT INTO students</code> statement was moved before the <code>INSERT INTO users</code> statement?</strong><br>
+    <em>Model Answer:</em> The MySQL engine would reject the query with <code>Error 1452: Cannot add or update a child row: a foreign key constraint fails</code> because referential integrity dictates that child rows cannot reference non-existent parent keys.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Dynamic Application Insertion</strong></p>
+        <p><em>Examiner Prompt:</em> "Write an SQL statement to insert an application record for student 'ucsc' applying for the 'Financial Assistance Grant' using dynamic subqueries for both foreign keys."</p>
+        <p><strong>Solution Code:</strong></p>
+        <pre><code class="language-sql">INSERT INTO student_scholarships 
+(student_id, scholarship_id, purpose, description, status)
+VALUES (
+    (SELECT id FROM users WHERE username = 'ucsc'),
+    (SELECT id FROM scholarships WHERE name = 'Financial Assistance Grant'),
+    'Tuition Support',
+    'Family monthly income below 60,000 LKR. Grama Niladhari certificate attached.',
+    'pending'
+);</code></pre>
+        <p><em>Technical Explanation:</em> Resolves both <code>student_id</code> and <code>scholarship_id</code> through subqueries against their respective natural keys (<code>username</code> and <code>name</code>), completely abstracting internal integer IDs.</p>
+    </div>
+</div>
+
+
+<hr>
+
+<div class="section-anchor" id="file-config-db"></div>
+<h2 class="topic-title" id="file-config-db">🔌 File 2: config/db.php — Database Connectivity &amp; PDO Exception Handling</h2>
+<p>The <code>config/db.php</code> file establishes the persistent data connection layer between the PHP runtime and the MySQL database server. Written in 14 lines of object-oriented PHP using the <strong>PHP Data Objects (PDO)</strong> extension, it centralizes database credentials, instantiates a robust PDO connection handle with strict UTF-8 character encoding, enforces structured exception handling, and sets the default result-set fetching strategy to associative arrays.</p>
+<h3 class="sub-title">Segment 2.1: Configuration Parameters &amp; Credential Definitions (Lines 1–6)</h3>
+<pre><code class="language-php">&lt;?php
+$host = &#x27;localhost&#x27;;
+$dbname = &#x27;scholarship_db&#x27;;
+$user = &#x27;root&#x27;;
+$pass = &#x27;&#x27;;
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">config/db.php (Lines 1–6)</span></div>
+    <p><strong>Line 1: <code>&lt;?php</code></strong></p>
+    <ul>
+        <li>The standard PHP opening tag. Instructs the Zend Engine preprocessor to begin parsing subsequent tokens as PHP server-side instructions rather than streaming them directly to the HTTP output buffer.</li>
+    </ul>
+    <p><strong>Line 2: <code>$host = 'localhost';</code></strong></p>
+    <ul>
+        <li>Initializes the server hostname variable. In a standard local development environment (e.g., Apache/PHP running alongside MySQL on XAMPP, WAMP, or Linux LAMP stacks), <code>'localhost'</code> instructs the networking layer to connect via the local loopback interface (<code>127.0.0.1</code>) or the local UNIX domain socket (<code>/var/run/mysqld/mysqld.sock</code>).</li>
+    </ul>
+    <p><strong>Line 3: <code>$dbname = 'scholarship_db';</code></strong></p>
+    <ul>
+        <li>Specifies the target schema catalog created in <code>schema.sql</code>. All SQL statements executed through this connection handle are bound to this catalog.</li>
+    </ul>
+    <p><strong>Lines 4–5: <code>$user = 'root'; $pass = '';</code></strong></p>
+    <ul>
+        <li>Declares the authentication credentials for the database connection.</li>
+        <li><code>'root'</code>: The default administrative superuser for MySQL installations.</li>
+        <li><code>''</code>: An empty string representing the default password on local development stacks (e.g., vanilla XAMPP).</li>
+    </ul>
+    <p><strong>Line 6: Blank line.</strong> Visual separator between configuration variables and the operational connection logic.</p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">Separation of Concerns &amp; Variable Scope</span></div>
+    <p><strong>Architectural Separation of Concerns:</strong></p>
+    <ul>
+        <li>In multi-page web applications, hardcoding database credentials inside individual presentation or action scripts (such as <code>admin.php</code> or <code>login.php</code>) creates severe maintenance liabilities. If the database host or credentials change, a developer would have to update dozens of disparate files.</li>
+        <li>Centralizing connection settings in <code>config/db.php</code> enables modular inclusion across all entry points via <code>require_once '../config/db.php';</code>.</li>
+    </ul>
+    <p><strong>Scope Compliance:</strong> The script employs simple procedural configuration variables accessible in the script's global scope upon inclusion. It strictly avoids external dependency managers (e.g., Composer) or heavy third-party environment parsing libraries (such as <code>vlucas/phpdotenv</code>) which are out-of-scope for the IS1207 course.</p>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Headers Already Sent Trap</span></div>
+    <ul>
+        <li><strong>The Preceding Whitespace Trap:</strong> If even a single blank space, newline, or UTF-8 Byte Order Mark (BOM) exists <em>before</em> the opening <code>&lt;?php</code> tag on Line 1, the PHP engine immediately initiates HTTP response body streaming. Consequently, any downstream script that includes <code>db.php</code> and later invokes <code>session_start()</code> or <code>header("Location: ...")</code> will fail with the fatal warning:
+        <br><code>Warning: Cannot modify header information - headers already sent by (output started at .../config/db.php:1)</code>.</li>
+        <li><strong>Variable Case-Sensitivity:</strong> In PHP, variable names are case-sensitive! Accessing <code>$Host</code> or <code>$DBNAME</code> will result in <code>Notice: Undefined variable</code>, causing PDO to attempt connecting with empty host or database parameters.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why is it critical to separate database connection configuration into an isolated file?</strong><br>
+    <em>Model Answer:</em> It follows the Single Responsibility Principle and eliminates DRY (Don't Repeat Yourself) violations. Centralizing configuration allows credentials, character encoding, and connection error handling to be modified in one location rather than across dozens of individual scripts.</p>
+
+    <p><strong>Viva Q2: What security risks arise from having <code>$user = 'root'</code> with an empty password in production?</strong><br>
+    <em>Model Answer:</em> Using the unauthenticated root account grants total administrative privileges across all database catalogs on the server. If an SQL injection vulnerability exists in any script, an attacker can read, alter, or drop entire databases. In production, a dedicated MySQL user with least-privilege permissions scoped only to <code>scholarship_db</code> must be configured with a strong password.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Environment Variable Fallback</strong></p>
+        <p><em>Examiner Prompt:</em> "Refactor Lines 2–5 so that credentials can be read dynamically from environment variables (e.g., in cloud environments like Docker or Heroku), falling back to localhost defaults if unset."</p>
+        <p><strong>Before (config/db.php lines 2–5):</strong></p>
+        <pre><code class="language-php">$host = 'localhost';
+$dbname = 'scholarship_db';
+$user = 'root';
+$pass = '';</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-php">$host   = getenv('DB_HOST') ?: 'localhost';
+$dbname = getenv('DB_NAME') ?: 'scholarship_db';
+$user   = getenv('DB_USER') ?: 'root';
+$pass   = getenv('DB_PASS') !== false ? getenv('DB_PASS') : '';</code></pre>
+        <p><em>Technical Explanation:</em> <code>getenv()</code> extracts operating system environment variables. Using the shorthand ternary operator <code>?:</code> provides clean fallback to local defaults when environment variables are undefined.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 2.2: PDO Instantiation, DSN String, Driver Attributes &amp; Exception Handling (Lines 7–14)</h3>
+<pre><code class="language-php">try {
+    $conn = new PDO(&quot;mysql:host=$host;dbname=$dbname;charset=utf8mb4&quot;, $user, $pass);
+    $conn-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $conn-&gt;setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die(&quot;Database connection failed: &quot; . $e-&gt;getMessage());
+}
+?&gt;
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">config/db.php (Lines 7–14)</span></div>
+    <p><strong>Line 7: <code>try {</code></strong> Initiates a structured exception-handling block to intercept runtime failures during connection negotiation.</p>
+    <p><strong>Line 8: <code>$conn = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $user, $pass);</code></strong></p>
+    <ul>
+        <li><strong><code>new PDO(...)</code>:</strong> Instantiates the PHP Data Objects core class. Creates an active database connection handle.</li>
+        <li><strong>DSN (Data Source Name):</strong> The first constructor argument:
+            <ul>
+                <li><code>mysql:</code>: The driver prefix indicating the MySQL database driver.</li>
+                <li><code>host=$host;</code>: Interpolates <code>$host</code> (<code>localhost</code>).</li>
+                <li><code>dbname=$dbname;</code>: Interpolates <code>$dbname</code> (<code>scholarship_db</code>).</li>
+                <li><code>charset=utf8mb4;</code>: Configures the client character set to 4-byte UTF-8, safeguarding against Unicode encoding mismatches and certain multi-byte SQL injection vectors.</li>
+            </ul>
+        </li>
+        <li><strong>Double Quotes Evaluation:</strong> Double quotes allow variable interpolation of <code>$host</code> and <code>$dbname</code> directly inside the string literal.</li>
+        <li><strong><code>$user, $pass</code>:</strong> Credentials passed as the second and third constructor parameters.</li>
+    </ul>
+    <p><strong>Line 9: <code>$conn-&gt;setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);</code></strong></p>
+    <ul>
+        <li>Configures the PDO error handling mode. By default, PDO operates in <code>ERRMODE_SILENT</code> (where errors must be checked manually via <code>errorCode()</code> / <code>errorInfo()</code>).</li>
+        <li>Setting <code>ERRMODE_EXCEPTION</code> instructs PDO to throw a <code>PDOException</code> whenever an SQL error occurs, enabling clean, unified error handling and preventing silent database query failures.</li>
+    </ul>
+    <p><strong>Line 10: <code>$conn-&gt;setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);</code></strong></p>
+    <ul>
+        <li>Defines the default fetching strategy for all subsequent <code>fetch()</code> and <code>fetchAll()</code> calls.</li>
+        <li><code>PDO::FETCH_ASSOC</code> forces result sets to be returned exclusively as associative arrays indexed by column names (e.g., <code>$row['username']</code>). It suppresses redundant numeric zero-based indices (saving memory and eliminating array indexing ambiguities).</li>
+    </ul>
+    <p><strong>Line 11: <code>} catch (PDOException $e) {</code></strong> Intercepts any <code>PDOException</code> instance thrown by the PDO constructor if the database server is offline or authentication fails.</p>
+    <p><strong>Line 12: <code>die("Database connection failed: " . $e-&gt;getMessage());</code></strong></p>
+    <ul>
+        <li>Terminates script execution immediately with an error message. Concatenates the exception message string obtained via <code>$e-&gt;getMessage()</code>.</li>
+    </ul>
+    <p><strong>Line 13: <code>}</code></strong> Closes the catch block.</p>
+    <p><strong>Line 14: <code>?&gt;</code></strong> Closes the PHP block.</p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">PDO vs. MySQLi &amp; Abstraction Advantages</span></div>
+    <p><strong>Database Access APIs in the UCSC IS1207 Syllabus:</strong></p>
+    <ul>
+        <li><strong>Deprecated <code>mysql_*</code>:</strong> The legacy procedural extension (e.g., <code>mysql_connect()</code>) was deprecated in PHP 5.5 and completely removed in PHP 7.0. Using <code>mysql_*</code> in university exams results in zero marks.</li>
+        <li><strong><code>mysqli</code> (MySQL Improved):</strong> Supports procedural and OOP styles, but is restricted exclusively to MySQL/MariaDB databases.</li>
+        <li><strong>PDO (PHP Data Objects):</strong> A database abstraction layer providing a consistent interface across 12+ relational database systems (MySQL, PostgreSQL, SQLite, Oracle). Code written with PDO can transition across different DBMS engines simply by changing the DSN string. Furthermore, PDO provides robust native prepared statement support with parameterized inputs.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Default Fetch Modes &amp; Stack Trace Leaks</span></div>
+    <ul>
+        <li><strong>Default Fetch Mode (<code>FETCH_BOTH</code>):</strong> If Line 10 is omitted, PDO defaults to <code>PDO::FETCH_BOTH</code>. When calling <code>fetchAll()</code>, every tuple contains duplicates: each column is stored twice (once with its string column name and once with a 0-indexed integer). This doubles PHP memory consumption and can corrupt JSON encoders!</li>
+        <li><strong>Production Information Disclosure Trap:</strong> Calling <code>die($e-&gt;getMessage())</code> on Line 12 prints raw exception details to the browser. If the database server password was incorrect, the stack trace might disclose server file paths, usernames, and hostnames to public users. In production, errors should be logged to a secure file while presenting a generic error message to the client.</li>
+        <li><strong>Syntax Error in DSN String:</strong> Forgetting the semicolon separator between DSN components (e.g., <code>"mysql:host=$host dbname=$dbname"</code>) triggers a fatal <code>PDOException: invalid data source name</code>.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why did you choose PDO over <code>mysqli</code> for this project?</strong><br>
+    <em>Model Answer:</em> PDO offers true database abstraction, meaning the application logic is decoupled from MySQL-specific drivers. Additionally, PDO enforces consistent object-oriented error handling via <code>PDOException</code> and provides clean prepared statement bindings with both positional and named parameters.</p>
+
+    <p><strong>Viva Q2: What is the purpose of setting <code>PDO::ATTR_ERRMODE</code> to <code>PDO::ERRMODE_EXCEPTION</code>?</strong><br>
+    <em>Model Answer:</em> By default, PDO operates silently on errors, requiring tedious manual checks after every query. Enabling <code>ERRMODE_EXCEPTION</code> ensures that any syntax error, constraint failure, or connection drop triggers an immediate exception that bubbles up to a central handler.</p>
+
+    <p><strong>Viva Q3: What is <code>charset=utf8mb4</code> in the DSN, and why is it not sufficient to set UTF-8 only in HTML?</strong><br>
+    <em>Model Answer:</em> HTML UTF-8 headers only specify how the browser renders characters. If the MySQL connection encoding is not configured as <code>utf8mb4</code>, multi-byte Unicode characters (such as Sinhala or Tamil script) get corrupted during transmission between PHP and the database.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Disabling Emulated Prepared Statements</strong></p>
+        <p><em>Examiner Prompt:</em> "By default, PDO emulates prepared statements client-side in PHP. Add a configuration attribute to Line 10 to disable emulated prepares, forcing MySQL to perform true server-side statement preparation."</p>
+        <p><strong>Before (config/db.php line 10):</strong></p>
+        <pre><code class="language-php">    $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-php">    $conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+    $conn->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);</code></pre>
+        <p><em>Technical Explanation:</em> Disabling <code>PDO::ATTR_EMULATE_PREPARES</code> guarantees that queries are compiled by the MySQL server before parameters are bound in a separate protocol packet. This prevents complex multi-statement SQL injection attacks and ensures strict database data type enforcement.</p>
+    </div>
+</div>
+
+
+<hr>
+
+<div class="section-anchor" id="file-index-php"></div>
+<h2 class="topic-title" id="file-index-php">🚀 File 3: index.php — Front Controller &amp; HTTP Redirection Architecture</h2>
+<p>The root <code>index.php</code> file serves as the system entry point. Within 4 lines of clean PHP, it implements front-controller routing by issuing an immediate HTTP 302 redirection header, transferring the client browser from the project root directory directly to the public authentication gateway (<code>public/login.php</code>), followed by immediate process termination.</p>
+<h3 class="sub-title">Segment 3.1: HTTP 302 Redirection &amp; Process Termination (Lines 1–4)</h3>
+<pre><code class="language-php">&lt;?php
+header(&quot;Location: public/login.php&quot;);
+exit();
+?&gt;
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">index.php (Lines 1–4)</span></div>
+    <p><strong>Line 1: <code>&lt;?php</code></strong> PHP script delimiter.</p>
+    <p><strong>Line 2: <code>header("Location: public/login.php");</code></strong></p>
+    <ul>
+        <li><strong>Function Call:</strong> <code>header(string $header, bool $replace = true, int $response_code = 0)</code> sends a raw HTTP response header to the client browser.</li>
+        <li><strong>Directive <code>Location: public/login.php</code>:</strong> Instructs the user agent (web browser) to immediately issue a secondary HTTP request to the relative target URI <code>public/login.php</code>.</li>
+        <li><strong>Default HTTP Status Code:</strong> When a <code>Location:</code> header is emitted without an explicit response code, PHP automatically defaults to emitting <strong>HTTP Status Code 302 Found</strong> (Temporary Redirect).</li>
+    </ul>
+    <p><strong>Line 3: <code>exit();</code></strong></p>
+    <ul>
+        <li><strong>Core Language Construct:</strong> Immediately halts execution of the PHP Zend Engine. Flushes the output buffer and terminates script interpretation.</li>
+        <li><strong>Security Rationale:</strong> Without <code>exit()</code>, PHP continues to execute any subsequent code lines even after sending the redirection header. While an ordinary browser follows the redirect, automated tools (such as <code>curl</code>, search engine crawlers, or malicious penetration testers) can ignore the header and read the output of subsequent code.</li>
+    </ul>
+    <p><strong>Line 4: <code>?&gt;</code></strong> PHP closing delimiter.</p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">HTTP Redirection &amp; Front Controller Pattern</span></div>
+    <p><strong>HTTP Redirection Mechanics (301 vs. 302):</strong></p>
+    <ul>
+        <li><strong>HTTP 302 Found (Temporary Redirect):</strong> The browser does not cache the redirect. Subsequent requests to <code>/</code> will always revisit <code>index.php</code> and execute this script. This is ideal for dynamic routing and session-dependent gateways.</li>
+        <li><strong>HTTP 301 Moved Permanently:</strong> Instructs the browser and search engines to cache the redirect indefinitely. Browsers will automatically skip visiting <code>index.php</code> on future requests and jump straight to the target URL. 301 redirects are inappropriate for authentication portals where destination routing changes based on user session states.</li>
+    </ul>
+    <p><strong>Front Controller Architecture:</strong> In standard Web Engineering, directing initial requests to an entry controller prevents users from browsing directory listings if Apache <code>mod_autoindex</code> is active, routing visitors directly into the application flow.</p>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">The Cardinal "Missing exit()" Past Paper Trap</span></div>
+    <ul>
+        <li><strong>The Missing <code>exit()</code> / <code>die()</code> Trap:</strong> This is one of the most heavily tested questions in UCSC IS1207 examinations. Past papers provide a code snippet where <code>header("Location: ...")</code> is called, followed by sensitive database queries, without an <code>exit();</code> call.
+        <br><em>Question:</em> "What will happen if line 3 is omitted?"
+        <br><em>Answer:</em> The server sends the 302 header to the client, but <strong>the PHP interpreter continues executing all subsequent lines of code on the server</strong>! An attacker can bypass the redirect using command-line HTTP clients (e.g., <code>curl -s http://localhost/admin.php</code>) and receive sensitive administrative data. Always pair <code>header("Location: ...")</code> with <code>exit();</code>.</li>
+        <li><strong>Headers Already Sent Error:</strong> If any output (HTML tags, spaces, or BOM marks) is sent before <code>header()</code>, the HTTP header phase is finished and PHP throws a fatal warning: <code>Cannot modify header information - headers already sent</code>.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why must <code>exit();</code> or <code>die();</code> always follow a <code>header("Location: ...")</code> call?</strong><br>
+    <em>Model Answer:</em> The <code>header()</code> function only writes an HTTP header to the response buffer; it does not stop script execution. Without <code>exit()</code>, the server continues processing the rest of the script, which could lead to unwanted code execution or data leakage.</p>
+
+    <p><strong>Viva Q2: What default HTTP status code does PHP issue when you provide a <code>Location</code> header?</strong><br>
+    <em>Model Answer:</em> It emits an HTTP 302 Found (Temporary Redirect) status code unless an explicit response code (e.g., 301 or 303) is passed as the third parameter to <code>header()</code>.</p>
+
+    <p><strong>Viva Q3: What happens if an <code>echo</code> statement is placed before line 2?</strong><br>
+    <em>Model Answer:</em> The HTTP specification mandates that headers must precede the message body. An <code>echo</code> statement triggers the output buffering subsystem to send the HTTP response headers and start body streaming. Calling <code>header()</code> afterwards triggers a "Headers already sent" warning and the redirection fails.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Session-Aware Smart Redirection</strong></p>
+        <p><em>Examiner Prompt:</em> "Refactor <code>index.php</code> so that if a user is already authenticated (has a valid <code>$_SESSION['user_id']</code>), they are automatically redirected to <code>public/home.php</code>; otherwise, redirect them to <code>public/login.php</code>."</p>
+        <p><strong>Before (index.php):</strong></p>
+        <pre><code class="language-php">&lt;?php
+header("Location: public/login.php");
+exit();
+?&gt;</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-php">&lt;?php
+session_start();
+
+if (isset($_SESSION['user_id'])) {
+    header("Location: public/home.php");
+} else {
+    header("Location: public/login.php");
+}
+exit();
+?&gt;</code></pre>
+        <p><em>Technical Explanation:</em> <code>session_start()</code> attaches to the active session cookie. Inspecting <code>isset($_SESSION['user_id'])</code> allows dynamic routing to the authenticated dashboard (<code>home.php</code>), avoiding forcing logged-in users to view the login screen again.</p>
+    </div>
+</div>
+
+
+<hr>
+
+<div class="section-anchor" id="file-public-logout"></div>
+<h2 class="topic-title" id="file-public-logout">🚪 File 4: public/logout.php — Session Teardown &amp; State Invalidation</h2>
+<p>The <code>public/logout.php</code> script implements the complete, textbook session invalidation lifecycle required by the UCSC IS1207 syllabus. Spanning 7 lines, it safely resumes the active session, clears in-memory state in the <code>$_SESSION</code> superglobal, destroys persistent server-side session storage, and redirects the client back to the login interface with an HTTP 302 header.</p>
+<h3 class="sub-title">Segment 4.1: Complete Session Termination Lifecycle (Lines 1–7)</h3>
+<pre><code class="language-php">&lt;?php
+session_start();
+$_SESSION = array();
+session_destroy();
+header(&quot;Location: login.php&quot;);
+exit();
+?&gt;
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">public/logout.php (Lines 1–7)</span></div>
+    <p><strong>Line 1: <code>&lt;?php</code></strong> Opening PHP processing tag.</p>
+    <p><strong>Line 2: <code>session_start();</code></strong></p>
+    <ul>
+        <li><strong>Session Attachment:</strong> Checks for an existing session cookie (default name: <code>PHPSESSID</code>) passed in the HTTP request headers. If present, it loads the serialized session payload from server storage (e.g., <code>/tmp/sess_&lt;id&gt;</code>) and populates the <code>$_SESSION</code> superglobal array.</li>
+        <li><strong>Mandatory Requirement:</strong> You cannot destroy or manipulate an active session without first initializing or resuming it via <code>session_start()</code>.</li>
+    </ul>
+    <p><strong>Line 3: <code>$_SESSION = array();</code></strong></p>
+    <ul>
+        <li><strong>In-Memory State Evacuation:</strong> Resets the <code>$_SESSION</code> superglobal to an empty array in the current process memory.</li>
+        <li><strong>Crucial Technical Nuance:</strong> <code>session_destroy()</code> only deletes the physical session file on disk; it DOES NOT empty the in-memory <code>$_SESSION</code> array for the remainder of the current script execution. Calling <code>$_SESSION = array();</code> guarantees that any concurrent or lingering references within this request cannot read stale session attributes.</li>
+    </ul>
+    <p><strong>Line 4: <code>session_destroy();</code></strong></p>
+    <ul>
+        <li><strong>Persistent Storage Destruction:</strong> Deletes the registered session data from the server's storage handler (e.g., unlinks the physical session file on disk). Invalidates the session ID on the server side so that it cannot be reused.</li>
+    </ul>
+    <p><strong>Line 5: <code>header("Location: login.php");</code></strong></p>
+    <ul>
+        <li>Emits an HTTP 302 Temporary Redirect response header directing the user back to the login screen.</li>
+    </ul>
+    <p><strong>Line 6: <code>exit();</code></strong></p>
+    <ul>
+        <li>Immediately terminates PHP script execution, ensuring no subsequent instructions run after the redirect.</li>
+    </ul>
+    <p><strong>Line 7: <code>?&gt;</code></strong> PHP closing delimiter.</p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">State Management &amp; Session Lifecycle</span></div>
+    <p><strong>State Management in Stateless HTTP:</strong></p>
+    <ul>
+        <li>HTTP is a stateless protocol; each request is completely independent. Web applications maintain conversational state across requests using <strong>Sessions</strong>.</li>
+        <li><strong>How PHP Sessions Work:</strong>
+            <ol>
+                <li>The server generates a cryptographically random 32-character hexadecimal string called a Session Identifier (Session ID).</li>
+                <li>The server sets a client-side cookie containing this identifier: <code>Set-Cookie: PHPSESSID=...; path=/; HttpOnly</code>.</li>
+                <li>On each subsequent request, the browser includes this cookie in the <code>Cookie:</code> header.</li>
+                <li><code>session_start()</code> matches the cookie to the server's stored session data, maintaining state across page views.</li>
+            </ol>
+        </li>
+    </ul>
+    <p><strong>Scope Compliance:</strong> This implementation uses native PHP session management functions covered directly in the UCSC IS1207 lectures. It avoids third-party session handlers (such as Redis or Memcached), keeping the architecture cleanly within academic scope.</p>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Session Tracing &amp; Destruction Misconceptions</span></div>
+    <ul>
+        <li><strong>The "session_destroy() clears $_SESSION" Myth:</strong> In past paper tracing questions, students are given code where <code>session_destroy()</code> is called, followed immediately by <code>echo $_SESSION['user_id'];</code>.
+        <br><em>Question:</em> "What is the output?"
+        <br><em>Trap:</em> Most students answer "Notice: Undefined variable" or "Empty". <strong>This is incorrect!</strong> In PHP, <code>session_destroy()</code> only marks the storage file for deletion; it leaves the in-memory <code>$_SESSION</code> array untouched! To actually clear in-memory variables, you must explicitly execute <code>$_SESSION = array();</code>.</li>
+        <li><strong>Calling <code>session_destroy()</code> without <code>session_start()</code>:</strong> Attempting to destroy a session without first calling <code>session_start()</code> triggers a warning: <code>Warning: Trying to destroy uninitialized session</code>.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why must <code>session_start()</code> be called in a logout script?</strong><br>
+    <em>Model Answer:</em> PHP needs to locate the active session before it can destroy it. Calling <code>session_start()</code> reads the incoming session cookie, identifies the active session storage file on the server, and prepares it for invalidation by <code>session_destroy()</code>.</p>
+
+    <p><strong>Viva Q2: What is the difference between <code>$_SESSION = array();</code> and <code>session_destroy()</code>?</strong><br>
+    <em>Model Answer:</em> <code>$_SESSION = array();</code> empties the runtime in-memory superglobal array in PHP process memory. <code>session_destroy()</code> removes the physical session data from the server's permanent storage handler (such as the disk file system). Both are necessary for a comprehensive teardown.</p>
+
+    <p><strong>Viva Q3: Does <code>session_destroy()</code> delete the session cookie on the client's browser?</strong><br>
+    <em>Model Answer:</em> No. <code>session_destroy()</code> only deletes the session data on the server. The client browser retains the <code>PHPSESSID</code> cookie until its expiration time or until explicitly overwritten by a cookie with an expired timestamp.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Client Cookie Expiration</strong></p>
+        <p><em>Examiner Prompt:</em> "Enhance <code>logout.php</code> to explicitly instruct the client browser to delete its <code>PHPSESSID</code> cookie."</p>
+        <p><strong>Before (public/logout.php lines 3–5):</strong></p>
+        <pre><code class="language-php">$_SESSION = array();
+session_destroy();
+header("Location: login.php");</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-php">$_SESSION = array();
+
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(
+        session_name(), 
+        '', 
+        time() - 42000,
+        $params["path"], 
+        $params["domain"],
+        $params["secure"], 
+        $params["httponly"]
+    );
+}
+
+session_destroy();
+header("Location: login.php");</code></pre>
+        <p><em>Technical Explanation:</em> <code>setcookie()</code> emits a <code>Set-Cookie</code> HTTP header with an expiration timestamp set in the past (<code>time() - 42000</code>). When the browser receives this header, it immediately deletes the cookie from its local storage, ensuring complete client-side and server-side cleanup.</p>
+    </div>
+</div>
+
+
+<hr>
+
+<div class="section-anchor" id="file-public-admin"></div>
+<h2 class="topic-title" id="file-public-admin">🛡️ File 5: public/admin.php — Administrative Orchestration, Multi-Table Joins &amp; RBAC</h2>
+<p>The <code>public/admin.php</code> script is the administrative nerve center of the Scholarship Management System. Covering 279 lines, it integrates secure authentication checks via Role-Based Access Control (RBAC), procedural request routing (handling both GET and POST protocols), CRUD operations via PDO prepared statements, administrative safety guards preventing self-deletion, complex 4-table relational SQL joins, and accessible presentation markup with DOM Level 0 JavaScript form validation.</p>
+<h3 class="sub-title">Segment 5.1: Session Initialization, Dependency Loading &amp; RBAC Gatekeeper (Lines 1–13)</h3>
+<pre><code class="language-php">&lt;?php
+session_start();
+require_once &#x27;../config/db.php&#x27;;
+
+if (!isset($_SESSION[&#x27;user_id&#x27;]) || $_SESSION[&#x27;role&#x27;] !== &#x27;admin&#x27;) {
+    header(&quot;Location: home.php&quot;);
+    exit();
+}
+
+$message = &#x27;&#x27;;
+$action = isset($_GET[&#x27;action&#x27;]) ? $_GET[&#x27;action&#x27;] : &#x27;list&#x27;;
+$editUser = null;
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">public/admin.php (Lines 1–13)</span></div>
+    <p><strong>Line 1: <code>&lt;?php</code></strong> Opens the PHP execution block.</p>
+    <p><strong>Line 2: <code>session_start();</code></strong> Resumes the active session via the client cookie <code>PHPSESSID</code>, un-serializing all session variables into the <code>$_SESSION</code> superglobal.</p>
+    <p><strong>Line 3: <code>require_once '../config/db.php';</code></strong></p>
+    <ul>
+        <li>Loads the database connection handle (<code>$conn</code>).</li>
+        <li><code>require_once</code> ensures that if <code>db.php</code> is already loaded, it will not be re-included (avoiding redeclaration collisions), and halts execution with a fatal error (<code>E_COMPILE_ERROR</code>) if the file cannot be located.</li>
+    </ul>
+    <p><strong>Lines 5–8: Role-Based Access Control (RBAC) Authentication Guard:</strong></p>
+    <ul>
+        <li><code>!isset($_SESSION['user_id'])</code>: Checks if the user is unauthenticated.</li>
+        <li><code>$_SESSION['role'] !== 'admin'</code>: Evaluates whether the user's role fails to match <code>'admin'</code> using strict type comparison (<code>!==</code>).</li>
+        <li><strong>Logical OR (<code>||</code>) Short-Circuit Evaluation:</strong> If <code>!isset($_SESSION['user_id'])</code> evaluates to <code>true</code>, PHP skips evaluating the second operand entirely. This prevents throwing an <code>E_NOTICE: Undefined index: role</code> if an unauthenticated visitor accesses the URL directly.</li>
+        <li><code>header("Location: home.php"); exit();</code>: Evicts unauthorized users to the general home screen and immediately aborts further script execution.</li>
+    </ul>
+    <p><strong>Lines 10–12: View State &amp; Variable Declarations:</strong></p>
+    <ul>
+        <li><code>$message = '';</code>: Accumulator string for client-side feedback messages.</li>
+        <li><code>$action = isset($_GET['action']) ? $_GET['action'] : 'list';</code>: Ternary operator inspecting the query string. Defaults view state to <code>'list'</code> if no explicit action is provided.</li>
+        <li><code>$editUser = null;</code>: State variable holding user details when in edit mode.</li>
+    </ul>
+    <p><strong>Line 13: Blank line.</strong></p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">RBAC Architecture &amp; Defensive Programming</span></div>
+    <p><strong>Role-Based Access Control (RBAC):</strong></p>
+    <ul>
+        <li>RBAC is an authorization mechanism where permissions are associated with roles, and users are assigned to roles.</li>
+        <li>By checking both authentication (<code>isset($_SESSION['user_id'])</code>) and authorization (<code>$_SESSION['role'] === 'admin'</code>) at the very top of the script, <code>admin.php</code> adheres to the principle of <strong>Fail-Safe Defaults</strong>: access is denied unless explicitly authorized.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Short-Circuiting &amp; Strict Equality</span></div>
+    <ul>
+        <li><strong>Loose Equality (<code>==</code>) vs. Strict Equality (<code>===</code>):</strong> In older PHP versions (PHP &lt; 8.0), loose comparisons like <code>0 == 'admin'</code> evaluate to <code>true</code> due to type juggling. Using strict equality (<code>===</code> and <code>!==</code>) checks both value and data type (both must be strings), preventing authentication bypass vulnerabilities.</li>
+        <li><strong>Short-Circuit Evaluation Order:</strong> Reversing the condition to <code>if ($_SESSION['role'] !== 'admin' || !isset($_SESSION['user_id']))</code> generates an <code>E_NOTICE: Undefined index: role</code> for unauthenticated users because <code>$_SESSION['role']</code> is accessed before verifying its existence.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why is short-circuit evaluation significant in the authentication check on Line 5?</strong><br>
+    <em>Model Answer:</em> In the expression <code>!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin'</code>, if the first condition is true (user is not logged in), the logical OR (<code>||</code>) short-circuits and skips evaluating <code>$_SESSION['role']</code>. This avoids a PHP notice for an undefined array index.</p>
+
+    <p><strong>Viva Q2: What is the difference between <code>require_once</code> and <code>include_once</code>?</strong><br>
+    <em>Model Answer:</em> <code>require_once</code> emits a fatal compile error (<code>E_COMPILE_ERROR</code>) and halts script execution if the file is missing, which is critical for database connections. <code>include_once</code> only raises a warning (<code>E_WARNING</code>) and allows the script to continue running without a database handle.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Multi-Role Access Grant</strong></p>
+        <p><em>Examiner Prompt:</em> "Modify Line 5 to allow both 'admin' and 'superadmin' roles to access the administration panel."</p>
+        <p><strong>Before (public/admin.php line 5):</strong></p>
+        <pre><code class="language-php">if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-php">if (!isset($_SESSION['user_id']) || !in_array($_SESSION['role'], ['admin', 'superadmin'], true)) {</code></pre>
+        <p><em>Technical Explanation:</em> Using <code>in_array($value, $array, true)</code> with strict type checking allows modular expansion to support multiple privileged roles cleanly.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 5.2: POST Processing — User Addition with Parameterized SQL INSERT (Lines 14–26)</h3>
+<pre><code class="language-php">if ($_SERVER[&#x27;REQUEST_METHOD&#x27;] === &#x27;POST&#x27;) {
+    $postAction = $_POST[&#x27;action&#x27;];
+
+    if ($postAction === &#x27;add&#x27;) {
+        $username = trim($_POST[&#x27;username&#x27;]);
+        $password = trim($_POST[&#x27;password&#x27;]);
+        $email = trim($_POST[&#x27;email&#x27;]);
+        $role = $_POST[&#x27;role&#x27;];
+
+        $stmt = $conn-&gt;prepare(&quot;INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)&quot;);
+        if ($stmt-&gt;execute([$username, $password, $email, $role])) {
+            $message = &quot;User added successfully.&quot;;
+        }
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">public/admin.php (Lines 14–26)</span></div>
+    <p><strong>Line 14: <code>if ($_SERVER['REQUEST_METHOD'] === 'POST') {</code></strong> Inspects the request method to ensure mutations occur exclusively via HTTP POST.</p>
+    <p><strong>Line 15: <code>$postAction = $_POST['action'];</code></strong> Extracts the hidden form action parameter to route between user creation and user editing.</p>
+    <p><strong>Line 17: <code>if ($postAction === 'add') {</code></strong> Branch for new user registration.</p>
+    <p><strong>Lines 18–21: Input Sanitization:</strong></p>
+    <ul>
+        <li><code>$username = trim($_POST['username']);</code>: Strips leading and trailing whitespace characters.</li>
+        <li><code>$password = trim($_POST['password']);</code>: Trims accidental spaces from the password.</li>
+        <li><code>$email = trim($_POST['email']);</code>: Cleans email string.</li>
+        <li><code>$role = $_POST['role'];</code>: Extracts the selected role from the dropdown menu.</li>
+    </ul>
+    <p><strong>Line 23: <code>$stmt = $conn-&gt;prepare("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, ?)");</code></strong></p>
+    <ul>
+        <li>Prepares the SQL statement on the MySQL server with four positional parameter placeholders (<code>?</code>).</li>
+        <li>Decouples query structure from user-supplied input data.</li>
+    </ul>
+    <p><strong>Line 24: <code>if ($stmt-&gt;execute([$username, $password, $email, $role])) {</code></strong></p>
+    <ul>
+        <li>Binds the sanitized values into the statement execution packet.</li>
+        <li>MySQL parses the query template first, guaranteeing that user input is treated strictly as data literals and cannot alter the SQL command structure.</li>
+    </ul>
+    <p><strong>Lines 25–26: Success Handling:</strong> Sets <code>$message = "User added successfully.";</code> and closes the conditional block.</p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">Prepared Statements &amp; SQL Injection Defense</span></div>
+    <p><strong>How Prepared Statements Eliminate SQL Injection:</strong></p>
+    <ul>
+        <li>In un-parameterized queries (e.g., string concatenation: <code>"INSERT INTO users VALUES ('" . $user . "')"</code>), an attacker can supply malicious characters such as <code>' OR 1=1 --</code> to break out of string delimiters and alter the SQL grammar.</li>
+        <li>With PDO prepared statements:
+            <ol>
+                <li><strong>Prepare Phase:</strong> The SQL template is transmitted to the database and compiled into an execution tree.</li>
+                <li><strong>Execute Phase:</strong> The application sends parameter values across the wire in a separate data channel. The database engine inserts values directly into their pre-compiled slots. Even if a value contains quotes or SQL keywords, it is treated strictly as a scalar string literal.</li>
+            </ol>
+        </li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Positional Parameter Mismatches</span></div>
+    <ul>
+        <li><strong>Parameter Count Mismatch (HY093):</strong> The number of elements in the <code>execute([...])</code> array MUST exactly match the number of <code>?</code> placeholders in the <code>prepare()</code> statement. If four placeholders are declared but three parameters are passed, PDO throws <code>Fatal error: SQLSTATE[HY093]: Invalid parameter number</code>.</li>
+        <li><strong>Insecure String Concatenation Trap:</strong> Written exam questions frequently present code with string concatenation and ask: <em>"Identify the vulnerability and rewrite the code securely."</em> The solution is always to replace raw concatenation with PDO prepared statements and positional parameters.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why are prepared statements superior to functions like <code>addslashes()</code> for preventing SQL injection?</strong><br>
+    <em>Model Answer:</em> <code>addslashes()</code> merely attempts to escape certain characters (like single quotes) and can be bypassed depending on multi-byte character sets (e.g., GBK encoding exploits). Prepared statements separate the SQL code from user data at the database engine level, rendering injection architecturally impossible.</p>
+
+    <p><strong>Viva Q2: What is the purpose of using <code>trim()</code> on user input?</strong><br>
+    <em>Model Answer:</em> <code>trim()</code> removes unwanted whitespace characters (spaces, tabs, newlines) from the beginning and end of strings, preventing users from accidentally creating usernames or passwords with trailing spaces.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Cryptographic Password Hashing</strong></p>
+        <p><em>Examiner Prompt:</em> "Currently, the code stores passwords in plain text. Modify Line 24 to hash the password securely using standard Bcrypt before saving it to the database."</p>
+        <p><strong>Before (public/admin.php line 24):</strong></p>
+        <pre><code class="language-php">        if ($stmt->execute([$username, $password, $email, $role])) {</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-php">        $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
+        if ($stmt->execute([$username, $hashedPassword, $email, $role])) {</code></pre>
+        <p><em>Technical Explanation:</em> <code>password_hash()</code> generates a secure one-way salted Bcrypt hash (prefixed with <code>$2y$</code>) that protects user credentials against offline dictionary and rainbow table attacks.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 5.3: POST Processing — User Modification &amp; Conditional Password Logic (Lines 27–44)</h3>
+<pre><code class="language-php">    } elseif ($postAction === &#x27;edit&#x27;) {
+        $id = $_POST[&#x27;id&#x27;];
+        $username = trim($_POST[&#x27;username&#x27;]);
+        $email = trim($_POST[&#x27;email&#x27;]);
+        $role = $_POST[&#x27;role&#x27;];
+
+        if (!empty($_POST[&#x27;password&#x27;])) {
+            $stmt = $conn-&gt;prepare(&quot;UPDATE users SET username=?, password=?, email=?, role=? WHERE id=?&quot;);
+            $stmt-&gt;execute([$username, trim($_POST[&#x27;password&#x27;]), $email, $role, $id]);
+        } else {
+            $stmt = $conn-&gt;prepare(&quot;UPDATE users SET username=?, email=?, role=? WHERE id=?&quot;);
+            $stmt-&gt;execute([$username, $email, $role, $id]);
+        }
+        $message = &quot;User updated successfully.&quot;;
+        $action = &#x27;list&#x27;;
+    }
+}
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">public/admin.php (Lines 27–44)</span></div>
+    <p><strong>Line 27: <code>} elseif ($postAction === 'edit') {</code></strong> Handles user modification form submissions.</p>
+    <p><strong>Lines 28–31: Extracting Form Data:</strong> Extracts <code>$id</code>, trimmed <code>$username</code>, trimmed <code>$email</code>, and <code>$role</code>.</p>
+    <p><strong>Lines 33–39: Conditional Password Update Logic:</strong></p>
+    <ul>
+        <li><code>if (!empty($_POST['password'])) {</code>: Checks if an updated password was provided.</li>
+        <li><strong>Non-Empty Branch (Lines 34–35):</strong> If the admin supplied a new password, executes an <code>UPDATE</code> statement including the new password:
+            <br><code>UPDATE users SET username=?, password=?, email=?, role=? WHERE id=?</code>.</li>
+        <li><strong>Empty Branch (Lines 36–38):</strong> If the password field was left blank, executes an alternative <code>UPDATE</code> that updates username, email, and role while <strong>preserving the existing password in the database</strong>:
+            <br><code>UPDATE users SET username=?, email=?, role=? WHERE id=?</code>.</li>
+    </ul>
+    <p><strong>Lines 40–42: <code>$message = "User updated successfully."; $action = 'list'; } }</code></strong> Notifies the administrator and resets the view state back to <code>'list'</code> to re-render the dashboard tables.</p>
+    <p><strong>Lines 43–44: Blank line.</strong></p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">DML Updates &amp; The Mandatory WHERE Clause</span></div>
+    <p><strong>The Critical Role of the <code>WHERE</code> Clause in DML Updates:</strong></p>
+    <ul>
+        <li>In SQL DML, <code>UPDATE table SET col = val</code> without a <code>WHERE</code> clause modifies <strong>every single record in the entire relation</strong>.</li>
+        <li>Using prepared statements with <code>WHERE id = ?</code> guarantees that the update operation is strictly constrained to the targeted primary key.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">The Accidental Password Overwrite Trap</span></div>
+    <ul>
+        <li><strong>The Empty Password Overwrite Bug:</strong> A frequent bug in student projects is running an unconditional update: <code>UPDATE users SET username=?, password=?, email=? WHERE id=?</code> regardless of whether the password input was filled. If the user leaves the password blank, their password in the database is overwritten with an empty string, breaking authentication! The conditional check on Line 33 avoids this pitfall.</li>
+        <li><strong>Parameter Mapping Order in Prepared UPDATEs:</strong> Notice that in <code>execute([$username, $email, $role, $id])</code>, <code>$id</code> MUST be placed last because it corresponds to the <code>WHERE id = ?</code> placeholder at the end of the query. Passing <code>[$id, $username, ...]</code> swaps the parameters and corrupts data.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why does Line 33 check <code>!empty($_POST['password'])</code> before updating?</strong><br>
+    <em>Model Answer:</em> In user edit forms, password fields are left blank by default if the administrator only intends to update profile details (like email or role). Checking <code>!empty()</code> ensures that existing passwords are not accidentally overwritten with empty strings.</p>
+
+    <p><strong>Viva Q2: What would happen if the <code>WHERE id = ?</code> clause was accidentally omitted from Line 37?</strong><br>
+    <em>Model Answer:</em> The SQL engine would execute an unrestricted <code>UPDATE</code>, setting the username, email, and role of <strong>every user in the database</strong> to the submitted values, causing catastrophic data corruption.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Admin Demotion Guard</strong></p>
+        <p><em>Examiner Prompt:</em> "Add a validation check preventing an administrator from demoting their own account to a student role."</p>
+        <p><strong>Before (public/admin.php line 31):</strong></p>
+        <pre><code class="language-php">        $role = $_POST['role'];</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-php">        $role = $_POST['role'];
+        if ($id == $_SESSION['user_id'] && $role !== 'admin') {
+            $message = "You cannot demote your own administrative account.";
+            $action = 'list';
+            break;
+        }</code></pre>
+        <p><em>Technical Explanation:</em> Comparing the submitted user ID against <code>$_SESSION['user_id']</code> prevents self-privilege revocation, ensuring at least one admin remains active.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 5.4: GET Routing — Safe Cascading User Deletion &amp; Edit Pre-fetching (Lines 45–67)</h3>
+<pre><code class="language-php">if ($_SERVER[&#x27;REQUEST_METHOD&#x27;] === &#x27;GET&#x27;) {
+    if ($action === &#x27;delete&#x27;) {
+        $id = $_GET[&#x27;id&#x27;];
+        if ($id) {
+            $check = $conn-&gt;prepare(&quot;SELECT role FROM users WHERE id = ?&quot;);
+            $check-&gt;execute([$id]);
+            $u = $check-&gt;fetch();
+            if ($u &amp;&amp; $u[&#x27;role&#x27;] !== &#x27;admin&#x27;) {
+                $conn-&gt;prepare(&quot;DELETE FROM users WHERE id = ?&quot;)-&gt;execute([$id]);
+                $message = &quot;User deleted successfully.&quot;;
+            } else {
+                $message = &quot;Cannot delete admin accounts.&quot;;
+            }
+        }
+        $action = &#x27;list&#x27;;
+    } elseif ($action === &#x27;edit&#x27;) {
+        $id = $_GET[&#x27;id&#x27;];
+        $stmt = $conn-&gt;prepare(&quot;SELECT * FROM users WHERE id = ?&quot;);
+        $stmt-&gt;execute([$id]);
+        $editUser = $stmt-&gt;fetch();
+    }
+}
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">public/admin.php (Lines 45–67)</span></div>
+    <p><strong>Line 45: <code>if ($_SERVER['REQUEST_METHOD'] === 'GET') {</code></strong> Routes incoming HTTP GET operations (view navigation, record deletion, and edit form retrieval).</p>
+    <p><strong>Line 46: <code>if ($action === 'delete') {</code></strong> Deletion action handler.</p>
+    <p><strong>Lines 47–48: <code>$id = $_GET['id']; if ($id) {</code></strong> Validates that an ID was supplied in the URL query string.</p>
+    <p><strong>Lines 49–57: Administrative Safety Guard &amp; Cascading Deletion:</strong></p>
+    <ul>
+        <li><code>$check = $conn-&gt;prepare("SELECT role FROM users WHERE id = ?"); $check-&gt;execute([$id]); $u = $check-&gt;fetch();</code>: Pre-fetches the role of the target account before deletion.</li>
+        <li><code>if ($u &amp;&amp; $u['role'] !== 'admin') {</code>: <strong>Administrative Protection Rule:</strong> Completely prohibits the deletion of accounts holding the <code>'admin'</code> role. Prevents total administrative lockout.</li>
+        <li><code>$conn-&gt;prepare("DELETE FROM users WHERE id = ?")-&gt;execute([$id]);</code>: Method chaining that prepares and executes the deletion query. Due to <code>ON DELETE CASCADE</code> in <code>schema.sql</code>, all child rows in <code>students</code> and <code>student_scholarships</code> are automatically cleaned up.</li>
+        <li><code>} else { $message = "Cannot delete admin accounts."; }</code>: Emits a warning if deletion of an admin account is attempted.</li>
+    </ul>
+    <p><strong>Line 59: <code>$action = 'list';</code></strong> Resets action to <code>'list'</code> to return the admin to the user table.</p>
+    <p><strong>Lines 60–65: <code>} elseif ($action === 'edit') {</code></strong> Pre-fetches the selected user tuple (<code>SELECT * FROM users WHERE id = ?</code>) and stores it in <code>$editUser</code> for form pre-population.</p>
+    <p><strong>Lines 66–67: <code>} }</code> and blank line.</strong></p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">Defensive Deletion &amp; Referential Cascades</span></div>
+    <p><strong>Database &amp; Application Layer Defense:</strong></p>
+    <ul>
+        <li>Deletions represent high-risk operations. The application tier applies business validation (preventing admin account deletion), while the database tier enforces referential integrity through <code>ON DELETE CASCADE</code>.</li>
+        <li>When <code>DELETE FROM users WHERE id = ?</code> executes, InnoDB checks foreign key dependency graphs and automatically deletes the matching tuples from <code>students</code> and <code>student_scholarships</code> within the same transactional cycle.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">GET Request State Modification Warning</span></div>
+    <ul>
+        <li><strong>Performing Mutations via GET Requests:</strong> In formal web standards (RFC 7231), HTTP GET requests are defined as <em>safe</em> and <em>idempotent</em> (they should not produce side-effects or modify state). Performing record deletion via <code>admin.php?action=delete&amp;id=5</code> works in simple projects, but examiners will ask: <em>"Why is deleting via a GET link risky?"</em>
+        <br><em>Answer:</em> Search engine web crawlers following links or browser pre-fetching can inadvertently trigger deletions. In enterprise architectures, deletions should be handled via POST requests with CSRF tokens.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why does Line 52 check <code>$u['role'] !== 'admin'</code> before executing the DELETE query?</strong><br>
+    <em>Model Answer:</em> To protect system integrity and prevent administrative lockout. If administrators could delete other admins or their own accounts, the system could be left with zero administrative users.</p>
+
+    <p><strong>Viva Q2: What happens to a student's applications when their user account is deleted on Line 53?</strong><br>
+    <em>Model Answer:</em> Due to <code>FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE</code> in the schema, all matching application records in <code>student_scholarships</code> are automatically deleted by the MySQL storage engine.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Self-Deletion Guard</strong></p>
+        <p><em>Examiner Prompt:</em> "Enhance the check on Line 52 so an admin cannot delete their own account even if their role was altered."</p>
+        <p><strong>Before (public/admin.php line 52):</strong></p>
+        <pre><code class="language-php">            if ($u && $u['role'] !== 'admin') {</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-php">            if ($u && $u['role'] !== 'admin' && $id != $_SESSION['user_id']) {</code></pre>
+        <p><em>Technical Explanation:</em> Adding <code>$id != $_SESSION['user_id']</code> guarantees that an active administrator cannot inadvertently delete their own currently authenticated session account.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 5.5: Data Aggregation Engine, Statistical Computation &amp; Complex 4-Table SQL Join (Lines 68–91)</h3>
+<pre><code class="language-php">$users = [];
+$applications = [];
+$stats = [&#x27;total_users&#x27; =&gt; 0, &#x27;students&#x27; =&gt; 0, &#x27;staff&#x27; =&gt; 0, &#x27;scholarships&#x27; =&gt; 0, &#x27;applications&#x27; =&gt; 0];
+
+if ($action === &#x27;list&#x27;) {
+    $stmt = $conn-&gt;query(&quot;SELECT id, username, email, role, created_at FROM users ORDER BY id DESC&quot;);
+    $users = $stmt-&gt;fetchAll();
+
+    $stats[&#x27;total_users&#x27;] = count($users);
+    foreach ($users as $u) {
+        if ($u[&#x27;role&#x27;] === &#x27;student&#x27;) $stats[&#x27;students&#x27;]++;
+        if ($u[&#x27;role&#x27;] === &#x27;admin&#x27; || $u[&#x27;role&#x27;] === &#x27;registrar&#x27;) $stats[&#x27;staff&#x27;]++;
+    }
+
+    $stmt2 = $conn-&gt;query(&quot;SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, st.dob, st.gender, st.parents_income, st.parents_occupation, st.gpa, st.permanent_address, st.nic, st.contact_numbers, sch.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id LEFT JOIN students st ON u.id = st.user_id INNER JOIN scholarships sch ON ss.scholarship_id = sch.id ORDER BY ss.applied_at DESC&quot;);
+    $applications = $stmt2-&gt;fetchAll();
+
+    $stats[&#x27;scholarships&#x27;] = $conn-&gt;query(&quot;SELECT COUNT(*) FROM scholarships&quot;)-&gt;fetchColumn();
+    $stats[&#x27;applications&#x27;] = count($applications);
+}
+
+$pageTitle = &#x27;Admin Panel - Scholarship Management System&#x27;;
+require_once &#x27;../includes/header.php&#x27;;
+?&gt;
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">public/admin.php (Lines 68–91)</span></div>
+    <p><strong>Lines 68–70: Data Structure Initialization:</strong> Initializes <code>$users</code> array, <code>$applications</code> array, and the <code>$stats</code> associative array tracking key metrics.</p>
+    <p><strong>Lines 72–74: User Population:</strong></p>
+    <ul>
+        <li><code>$stmt = $conn-&gt;query("SELECT id, username, email, role, created_at FROM users ORDER BY id DESC");</code>: Executes a direct query without parameters (safe because the query contains no dynamic user input).</li>
+        <li><code>$users = $stmt-&gt;fetchAll();</code>: Fetches all user tuples as associative arrays.</li>
+    </ul>
+    <p><strong>Lines 76–80: In-Memory Statistical Aggregation:</strong></p>
+    <ul>
+        <li><code>$stats['total_users'] = count($users);</code>: Computes total registered accounts.</li>
+        <li>Iterates through <code>$users</code> via <code>foreach</code> to calculate student counts and administrative staff counts.</li>
+    </ul>
+    <p><strong>Lines 82–83: The 4-Table Relational Join Query:</strong></p>
+    <ul>
+        <li><strong>Query Structure:</strong>
+            <pre><code class="language-sql">SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, 
+       st.dob, st.gender, st.parents_income, st.parents_occupation, 
+       st.gpa, st.permanent_address, st.nic, st.contact_numbers, 
+       sch.name AS scholarship_name 
+FROM student_scholarships ss 
+INNER JOIN users u ON ss.student_id = u.id 
+LEFT JOIN students st ON u.id = st.user_id 
+INNER JOIN scholarships sch ON ss.scholarship_id = sch.id 
+ORDER BY ss.applied_at DESC</code></pre>
+        </li>
+        <li><code>INNER JOIN users u ON ss.student_id = u.id</code>: Matches the application to its applicant account.</li>
+        <li><code>LEFT JOIN students st ON u.id = st.user_id</code>: <strong>Crucial Join Type:</strong> Uses a <code>LEFT JOIN</code> so that even if a student has not completed their extended profile in <code>students</code>, their scholarship application record is STILL retrieved rather than being discarded!</li>
+        <li><code>INNER JOIN scholarships sch ON ss.scholarship_id = sch.id</code>: Resolves the human-readable scholarship name.</li>
+        <li><code>ORDER BY ss.applied_at DESC</code>: Sorts applications chronologically, showing newest first.</li>
+    </ul>
+    <p><strong>Lines 85–86: Scalar Aggregate Calculations:</strong></p>
+    <ul>
+        <li><code>$conn-&gt;query("SELECT COUNT(*) FROM scholarships")-&gt;fetchColumn();</code>: <code>fetchColumn()</code> retrieves the single scalar integer directly without creating an intermediate array.</li>
+        <li><code>$stats['applications'] = count($applications);</code>: Sets application count.</li>
+    </ul>
+    <p><strong>Lines 89–91: Page Layout Configuration:</strong> Sets <code>$pageTitle</code> and includes the common header layout.</p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">Relational Joins (INNER vs. LEFT) &amp; Aggregate Functions</span></div>
+    <p><strong>INNER JOIN vs. LEFT OUTER JOIN:</strong></p>
+    <ul>
+        <li><strong>INNER JOIN:</strong> Returns tuples only when there is a match in BOTH tables ($R \bowtie S$). If a tuple has no matching foreign key, it is excluded from the result set.</li>
+        <li><strong>LEFT OUTER JOIN:</strong> Returns all tuples from the left relation, paired with matching tuples from the right relation. If no match exists, the right relation's columns are filled with <code>NULL</code>.</li>
+        <li>In Line 82, <code>LEFT JOIN students st</code> is used deliberately because a user might submit an application before completing their bio-data. An <code>INNER JOIN</code> would silently drop that application from the administrator's view!</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">The INNER JOIN Data Loss Trap</span></div>
+    <ul>
+        <li><strong>The INNER JOIN Silencing Bug:</strong> A standard past-paper exam question asks: <em>"A student submits a scholarship application, but the administrator's dashboard shows zero applications. Why?"</em>
+        <br><em>Answer:</em> If the query used <code>INNER JOIN students st</code> and the student had not completed their extended bio-data profile in <code>students</code>, the join condition <code>u.id = st.user_id</code> evaluates to false, causing the entire row to be dropped. Changing to <code>LEFT JOIN</code> resolves the bug.</li>
+        <li><strong><code>fetchColumn()</code> vs. <code>fetch()</code>:</strong> When executing <code>SELECT COUNT(*)</code>, <code>fetch()</code> returns an associative array like <code>['COUNT(*)' => '3']</code>, requiring messy array key access. <code>fetchColumn()</code> returns the scalar primitive directly.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why did you use a <code>LEFT JOIN</code> on the <code>students</code> table instead of an <code>INNER JOIN</code> in Line 82?</strong><br>
+    <em>Model Answer:</em> To guarantee that all scholarship applications appear in the admin overview even if the applicant has not completed their extended bio-data profile. An <code>INNER JOIN</code> would silently omit any applications where matching rows in <code>students</code> do not exist.</p>
+
+    <p><strong>Viva Q2: Explain the performance difference between <code>SELECT COUNT(*)</code> in SQL vs. fetching all rows and calling PHP <code>count()</code>.</strong><br>
+    <em>Model Answer:</em> <code>SELECT COUNT(*)</code> executes inside the database engine, returning a single 4-byte integer over the network. Fetching all rows and counting them in PHP transfers entire datasets over the network, consuming massive memory and bandwidth.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Filter Applications by Status</strong></p>
+        <p><em>Examiner Prompt:</em> "Modify the application query on Line 82 to fetch only applications whose status is 'pending'."</p>
+        <p><strong>Before (public/admin.php line 82 snippet):</strong></p>
+        <pre><code class="language-sql">INNER JOIN scholarships sch ON ss.scholarship_id = sch.id 
+ORDER BY ss.applied_at DESC</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-sql">INNER JOIN scholarships sch ON ss.scholarship_id = sch.id 
+WHERE ss.status = 'pending' 
+ORDER BY ss.applied_at DESC</code></pre>
+        <p><em>Technical Explanation:</em> Adding the <code>WHERE ss.status = 'pending'</code> clause filters the joined relation prior to sorting, returning only unreviewed applications.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 5.6: Presentation Tier — Notification Alert &amp; User Modification Form (Lines 92–131)</h3>
+<pre><code class="language-html">    &lt;div class=&quot;container&quot;&gt;
+        &lt;div class=&quot;dashboard-header&quot;&gt;
+            &lt;h1&gt;Admin Panel&lt;/h1&gt;
+        &lt;/div&gt;
+
+        &lt;?php if ($message): ?&gt;
+        &lt;script type=&quot;text/javascript&quot;&gt;alert(&quot;&lt;?php echo addslashes($message); ?&gt;&quot;);&lt;/script&gt;
+        &lt;?php endif; ?&gt;
+
+        &lt;?php if ($action === &#x27;edit&#x27; &amp;&amp; $editUser): ?&gt;
+            &lt;div class=&quot;content-page&quot;&gt;
+                &lt;h2&gt;Edit User&lt;/h2&gt;
+                &lt;form action=&quot;admin.php&quot; method=&quot;POST&quot; name=&quot;editUserForm&quot; onsubmit=&quot;return checkEditUser()&quot;&gt;
+                    &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;edit&quot;&gt;
+                    &lt;input type=&quot;hidden&quot; name=&quot;id&quot; value=&quot;&lt;?php echo $editUser[&#x27;id&#x27;]; ?&gt;&quot;&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;editUsername&quot;&gt;Username&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; id=&quot;editUsername&quot; name=&quot;username&quot; value=&quot;&lt;?php echo htmlspecialchars($editUser[&#x27;username&#x27;]); ?&gt;&quot;&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;editEmail&quot;&gt;Email&lt;/label&gt;
+                        &lt;input type=&quot;email&quot; id=&quot;editEmail&quot; name=&quot;email&quot; value=&quot;&lt;?php echo htmlspecialchars($editUser[&#x27;email&#x27;]); ?&gt;&quot;&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;editPassword&quot;&gt;Password &lt;em&gt;(leave blank to keep current)&lt;/em&gt;&lt;/label&gt;
+                        &lt;input type=&quot;password&quot; id=&quot;editPassword&quot; name=&quot;password&quot;&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;editRole&quot;&gt;Role&lt;/label&gt;
+                        &lt;select id=&quot;editRole&quot; name=&quot;role&quot;&gt;
+                            &lt;option value=&quot;student&quot; &lt;?php if ($editUser[&#x27;role&#x27;] === &#x27;student&#x27;) echo &#x27;selected&#x27;; ?&gt;&gt;Student&lt;/option&gt;
+                            &lt;option value=&quot;admin&quot; &lt;?php if ($editUser[&#x27;role&#x27;] === &#x27;admin&#x27;) echo &#x27;selected&#x27;; ?&gt;&gt;Admin&lt;/option&gt;
+                            &lt;option value=&quot;registrar&quot; &lt;?php if ($editUser[&#x27;role&#x27;] === &#x27;registrar&#x27;) echo &#x27;selected&#x27;; ?&gt;&gt;Registrar&lt;/option&gt;
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+                    &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot;&gt;Update User&lt;/button&gt;
+                    &lt;a href=&quot;admin.php&quot; class=&quot;btn btn-danger&quot;&gt;Cancel&lt;/a&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">public/admin.php (Lines 92–131)</span></div>
+    <p><strong>Lines 92–95: Dashboard Header:</strong> Establishes the main content container and renders the page heading.</p>
+    <p><strong>Lines 97–99: Dynamic JavaScript Alert Notification:</strong></p>
+    <ul>
+        <li><code>&lt;?php if ($message): ?&gt;</code>: Conditionally renders a script block if <code>$message</code> is non-empty.</li>
+        <li><code>alert("&lt;?php echo addslashes($message); ?&gt;");</code>: Emits a browser alert. <code>addslashes()</code> escapes any double quotes or backslashes, preventing broken JavaScript string literals.</li>
+    </ul>
+    <p><strong>Lines 101–131: Conditional User Edit Form View:</strong></p>
+    <ul>
+        <li><code>&lt;?php if ($action === 'edit' &amp;&amp; $editUser): ?&gt;</code>: Renders the edit interface only when the admin has requested to edit an existing user.</li>
+        <li><code>&lt;form action="admin.php" method="POST" name="editUserForm" onsubmit="return checkEditUser()"&gt;</code>: Configures form submission parameters and binds client-side validation.</li>
+        <li><code>&lt;input type="hidden" name="action" value="edit"&gt;</code>: Hidden input instructing the POST processor to execute the <code>edit</code> branch.</li>
+        <li><code>&lt;input type="hidden" name="id" value="&lt;?php echo $editUser['id']; ?&gt;"&gt;</code>: Preserves the target user primary key across requests.</li>
+        <li><code>htmlspecialchars($editUser['username'])</code>: <strong>XSS Mitigation:</strong> Escapes HTML characters (e.g., <code>&lt;</code>, <code>&gt;</code>, <code>"</code>) before echoing into form input attributes.</li>
+        <li><code>&lt;option value="student" &lt;?php if ($editUser['role'] === 'student') echo 'selected'; ?&gt;&gt;Student&lt;/option&gt;</code>: Dynamically sets the <code>selected</code> attribute on the active role option.</li>
+        <li><code>&lt;a href="admin.php" class="btn btn-danger"&gt;Cancel&lt;/a&gt;</code>: Provides a clean cancel button returning the admin to the user list.</li>
+    </ul>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">Cross-Site Scripting (XSS) &amp; Output Encoding</span></div>
+    <p><strong>Mitigating Reflected and Stored XSS:</strong></p>
+    <ul>
+        <li>If an attacker registered a username containing HTML characters (e.g., <code>"&gt;&lt;script&gt;alert('XSS')&lt;/script&gt;</code>), rendering that value directly into an input attribute like <code>value="&lt;?php echo $username; ?&gt;"</code> breaks the HTML attribute and executes malicious JavaScript in the administrator's session.</li>
+        <li><code>htmlspecialchars($string, ENT_QUOTES, 'UTF-8')</code> converts special characters to their corresponding HTML entities (e.g., <code>"</code> becomes <code>&amp;quot;</code>), ensuring the browser parses the text strictly as character data rather than executable markup.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">XSS Vulnerability &amp; Form Pre-population Traps</span></div>
+    <ul>
+        <li><strong>Unescaped Output in Form Values:</strong> A staple past-paper question asks students to spot vulnerabilities in a form pre-population snippet:
+        <br><code>&lt;input type="text" name="username" value="&lt;?php echo $user['username']; ?&gt;"&gt;</code>.
+        <br>The correct answer highlights that omitting <code>htmlspecialchars()</code> introduces an XSS vulnerability.</li>
+        <li><strong>Missing <code>return</code> in <code>onsubmit</code>:</strong> Writing <code>onsubmit="checkEditUser()"</code> instead of <code>onsubmit="return checkEditUser()"</code> causes the form to submit even if the validation function returns <code>false</code>!</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why is <code>htmlspecialchars()</code> mandatory when outputting database values into HTML input fields?</strong><br>
+    <em>Model Answer:</em> To prevent Cross-Site Scripting (XSS). If a field contains characters like double quotes (<code>"</code>), omitting <code>htmlspecialchars()</code> allows an attacker to break out of the HTML attribute and inject arbitrary scripts or event handlers into the admin's browser.</p>
+
+    <p><strong>Viva Q2: Why is <code>addslashes()</code> used on Line 98 instead of <code>htmlspecialchars()</code>?</strong><br>
+    <em>Model Answer:</em> The value is being injected into a JavaScript string literal inside a <code>&lt;script&gt;</code> block: <code>alert("...")</code>. In JavaScript string literals, unescaped quotes or backslashes cause syntax errors. <code>addslashes()</code> escapes quotes with backslashes, ensuring the string remains valid JavaScript.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Readonly Primary Key Display</strong></p>
+        <p><em>Examiner Prompt:</em> "Add a visible but non-editable field to the edit form displaying the User ID to the administrator."</p>
+        <p><strong>Before (public/admin.php line 106):</strong></p>
+        <pre><code class="language-html">                    <input type="hidden" name="id" value="<?php echo $editUser['id']; ?>"></code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-html">                    <input type="hidden" name="id" value="<?php echo $editUser['id']; ?>">
+                    <div class="form-group">
+                        <label for="displayUserId">User ID (Read Only)</label>
+                        <input type="text" id="displayUserId" value="<?php echo $editUser['id']; ?>" readonly disabled>
+                    </div></code></pre>
+        <p><em>Technical Explanation:</em> The <code>readonly disabled</code> attributes prevent client-side tampering while providing visual context. The hidden input continues transmitting the actual ID in the POST payload.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 5.7: Presentation Tier — System Report KPI Dashboard &amp; User Management Grid (Lines 132–188)</h3>
+<pre><code class="language-html">        &lt;?php else: ?&gt;
+            &lt;div class=&quot;table-container&quot;&gt;
+                &lt;h2&gt;System Report&lt;/h2&gt;
+                &lt;table class=&quot;stats-table&quot;&gt;
+                    &lt;thead&gt;
+                        &lt;tr&gt;
+                            &lt;th&gt;Total Users&lt;/th&gt;
+                            &lt;th&gt;Students&lt;/th&gt;
+                            &lt;th&gt;Admin / Registrar&lt;/th&gt;
+                            &lt;th&gt;Scholarships&lt;/th&gt;
+                            &lt;th&gt;Applications&lt;/th&gt;
+                        &lt;/tr&gt;
+                    &lt;/thead&gt;
+                    &lt;tbody&gt;
+                        &lt;tr&gt;
+                            &lt;td&gt;&lt;?php echo $stats[&#x27;total_users&#x27;]; ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo $stats[&#x27;students&#x27;]; ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo $stats[&#x27;staff&#x27;]; ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo $stats[&#x27;scholarships&#x27;]; ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo $stats[&#x27;applications&#x27;]; ?&gt;&lt;/td&gt;
+                        &lt;/tr&gt;
+                    &lt;/tbody&gt;
+                &lt;/table&gt;
+            &lt;/div&gt;
+
+            &lt;div class=&quot;table-container&quot;&gt;
+                &lt;h2&gt;User Management&lt;/h2&gt;
+                &lt;table&gt;
+                    &lt;caption&gt;Registered system users&lt;/caption&gt;
+                    &lt;thead&gt;
+                        &lt;tr&gt;
+                            &lt;th&gt;ID&lt;/th&gt;
+                            &lt;th&gt;Username&lt;/th&gt;
+                            &lt;th&gt;Email&lt;/th&gt;
+                            &lt;th&gt;Role&lt;/th&gt;
+                            &lt;th&gt;Actions&lt;/th&gt;
+                        &lt;/tr&gt;
+                    &lt;/thead&gt;
+                    &lt;tbody&gt;
+                        &lt;?php foreach ($users as $u): ?&gt;
+                        &lt;tr&gt;
+                            &lt;td&gt;&lt;?php echo $u[&#x27;id&#x27;]; ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;strong&gt;&lt;?php echo htmlspecialchars($u[&#x27;username&#x27;]); ?&gt;&lt;/strong&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo htmlspecialchars($u[&#x27;email&#x27;] ? $u[&#x27;email&#x27;] : &#x27;N/A&#x27;); ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo ucfirst($u[&#x27;role&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;td&gt;
+                                &lt;a href=&quot;admin.php?action=edit&amp;id=&lt;?php echo $u[&#x27;id&#x27;]; ?&gt;&quot; class=&quot;btn&quot;&gt;Edit&lt;/a&gt;
+                                &lt;?php if ($u[&#x27;role&#x27;] !== &#x27;admin&#x27;): ?&gt;
+                                    &lt;a href=&quot;admin.php?action=delete&amp;id=&lt;?php echo $u[&#x27;id&#x27;]; ?&gt;&quot; class=&quot;btn btn-danger&quot; onclick=&quot;return confirm(&#x27;Are you sure you want to delete this user?&#x27;)&quot;&gt;Delete&lt;/a&gt;
+                                &lt;?php endif; ?&gt;
+                            &lt;/td&gt;
+                        &lt;/tr&gt;
+                        &lt;?php endforeach; ?&gt;
+                    &lt;/tbody&gt;
+                &lt;/table&gt;
+            &lt;/div&gt;
+
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">public/admin.php (Lines 132–188)</span></div>
+    <p><strong>Line 132: <code>&lt;?php else: ?&gt;</code></strong> Begins the alternate view branch rendered when not in edit mode (the default dashboard view).</p>
+    <p><strong>Lines 133–155: System Report KPI Table:</strong></p>
+    <ul>
+        <li>Presents aggregate operational metrics: Total Users, Students, Staff, Scholarships, and Applications.</li>
+        <li>Values are drawn directly from the <code>$stats</code> array calculated on Lines 76–86.</li>
+    </ul>
+    <p><strong>Lines 157–187: Registered Users Data Grid:</strong></p>
+    <ul>
+        <li><code>&lt;table&gt;&lt;caption&gt;Registered system users&lt;/caption&gt;...</code>: Accessible semantic table structure.</li>
+        <li><code>&lt;?php foreach ($users as $u): ?&gt;</code>: Iterates through each user record.</li>
+        <li><code>echo htmlspecialchars($u['email'] ? $u['email'] : 'N/A');</code>: Ternary operator fallback displaying <code>'N/A'</code> if the optional email column is null.</li>
+        <li><code>echo ucfirst($u['role']);</code>: Formats role names with capitalized initial letters.</li>
+        <li><code>&lt;a href="admin.php?action=edit&amp;id=&lt;?php echo $u['id']; ?&gt;" class="btn"&gt;Edit&lt;/a&gt;</code>: Navigation link passing action and target ID via GET query parameters.</li>
+        <li><code>&lt;?php if ($u['role'] !== 'admin'): ?&gt;</code>: <strong>UI-Level Defensive Protection:</strong> Conditionally suppresses the "Delete" button for accounts with the <code>'admin'</code> role.</li>
+        <li><code>onclick="return confirm('Are you sure you want to delete this user?')"</code>: Client-side confirmation dialog preventing accidental clicks.</li>
+    </ul>
+    <p><strong>Line 188: Blank line.</strong></p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">HTML5 Semantic Tables &amp; JavaScript Confirm Dialogs</span></div>
+    <p><strong>Accessible Table Architecture:</strong></p>
+    <ul>
+        <li>The UCSC IS1207 syllabus emphasizes semantic HTML markup. Tables must incorporate <code>&lt;caption&gt;</code> (for screen readers and accessibility), <code>&lt;thead&gt;</code> (for column header semantics), and <code>&lt;tbody&gt;</code> (for data rows).</li>
+        <li><strong>Inline Event Cancellation:</strong> The <code>confirm()</code> function returns <code>true</code> if the user clicks "OK" and <code>false</code> if they click "Cancel". By returning this boolean directly in the inline handler (<code>return confirm(...)</code>), returning <code>false</code> cancels the default link navigation event, keeping the user safely on the page.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">The Missing "return" in confirm()</span></div>
+    <ul>
+        <li><strong>The <code>onclick="confirm(...)"</code> Trap:</strong> A recurring exam question asks: <em>"Why does the deletion link trigger deletion even when the user clicks 'Cancel' in the confirmation box?"</em>
+        <br><em>Answer:</em> The handler was written as <code>onclick="confirm('...')"</code> instead of <code>onclick="return confirm('...')"</code>. Without <code>return</code>, the boolean value returned by <code>confirm()</code> is discarded, and the browser executes the link's default navigation regardless of user choice.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why is the delete button hidden for admin accounts on Line 179?</strong><br>
+    <em>Model Answer:</em> It provides defense-in-depth. While the backend PHP script on Line 52 enforces that admin accounts cannot be deleted, hiding the button in the presentation layer prevents confusion and prevents accidental deletion requests from being submitted.</p>
+
+    <p><strong>Viva Q2: How does <code>onclick="return confirm(...)"</code> stop the browser from following a link?</strong><br>
+    <em>Model Answer:</em> In the DOM event model, returning <code>false</code> from an inline event handler cancels the default action of the event. For an anchor tag (<code>&lt;a&gt;</code>), the default action is navigation to <code>href</code>; returning <code>false</code> halts this navigation.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Account Creation Date Column</strong></p>
+        <p><em>Examiner Prompt:</em> "Add a column to the user management table displaying the registration date formatted as 'YYYY-MM-DD'."</p>
+        <p><strong>Before (public/admin.php line 166):</strong></p>
+        <pre><code class="language-html">                            <th>Role</th>
+                            <th>Actions</th></code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-html">                            <th>Role</th>
+                            <th>Registered On</th>
+                            <th>Actions</th></code></pre>
+        <p><em>And in the table body (after line 176):</em></p>
+        <pre><code class="language-html">                            <td><?php echo ucfirst($u['role']); ?></td>
+                            <td><?php echo date('Y-m-d', strtotime($u['created_at'])); ?></td>
+                            <td></code></pre>
+        <p><em>Technical Explanation:</em> <code>strtotime()</code> parses the SQL timestamp string into a Unix epoch integer, and <code>date('Y-m-d', ...)</code> formats it according to ISO standards.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 5.8: Presentation Tier — User Creation Form &amp; 4-Table Joined Application Overview (Lines 189–247)</h3>
+<pre><code class="language-html">            &lt;div class=&quot;content-page&quot;&gt;
+                &lt;h2&gt;Add New User&lt;/h2&gt;
+                &lt;form action=&quot;admin.php&quot; method=&quot;POST&quot; name=&quot;addUserForm&quot; onsubmit=&quot;return checkAddUser()&quot;&gt;
+                    &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;add&quot;&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;newUsername&quot;&gt;Username&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; id=&quot;newUsername&quot; name=&quot;username&quot;&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;newEmail&quot;&gt;Email&lt;/label&gt;
+                        &lt;input type=&quot;email&quot; id=&quot;newEmail&quot; name=&quot;email&quot;&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;newPassword&quot;&gt;Password&lt;/label&gt;
+                        &lt;input type=&quot;password&quot; id=&quot;newPassword&quot; name=&quot;password&quot;&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;newRole&quot;&gt;Role&lt;/label&gt;
+                        &lt;select id=&quot;newRole&quot; name=&quot;role&quot;&gt;
+                            &lt;option value=&quot;student&quot;&gt;Student&lt;/option&gt;
+                            &lt;option value=&quot;registrar&quot;&gt;Registrar&lt;/option&gt;
+                            &lt;option value=&quot;admin&quot;&gt;Admin&lt;/option&gt;
+                        &lt;/select&gt;
+                    &lt;/div&gt;
+                    &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot;&gt;Add User&lt;/button&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+
+            &lt;div class=&quot;table-container&quot;&gt;
+                &lt;h2&gt;Scholarship Applications &lt;em&gt;(Overview)&lt;/em&gt;&lt;/h2&gt;
+                &lt;table&gt;
+                    &lt;caption&gt;Read-only summary of all applications&lt;/caption&gt;
+                    &lt;thead&gt;
+                        &lt;tr&gt;
+                            &lt;th&gt;Username&lt;/th&gt;
+                            &lt;th&gt;Full Name&lt;/th&gt;
+                            &lt;th&gt;Scholarship&lt;/th&gt;
+                            &lt;th&gt;Applied On&lt;/th&gt;
+                            &lt;th&gt;Status&lt;/th&gt;
+                        &lt;/tr&gt;
+                    &lt;/thead&gt;
+                    &lt;tbody&gt;
+                        &lt;?php foreach ($applications as $app): ?&gt;
+                        &lt;tr&gt;
+                            &lt;td&gt;&lt;strong&gt;&lt;?php echo htmlspecialchars($app[&#x27;username&#x27;]); ?&gt;&lt;/strong&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo htmlspecialchars($app[&#x27;full_name&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;strong&gt;&lt;?php echo htmlspecialchars($app[&#x27;scholarship_name&#x27;]); ?&gt;&lt;/strong&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo htmlspecialchars($app[&#x27;applied_at&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo ucfirst($app[&#x27;status&#x27;]); ?&gt;&lt;/td&gt;
+                        &lt;/tr&gt;
+                        &lt;?php endforeach; ?&gt;
+                        &lt;?php if (empty($applications)): ?&gt;
+                        &lt;tr&gt;&lt;td colspan=&quot;5&quot;&gt;No applications yet.&lt;/td&gt;&lt;/tr&gt;
+                        &lt;?php endif; ?&gt;
+                    &lt;/tbody&gt;
+                &lt;/table&gt;
+            &lt;/div&gt;
+        &lt;?php endif; ?&gt;
+    &lt;/div&gt;
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">public/admin.php (Lines 189–247)</span></div>
+    <p><strong>Lines 189–215: Add New User Form:</strong></p>
+    <ul>
+        <li><code>&lt;form action="admin.php" method="POST" name="addUserForm" onsubmit="return checkAddUser()"&gt;</code>: Form configured for administrative user creation. Binds to <code>checkAddUser()</code>.</li>
+        <li>Form controls: text input for <code>username</code>, email input for <code>email</code>, password input for <code>password</code>, and select dropdown for <code>role</code>.</li>
+        <li>Hidden input <code>&lt;input type="hidden" name="action" value="add"&gt;</code> routes the request to Line 17 upon submission.</li>
+    </ul>
+    <p><strong>Lines 217–245: Scholarship Applications Overview Table:</strong></p>
+    <ul>
+        <li>Renders a comprehensive read-only table displaying the aggregated data from the 4-table SQL join performed on Line 82.</li>
+        <li>Columns: <strong>Username</strong> (<code>$app['username']</code>), <strong>Full Name</strong> (<code>$app['full_name']</code>), <strong>Scholarship</strong> (<code>$app['scholarship_name']</code>), <strong>Applied On</strong> (<code>$app['applied_at']</code>), and <strong>Status</strong> (<code>$app['status']</code>).</li>
+        <li><code>htmlspecialchars()</code> is applied to every displayed field to safeguard against stored XSS attacks.</li>
+        <li><code>&lt;?php if (empty($applications)): ?&gt;&lt;tr&gt;&lt;td colspan="5"&gt;No applications yet.&lt;/td&gt;&lt;/tr&gt;&lt;?php endif; ?&gt;</code>: Graceful empty state handling using <code>colspan="5"</code>.</li>
+    </ul>
+    <p><strong>Lines 246–247: <code>&lt;?php endif; ?&gt; &lt;/div&gt;</code></strong> Closes the dashboard conditional view and main content container.</p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">HTML Table Structure &amp; Colspan Attributes</span></div>
+    <p><strong>Table Cell Spanning (<code>colspan</code>):</strong></p>
+    <ul>
+        <li>The <code>colspan</code> attribute defines the number of columns a single cell should span horizontally across the table grid.</li>
+        <li>When displaying empty dataset messages, spanning all 5 columns ensures visual harmony and valid table layout without collapsing the grid.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">Colspan Calculation &amp; Stored XSS Traps</span></div>
+    <ul>
+        <li><strong>Incorrect <code>colspan</code> Values:</strong> In past HTML exams, setting <code>colspan="4"</code> when the table has 5 header columns leaves a ragged table border and results in marks deductions.</li>
+        <li><strong>Stored XSS via Applicant Names:</strong> If an applicant registers with a malicious name containing script tags, printing <code>$app['full_name']</code> without <code>htmlspecialchars()</code> executes stored XSS against the administrator, potentially allowing session hijacking.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Where does <code>$app['scholarship_name']</code> originate from in Line 235?</strong><br>
+    <em>Model Answer:</em> It is an alias generated in the 4-table join on Line 82 (<code>sch.name AS scholarship_name</code>), which renames the <code>name</code> column from the <code>scholarships</code> table to prevent collisions with other tables.</p>
+
+    <p><strong>Viva Q2: What is the purpose of the <code>colspan="5"</code> attribute on Line 241?</strong><br>
+    <em>Model Answer:</em> It instructs the single "No applications yet" table cell to span horizontally across all 5 columns of the table grid, ensuring consistent visual layout when no rows are present.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Color-Coded Status Badges</strong></p>
+        <p><em>Examiner Prompt:</em> "Modify Line 237 to display application statuses with color-coded CSS classes (e.g., green for approved, red for rejected, orange for pending)."</p>
+        <p><strong>Before (public/admin.php line 237):</strong></p>
+        <pre><code class="language-html">                            <td><?php echo ucfirst($app['status']); ?></td></code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-html">                            <td>
+                                <span class="badge badge-<?php echo htmlspecialchars($app['status']); ?>">
+                                    <?php echo ucfirst($app['status']); ?>
+                                </span>
+                            </td></code></pre>
+        <p><em>Technical Explanation:</em> Dynamically binding the CSS class to the sanitized status string enables clean visual styling based on application workflow states.</p>
+    </div>
+</div>
+
+<h3 class="sub-title">Segment 5.9: Client-Side Validation Scripts (DOM Level 0) &amp; Page Closure (Lines 248–279)</h3>
+<pre><code class="language-html">
+    &lt;script type=&quot;text/javascript&quot;&gt;
+        function checkAddUser() {
+            var username = document.addUserForm.username.value;
+            var email = document.addUserForm.email.value;
+            var password = document.addUserForm.password.value;
+
+            if (username == &quot;&quot;) {
+                alert(&quot;Please enter a username.&quot;);
+                return false;
+            }
+            if (email == &quot;&quot;) {
+                alert(&quot;Please enter an email.&quot;);
+                return false;
+            }
+            if (password == &quot;&quot;) {
+                alert(&quot;Please enter a password.&quot;);
+                return false;
+            }
+            return true;
+        }
+
+        function checkEditUser() {
+            var username = document.editUserForm.username.value;
+            if (username == &quot;&quot;) {
+                alert(&quot;Username cannot be empty.&quot;);
+                return false;
+            }
+            return true;
+        }
+    &lt;/script&gt;
+&lt;?php require_once &#x27;../includes/footer.php&#x27;; ?&gt;
+</code></pre>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Detailed Codebase Breakdown</span><span class="file-badge">public/admin.php (Lines 248–279)</span></div>
+    <p><strong>Line 249: <code>&lt;script type="text/javascript"&gt;</code></strong> Initiates the client-side JavaScript execution block.</p>
+    <p><strong>Lines 250–268: <code>checkAddUser()</code> Function:</strong></p>
+    <ul>
+        <li><strong>DOM Level 0 Object Access:</strong>
+            <ul>
+                <li><code>var username = document.addUserForm.username.value;</code></li>
+                <li><code>var email = document.addUserForm.email.value;</code></li>
+                <li><code>var password = document.addUserForm.password.value;</code></li>
+            </ul>
+            Accesses form inputs via the legacy DOM Level 0 document property hierarchy (<code>document.formName.fieldName.value</code>).
+        </li>
+        <li><strong>Sequential Validation Checks:</strong>
+            <ul>
+                <li>Tests if <code>username == ""</code>. If empty, issues <code>alert("Please enter a username.");</code> and returns <code>false</code>.</li>
+                <li>Tests if <code>email == ""</code>. If empty, alerts and returns <code>false</code>.</li>
+                <li>Tests if <code>password == ""</code>. If empty, alerts and returns <code>false</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Return True:</strong> If all checks pass, returns <code>true</code>, allowing the browser to submit the form.</li>
+    </ul>
+    <p><strong>Lines 270–277: <code>checkEditUser()</code> Function:</strong></p>
+    <ul>
+        <li>Validates <code>document.editUserForm.username.value</code>. Ensures usernames cannot be wiped during editing. Password check is deliberately omitted because password changes are optional when editing.</li>
+    </ul>
+    <p><strong>Line 278: <code>&lt;/script&gt;</code></strong> Closes the script block.</p>
+    <p><strong>Line 279: <code>&lt;?php require_once '../includes/footer.php'; ?&gt;</code></strong> Injects common footer markup, copyright notices, and closing <code>&lt;/body&gt;&lt;/html&gt;</code> tags.</p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Syllabus Theory &amp; Scope Compliance</span><span class="file-badge">DOM Level 0 Form Access &amp; Two-Tier Validation</span></div>
+    <p><strong>DOM Level 0 vs. Modern Event Listeners:</strong></p>
+    <ul>
+        <li>In modern web development, developers use <code>document.getElementById()</code> or <code>addEventListener('submit', ...)</code>.</li>
+        <li>However, the <strong>UCSC IS1207 syllabus specifically tests legacy DOM Level 0 form navigation</strong>: navigating forms through named properties (<code>document.formName.fieldName.value</code>) and returning booleans from inline <code>onsubmit</code> handlers.</li>
+    </ul>
+    <p><strong>Two-Tier Validation Model:</strong></p>
+    <ul>
+        <li><strong>Client-Side Validation (JavaScript):</strong> Enhances User Experience (UX) by providing instant feedback before network roundtrips occur. However, it can be bypassed easily by disabling JavaScript or submitting directly via <code>curl</code>.</li>
+        <li><strong>Server-Side Validation (PHP):</strong> Absolute requirement for application security and data integrity. Never trust client-submitted data alone.</li>
+    </ul>
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC Exam Traps &amp; Warnings</span><span class="file-badge">DOM Level 0 Identifier Traps</span></div>
+    <ul>
+        <li><strong>The Form Name Case-Sensitivity Trap:</strong> In DOM Level 0, <code>document.addUserForm</code> relies strictly on the <code>name</code> attribute of the <code>&lt;form&gt;</code> tag, NOT the <code>id</code> attribute. If a student writes <code>&lt;form id="addUserForm"&gt;</code> (omitting <code>name="addUserForm"</code>), <code>document.addUserForm</code> evaluates to <code>undefined</code>, causing a fatal JavaScript error: <code>TypeError: Cannot read properties of undefined</code>!</li>
+        <li><strong>The Missing <code>return</code> in <code>onsubmit</code>:</strong> As highlighted earlier, forgetting <code>return</code> in <code>&lt;form onsubmit="return checkAddUser()"&gt;</code> causes the form to submit even when validation fails.</li>
+    </ul>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Examiner Viva Defense &amp; Coding Challenge</span><span class="file-badge">Viva Q&amp;A + Live Modification</span></div>
+    <p><strong>Viva Q1: Why does DOM Level 0 syntax <code>document.addUserForm.username.value</code> work without using <code>document.getElementById()</code>?</strong><br>
+    <em>Model Answer:</em> In DOM Level 0, browsers automatically populate named forms and form controls as properties on the global <code>document</code> object. While superseded by DOM Level 2 and 3 methods, it is fully supported by all modern browsers for backwards compatibility and is an explicit component of the IS1207 syllabus.</p>
+
+    <p><strong>Viva Q2: Can client-side validation replace server-side validation in PHP?</strong><br>
+    <em>Model Answer:</em> Never. Client-side validation is strictly for user convenience and immediate feedback. Any malicious client can bypass JavaScript validation by disabling JavaScript, using automated scripts, or crafting raw HTTP POST requests.</p>
+
+    <div style="margin-top: 14px; padding-top: 10px; border-top: 1px dashed var(--border-color);">
+        <p><strong>Live Coding Challenge: Email Regex Validation in DOM Level 0</strong></p>
+        <p><em>Examiner Prompt:</em> "Add a regular expression check to <code>checkAddUser()</code> to verify that the entered email contains an '@' character and a domain period."</p>
+        <p><strong>Before (public/admin.php lines 259–262):</strong></p>
+        <pre><code class="language-javascript">            if (email == "") {
+                alert("Please enter an email.");
+                return false;
+            }</code></pre>
+        <p><strong>After (Examiner Modification):</strong></p>
+        <pre><code class="language-javascript">            if (email == "") {
+                alert("Please enter an email.");
+                return false;
+            }
+            var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert("Please enter a valid email address.");
+                return false;
+            }</code></pre>
+        <p><em>Technical Explanation:</em> The regular expression <code>/^[^\s@]+@[^\s@]+\.[^\s@]+$/</code> verifies that the string conforms to standard email syntax before allowing form submission.</p>
+    </div>
+</div>
+

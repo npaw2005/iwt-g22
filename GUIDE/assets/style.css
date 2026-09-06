@@ -355,3 +355,110 @@ hr {
     color: var(--accent-blue);
     border-color: var(--accent-blue);
 }
+
+/* File Deconstruction Custom Styles */
+.file-card {
+    background: linear-gradient(135deg, #161b22, #1a2230);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid var(--accent-blue);
+    border-radius: 8px;
+    padding: 24px;
+    margin: 36px 0 24px 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.file-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.file-card-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-meta-bar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.tech-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+.tech-php { background-color: rgba(188, 140, 255, 0.15); color: #bc8cff; border: 1px solid #bc8cff; }
+.tech-sql { background-color: rgba(56, 139, 253, 0.15); color: #58a6ff; border: 1px solid #58a6ff; }
+.tech-js { background-color: rgba(210, 153, 34, 0.15); color: #d29922; border: 1px solid #d29922; }
+.tech-css { background-color: rgba(57, 211, 83, 0.15); color: #39d353; border: 1px solid #39d353; }
+.tech-html { background-color: rgba(248, 81, 73, 0.15); color: #f85149; border: 1px solid #f85149; }
+
+.loc-badge {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    background-color: var(--bg-card);
+    padding: 3px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border-subtle);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.code-segment-box {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    margin: 20px 0 28px 0;
+    overflow: hidden;
+}
+
+.segment-header {
+    background-color: #1f242c;
+    padding: 10px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent-blue);
+}
+
+.segment-lines {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-family: ui-monospace, SFMono-Regular, monospace;
+}
+
+.segment-body {
+    padding: 18px 20px;
+}
+
+.file-nav-sticky {
+    position: sticky;
+    top: 0;
+    background-color: rgba(13, 17, 23, 0.95);
+    backdrop-filter: blur(8px);
+    padding: 14px 18px;
+    margin: 0 -18px 25px -18px;
+    border-bottom: 1px solid var(--border-color);
+    z-index: 50;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}

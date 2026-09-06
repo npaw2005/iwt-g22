@@ -1,0 +1,2074 @@
+
+<!-- ========================================================================= -->
+<!-- PART 2: APPLICATION PORTAL & CORE WORKFLOWS SPECIALIST STUDY GUIDE         -->
+<!-- Comprehensive UCSC IS1207 In-Depth Codebase Deconstruction               -->
+<!-- ========================================================================= -->
+
+<div class="hero-banner">
+    <h1>Part 2: Application Portal &amp; Core Workflows</h1>
+    <p>Exhaustive line-by-line deconstruction of the core interactive workflows, user identity management, multi-role dashboard routing, and registrar administration. Built strictly according to the UCSC IS1207 syllabus, past paper patterns, and examiner viva defense criteria.</p>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Section Overview</span><span class="file-badge">Module Architecture</span></div>
+    <p>This module analyzes four fundamental system files comprising 758 contiguous lines of production PHP, HTML5, and client-side JavaScript. Every single line of source code is displayed verbatim with complete architectural explanations, DOM Level 0 form navigation breakdowns, PDO parameterized database queries, and live defense challenges:</p>
+    <table class="study-table">
+        <thead>
+            <tr><th>File</th><th>Lines</th><th>Core Functionality</th><th>Primary Syllabus Concepts</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code><a href="#file-public-login">public/login.php</a></code></td><td>83 lines</td><td>Authentication Gateway</td><td>Session Bootstrap, PDO Authentication, DOM Level 0 Form Traversal</td></tr>
+            <tr><td><code><a href="#file-public-signup">public/signup.php</a></code></td><td>95 lines</td><td>Student Registration</td><td>Relational Uniqueness, Least Privilege Role Enforcement, Password Matching</td></tr>
+            <tr><td><code><a href="#file-public-applications">public/applications.php</a></code></td><td>220 lines</td><td>Registrar Management Panel</td><td>RBAC Authorization, 4-Table Relational JOINs, JavaScript Date Math</td></tr>
+            <tr><td><code><a href="#file-public-home">public/home.php</a></code></td><td>360 lines</td><td>Central Portal &amp; Upsert Engine</td><td>14-Field Form Handling, Profile Upsert Architecture, Algorithmic 12-Digit NIC Validation</td></tr>
+        </tbody>
+    </table>
+</div>
+<hr>
+
+<div id="file-public-login" class="section-anchor"></div>
+<h2 class="topic-title">public/login.php &mdash; Authentication Gateway &amp; Session Bootstrap</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Architectural Role</span><span class="file-badge">Authentication Entrypoint</span></div>
+    <p><code>public/login.php</code> is the central authentication gateway for the Scholarship Management System. It bridges HTTP client requests with MySQL credential persistence, establishes stateful sessions over stateless HTTP via <code>session_start()</code>, verifies credentials using PDO prepared statements, initializes Role-Based Access Control (RBAC) session variables, and renders client-side validation using strict DOM Level 0 form hierarchy.</p>
+</div>
+
+<h3 class="sub-title">Chunk 1: Session Initialization, DB Connection &amp; Auth Guard (Lines 1&ndash;8)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/login.php: Lines 1-8</span></div>
+    <pre><code class="language-php">&lt;?php
+session_start();
+require_once &#x27;../config/db.php&#x27;;
+
+if (isset($_SESSION[&#x27;user_id&#x27;])) {
+    header(&quot;Location: home.php&quot;);
+    exit();
+}
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 1-8</span></div>
+    <ul>
+        <li><strong>Line 1 (<code>&lt;?php</code>):</strong> Opening PHP delimiter tag. Instructs the Apache Zend Engine parser to interpret following tokens as server-side PHP instructions rather than sending raw text to the HTTP output stream.</li>
+        <li><strong>Line 2 (<code>session_start();</code>):</strong> Initializes or resumes a PHP session. It inspects incoming HTTP request headers for the <code>PHPSESSID</code> cookie. If absent, PHP generates a cryptographically secure 26-character pseudo-random session identifier, issues a <code>Set-Cookie: PHPSESSID=...; path=/</code> HTTP response header, and allocates an internal session storage file (e.g., <code>/tmp/sess_&lt;id&gt;</code>). If present, it loads the serialized session data into the superglobal array <code>$_SESSION</code>.
+        <br><em>Execution Rule:</em> Must be invoked prior to any byte of output (including UTF-8 BOM, whitespace, or HTML tags); otherwise, PHP raises an <code>E_WARNING: session_start(): Session cannot be started after headers have already been sent</code>.</li>
+        <li><strong>Line 3 (<code>require_once '../config/db.php';</code>):</strong> File inclusion directive with absolute single-execution guarantee. Relative path <code>../config/db.php</code> traverses one directory upward to include the database configuration. If the file is missing or contains fatal compile errors, <code>require_once</code> halts execution with an <code>E_COMPILE_ERROR</code>, preventing the script from running with an undefined database object <code>$conn</code>.</li>
+        <li><strong>Lines 5&ndash;8 (<code>if (isset($_SESSION['user_id'])) &#123; header("Location: home.php"); exit(); &#125;</code>):</strong> Authenticated session guard.
+            <ul>
+                <li><code>isset($_SESSION['user_id'])</code>: Checks whether the primary key identifier of an authenticated user exists in the restored session superglobal.</li>
+                <li><code>header("Location: home.php");</code>: Injects an <code>HTTP/1.1 302 Found</code> redirection header instructing the client browser to immediately dispatch a GET request to <code>home.php</code>.</li>
+                <li><code>exit();</code>: <strong>Vital execution terminator.</strong> <code>header()</code> does not terminate script execution. Without <code>exit()</code>, the PHP interpreter would continue executing all downstream lines (9&ndash;83), leaking server-side computations, executing unauthenticated POST queries, and sending the login form in the response body despite the redirect header!</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 2: POST Handling, Prepared Query &amp; Credential Validation (Lines 9&ndash;37)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/login.php: Lines 9-37</span></div>
+    <pre><code class="language-php">
+$error = &#x27;&#x27;;
+
+if ($_SERVER[&#x27;REQUEST_METHOD&#x27;] === &#x27;POST&#x27;) {
+    $username = trim($_POST[&#x27;username&#x27;]);
+    $password = trim($_POST[&#x27;password&#x27;]);
+
+    if (empty($username) || empty($password)) {
+        $error = &#x27;Please enter both username and password.&#x27;;
+    } else {
+        $stmt = $conn-&gt;prepare(&quot;SELECT id, username, password, role FROM users WHERE username = ?&quot;);
+        $stmt-&gt;execute([$username]);
+        $user = $stmt-&gt;fetch();
+
+        if ($user &amp;&amp; $password === $user[&#x27;password&#x27;]) {
+            $_SESSION[&#x27;user_id&#x27;] = $user[&#x27;id&#x27;];
+            $_SESSION[&#x27;username&#x27;] = $user[&#x27;username&#x27;];
+            $_SESSION[&#x27;role&#x27;] = $user[&#x27;role&#x27;];
+            header(&quot;Location: home.php&quot;);
+            exit();
+        } else {
+            $error = &#x27;Invalid username or password.&#x27;;
+        }
+    }
+}
+
+$pageTitle = &#x27;Login - Scholarship Management System&#x27;;
+require_once &#x27;../includes/header.php&#x27;;
+?&gt;
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 9-37</span></div>
+    <ul>
+        <li><strong>Line 10 (<code>$error = '';</code>):</strong> Initializes a local string accumulator for user-facing validation and authentication error messages. Defaults to an empty string representing a pristine state.</li>
+        <li><strong>Line 12 (<code>if ($_SERVER['REQUEST_METHOD'] === 'POST')</code>):</strong> HTTP verb verification using strict type and identity operator <code>===</code>. Isolates the initial idempotent <code>GET</code> request (which renders the empty form) from subsequent form submission <code>POST</code> payloads containing credentials.</li>
+        <li><strong>Lines 13&ndash;14 (<code>$username = trim($_POST['username']); $password = trim($_POST['password']);</code>):</strong> 
+            <ul>
+                <li><code>$_POST</code>: Superglobal associative array automatically populated by PHP by parsing the <code>application/x-www-form-urlencoded</code> HTTP request body.</li>
+                <li><code>trim()</code>: Strips leading and trailing whitespace, tab characters (<code>	</code>), and newlines (<code>
+</code>, <code></code>), guarding against inadvertent whitespace copy-pasted by students.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 16&ndash;18 (<code>if (empty($username) || empty($password))</code>):</strong> Server-side defense-in-depth presence check. The <code>empty()</code> construct checks whether variables evaluate to false (empty string, <code>null</code>, or unset). If either field is missing, <code>$error</code> is populated without invoking the database.</li>
+        <li><strong>Lines 19&ndash;21 (PDO Prepared Statement Execution):</strong>
+            <ul>
+                <li><code>$conn-&gt;prepare("SELECT id, username, password, role FROM users WHERE username = ?")</code>: Passes the SQL query template with a positional parameter marker (<code>?</code>) to the MySQL database engine. The SQL Abstract Syntax Tree (AST) is parsed and compiled before user data is supplied.</li>
+                <li><code>$stmt-&gt;execute([$username])</code>: Binds the trimmed <code>$username</code> string as a bound parameter. MySQL treats the parameter strictly as literal scalar data, making SQL injection mathematically impossible regardless of whether <code>$username</code> contains quotes or SQL keywords.</li>
+                <li><code>$user = $stmt-&gt;fetch()</code>: Fetches the next matching record from the cursor as an associative array (configured by <code>PDO::ATTR_DEFAULT_FETCH_MODE =&gt; PDO::FETCH_ASSOC</code> in <code>db.php</code>). If no user exists, returns <code>false</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 23&ndash;29 (Authentication &amp; Session Seeding):</strong>
+            <ul>
+                <li><code>if ($user &amp;&amp; $password === $user['password'])</code>: Compound short-circuit boolean condition. Evaluates whether a user row was returned AND the submitted password identically matches the database value. (In UCSC IS1207 academic scope, passwords are plain-text strings for transparent inspection and viva evaluation).</li>
+                <li><code>$_SESSION['user_id'] = $user['id'];</code>: Persists the primary key integer identifier.</li>
+                <li><code>$_SESSION['username'] = $user['username'];</code>: Persists the username string for dashboard greetings.</li>
+                <li><code>$_SESSION['role'] = $user['role'];</code>: Stores the authorization role (<code>'admin'</code>, <code>'registrar'</code>, <code>'student'</code>) providing the foundation for Role-Based Access Control (RBAC).</li>
+                <li><code>header("Location: home.php"); exit();</code>: Directs the authenticated user to the central dashboard and immediately terminates further PHP execution.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 30&ndash;32 (<code>$error = 'Invalid username or password.';</code>):</strong> Generic security error message. Avoids user enumeration vulnerabilities by not specifying whether it was the username or the password that failed.</li>
+        <li><strong>Lines 35&ndash;36 (<code>$pageTitle = '...'; require_once '../includes/header.php';</code>):</strong> Sets the page title variable consumed dynamically inside <code>header.php</code> for the HTML <code>&lt;title&gt;</code> tag and includes standard navigation styling.</li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 3: Form View Presentation &amp; Error Notification (Lines 38&ndash;66)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/login.php: Lines 38-66</span></div>
+    <pre><code class="language-php">    &lt;div class=&quot;auth-container&quot;&gt;
+        &lt;h2&gt;System Login&lt;/h2&gt;
+        &lt;?php if ($error): ?&gt;
+        &lt;script type=&quot;text/javascript&quot;&gt;alert(&quot;&lt;?php echo addslashes($error); ?&gt;&quot;);&lt;/script&gt;
+        &lt;?php endif; ?&gt;
+        &lt;form name=&quot;loginForm&quot; action=&quot;login.php&quot; method=&quot;POST&quot; onsubmit=&quot;return checkLogin()&quot;&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;label for=&quot;username&quot;&gt;Username&lt;/label&gt;
+                &lt;input type=&quot;text&quot; id=&quot;username&quot; name=&quot;username&quot;&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;label for=&quot;password&quot;&gt;Password&lt;/label&gt;
+                &lt;input type=&quot;password&quot; id=&quot;password&quot; name=&quot;password&quot;&gt;
+            &lt;/div&gt;
+            &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot;&gt;Login&lt;/button&gt;
+            &lt;a href=&quot;signup.php&quot; class=&quot;btn&quot;&gt;Sign Up&lt;/a&gt;
+            &lt;a href=&quot;home.php&quot; class=&quot;btn&quot;&gt;Guest View&lt;/a&gt;
+        &lt;/form&gt;
+
+        &lt;div style=&quot;margin-top: 25px; padding-top: 20px; border-top: 1px solid #ecf0f1; text-align: center;&quot;&gt;
+            &lt;a href=&quot;../GUIDE/&quot; target=&quot;_blank&quot; class=&quot;btn-guide&quot;&gt;
+                📖 Open Syllabus &amp;amp; Viva Study Guide &amp;rarr;
+            &lt;/a&gt;
+            &lt;p style=&quot;margin-top: 8px; margin-bottom: 0; font-size: 0.85em; color: #7f8c8d;&quot;&gt;
+                Complete guide for HTML, CSS, JS, PHP, SQL &amp;amp; Viva preparation
+            &lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 38-66</span></div>
+    <ul>
+        <li><strong>Line 38 (<code>&lt;div class="auth-container"&gt;</code>):</strong> Centered flexbox card layout defined in <code>public/css/style.css</code> providing responsive boundaries and shadow elevation.</li>
+        <li><strong>Lines 40&ndash;42 (Dynamic PHP Alert Injection):</strong>
+            <ul>
+                <li><code>&lt;?php if ($error): ?&gt;</code>: Alternative PHP syntax for control structures, optimal for embedding within template HTML.</li>
+                <li><code>&lt;script type="text/javascript"&gt;alert("&lt;?php echo addslashes($error); ?&gt;");&lt;/script&gt;</code>: Dynamically generates an inline JavaScript modal alert when an authentication failure occurs.</li>
+                <li><code>addslashes($error)</code>: Critical escaping function that prefixes single quotes, double quotes, backslashes, and NUL bytes with a backslash. Prevents syntax breaks and reflected Cross-Site Scripting (XSS) inside JavaScript string literals.</li>
+            </ul>
+        </li>
+        <li><strong>Line 43 (<code>&lt;form name="loginForm" action="login.php" method="POST" onsubmit="return checkLogin()"&gt;</code>):</strong>
+            <ul>
+                <li><code>name="loginForm"</code>: Identifies the form element within the DOM Level 0 hierarchy (accessible via <code>document.loginForm</code>).</li>
+                <li><code>action="login.php"</code>: Self-submitting form target URL.</li>
+                <li><code>method="POST"</code>: Packages form data inside the HTTP payload body rather than appending clear-text query parameters to the URL bar (as <code>GET</code> would).</li>
+                <li><code>onsubmit="return checkLogin()"</code>: Form submission event handler. The <strong><code>return</code> keyword is strictly mandatory</strong>; it forwards the boolean return value (<code>true</code> or <code>false</code>) of <code>checkLogin()</code> directly to the browser's form submission engine.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 44&ndash;51 (Form Field Groups):</strong> Semantic <code>&lt;label for="username"&gt;</code> and <code>&lt;label for="password"&gt;</code> elements linked to their respective <code>&lt;input&gt;</code> elements via the <code>for</code>/<code>id</code> attribute pairing for accessibility. Note that <code>type="password"</code> obfuscates typed characters on screen. Both elements provide <code>name</code> attributes (<code>name="username"</code>, <code>name="password"</code>) which PHP relies upon to populate <code>$_POST</code>.</li>
+        <li><strong>Lines 52&ndash;55 (Action Controls):</strong> Submit button triggering the <code>onsubmit</code> event, complemented by secondary anchor links styled as buttons allowing navigation to <code>signup.php</code> or <code>home.php</code> (guest view).</li>
+        <li><strong>Lines 57&ndash;64 (Study Guide Banner):</strong> Deep-link anchor targeting <code>../GUIDE/</code> with <code>target="_blank"</code> for fast examiner reference during project defense.</li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 4: DOM Level 0 Validation &amp; Template Termination (Lines 67&ndash;83)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/login.php: Lines 67-83</span></div>
+    <pre><code class="language-php">    &lt;script type=&quot;text/javascript&quot;&gt;
+        function checkLogin() {
+            var username = document.loginForm.username.value;
+            var password = document.loginForm.password.value;
+
+            if (username == &quot;&quot;) {
+                alert(&quot;Please enter your username.&quot;);
+                return false;
+            }
+            if (password == &quot;&quot;) {
+                alert(&quot;Please enter your password.&quot;);
+                return false;
+            }
+            return true;
+        }
+    &lt;/script&gt;
+&lt;?php require_once &#x27;../includes/footer.php&#x27;; ?&gt;
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 67-83</span></div>
+    <ul>
+        <li><strong>Line 67 (<code>&lt;script type="text/javascript"&gt;</code>):</strong> Standard HTML script tag enclosing client-side validation logic executed directly by the browser's JavaScript V8/SpiderMonkey engine.</li>
+        <li><strong>Line 68 (<code>function checkLogin()</code>):</strong> Function declaration invoked synchronously during the form's submission event lifecycle before any network packet is dispatched.</li>
+        <li><strong>Lines 69&ndash;70 (DOM Level 0 Object Retrieval):</strong>
+            <ul>
+                <li><code>var username = document.loginForm.username.value;</code>: Traverses the traditional DOM Level 0 object tree: <code>window</code> &rarr; <code>document</code> &rarr; form named <code>loginForm</code> &rarr; element named <code>username</code> &rarr; string property <code>value</code>.</li>
+                <li><code>var password = document.loginForm.password.value;</code>: Reads the raw string currently typed into the password input.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 72&ndash;75 (Username Presence Check):</strong>
+            <ul>
+                <li><code>if (username == "")</code>: Checks whether the username string is empty.</li>
+                <li><code>alert("Please enter your username.");</code>: Displays a synchronous modal warning dialog pausing JavaScript thread execution until dismissed.</li>
+                <li><code>return false;</code>: Returns boolean <code>false</code> to the <code>onsubmit="return checkLogin()"</code> caller, which instructs the browser to cancel the form submission event and prevent HTTP transmission.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 76&ndash;79 (Password Presence Check):</strong> Evaluates password string emptiness. If empty, triggers an alert and returns <code>false</code> to abort submission.</li>
+        <li><strong>Line 80 (<code>return true;</code>):</strong> Reached only when all validation conditions succeed. Signals the browser that form data is valid, allowing the default submission event to continue and dispatch the HTTP POST request.</li>
+        <li><strong>Line 83 (<code>&lt;?php require_once '../includes/footer.php'; ?&gt;</code>):</strong> Closes the open HTML tags (<code>&lt;/body&gt;</code>, <code>&lt;/html&gt;</code>) and injects standard footer markup.</li>
+    </ul>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Theoretical Syllabus Principles &amp; Scope Compliance</span><span class="file-badge">UCSC IS1207 Syllabus Core</span></div>
+    
+<p><strong>1. HTTP Statelessness &amp; The PHP Session Mechanism:</strong></p>
+<p>The Hypertext Transfer Protocol (HTTP) is inherently stateless; each request across TCP is processed in complete isolation without built-in memory of prior requests. To construct an authenticated portal, state must be synthesized. PHP achieves this through session handling:</p>
+<table class="study-table">
+    <thead>
+        <tr><th>Session Component</th><th>Operational Location</th><th>Role in <code>login.php</code></th></tr>
+    </thead>
+    <tbody>
+        <tr><td><strong>Session Identifier (<code>PHPSESSID</code>)</strong></td><td>Client Cookie Header</td><td>Opaque 26-character token transmitted with every HTTP request identifying the user.</td></tr>
+        <tr><td><strong>Session Store (<code>/tmp/sess_*</code>)</strong></td><td>Server Filesystem</td><td>Serialized server-side storage containing <code>$_SESSION['user_id']</code> and <code>$_SESSION['role']</code>.</td></tr>
+        <tr><td><strong>Superglobal <code>$_SESSION</code></strong></td><td>PHP Engine Memory</td><td>Auto-populated array accessible globally across server execution lifecycle.</td></tr>
+    </tbody>
+</table>
+
+<p><strong>2. DOM Level 0 Form Navigation Hierarchy:</strong></p>
+<p>In accordance with the UCSC IS1207 syllabus specification, client-side script validation uses the classic <strong>DOM Level 0 object hierarchy</strong>: <code>document.formName.inputName.value</code>.</p>
+<ul>
+    <li><strong>Why DOM Level 0 is Strictly In-Scope:</strong> The IS1207 examination explicitly examines candidates on navigating HTML forms using form names and element names as direct properties of the <code>document</code> object.</li>
+    <li><strong>Why <code>getElementById</code> &amp; Modern APIs Were Avoided:</strong> Using <code>document.getElementById('username').value</code> or <code>document.querySelector('#username')</code> introduces DOM Level 1/2 and Selectors API dependencies that bypass the specific hierarchical property traversal taught and examined in UCSC IS1207 past papers.</li>
+    <li><strong>Why <code>alert()</code> Popups Are Used:</strong> Dynamic DOM modification (e.g. creating error spans with <code>appendChild</code> or modifying <code>innerHTML</code>) introduces asynchronous DOM manipulation outside the core syllabus scope. Synchronous modal <code>alert()</code> dialogs are the definitive IS1207 standard for user validation feedback.</li>
+</ul>
+
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC IS1207 Past Paper Traps &amp; Exam Alerts</span><span class="file-badge">High-Frequency Exam Pitfalls</span></div>
+    
+<ul>
+    <li><strong>Trap 1: The Missing <code>return</code> Keyword in <code>onsubmit</code> (AY2020, AY2022):</strong>
+        <br>If written as <code>&lt;form onsubmit="checkLogin()"&gt;</code>, the browser executes <code>checkLogin()</code>, evaluates it to <code>false</code>, but does <em>not</em> return that value to the submission handler. As a result, the form <strong>submits anyway</strong> despite invalid input! The syntax <code>onsubmit="return checkLogin()"</code> is mandatory to cancel submission.
+    </li>
+    <li><strong>Trap 2: Form <code>name</code> vs <code>id</code> Attribute Confusion:</strong>
+        <br>DOM Level 0 traversal (<code>document.loginForm.username</code>) relies strictly on the HTML <code>name</code> attribute. If a developer only defines <code>&lt;form id="loginForm"&gt;</code>, <code>document.loginForm</code> evaluates to <code>undefined</code>, and attempting to read <code>.username</code> throws an uncaught <code>TypeError: Cannot read properties of undefined</code>, breaking form submission entirely.
+    </li>
+    <li><strong>Trap 3: Omitting <code>exit()</code> after <code>header("Location: ...")</code>:</strong>
+        <br>In PHP, sending a <code>Location</code> header does not kill the running process. If <code>exit()</code> is omitted after line 27, PHP continues processing lines 28&ndash;83 on the server, consuming CPU/memory and transmitting the entire HTML document body in the 302 redirect response.
+    </li>
+    <li><strong>Trap 4: String Equality <code>== ""</code> vs Strict Identity <code>=== ""</code>:</strong>
+        <br>In JavaScript, <code>"" == 0</code> evaluates to <code>true</code> due to implicit type coercion. When validating text inputs, reading <code>.value</code> always produces a string primitive, so <code>username == ""</code> safely matches an empty string. However, understanding type coercion nuances is a favorite UCSC viva test.
+    </li>
+</ul>
+
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 1</span><span class="file-badge">public/login.php: Line 2</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why must <code>session_start()</code> be placed at the very top of <code>login.php</code> before any HTML markup or whitespace?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>Because <code>session_start()</code> operates by sending an HTTP response header (<code>Set-Cookie: PHPSESSID=...</code>). The HTTP protocol requires that all response headers precede any response body bytes. If even a single blank line, space, or HTML tag is emitted before line 2, PHP enters output buffering/streaming mode and issues an <code>E_WARNING: Cannot send session cookie - headers already sent</code>, resulting in broken session state and unauthenticated redirects.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 2</span><span class="file-badge">public/login.php: Line 43</span></div>
+    <p><strong>Examiner:</strong> &ldquo;What is the exact purpose of the <code>return</code> keyword in <code>onsubmit=&quot;return checkLogin()&quot;</code>?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>The <code>onsubmit</code> attribute is an inline event handler wrapper. When the user submits the form, the browser internally evaluates the attribute string as a function body. If we write <code>onsubmit=&quot;checkLogin()&quot;</code>, <code>checkLogin()</code> returns <code>false</code>, but the wrapper function itself returns <code>undefined</code>, allowing default form submission to proceed. Writing <code>return checkLogin()</code> ensures that the boolean value <code>false</code> is returned directly by the inline handler, instructing the browser's event dispatcher to call <code>preventDefault()</code> and abort submission.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 3</span><span class="file-badge">public/login.php: Line 19</span></div>
+    <p><strong>Examiner:</strong> &ldquo;How does your PDO prepared query protect against SQL Injection, and what would happen if you used string concatenation?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>In line 19, <code>$conn-&gt;prepare()</code> sends the SQL statement with a parameter placeholder (<code>?</code>) to the MySQL database engine first. The query syntax and structure are parsed and compiled into an execution tree beforehand. When <code>$stmt-&gt;execute([$username])</code> supplies user input, MySQL treats it strictly as passive literal data, never as executable SQL code. If we had used string concatenation (e.g., <code>&quot;SELECT ... WHERE username = '&quot; . $username . &quot;'&quot;</code>), an attacker entering <code>admin' --</code> could manipulate the query AST, bypass password verification, and gain full unauthorized administrator access.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 4</span><span class="file-badge">public/login.php: Line 41</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why did you use <code>addslashes($error)</code> inside the <code>alert(...)</code> script tag?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>If the <code>$error</code> message contains single or double quotation marks (for example: <code>User's account disabled</code>), echoing it raw into <code>alert(&quot;&lt;?php echo $error; ?&gt;&quot;)</code> would prematurely close the JavaScript string literal, producing an unhandled JavaScript SyntaxError (<code>Uncaught SyntaxError: Unexpected identifier</code>). <code>addslashes()</code> escapes quotes with backslashes, ensuring well-formed JavaScript literals and preventing reflected XSS.</p>
+</div>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Live Coding Challenge</span><span class="file-badge">public/login.php</span></div>
+    <h3 class="sub-title" style="margin-top: 0;">UCSC Live Coding Defense: Add Username Length & Space Constraints</h3>
+    <p><strong>Examiner Scenario:</strong> The examiner instructs: 'Modify login.php so that usernames must be at least 4 characters long and cannot contain any spaces. You must enforce this validation using client-side JavaScript without using regular expressions.'</p>
+    <div style="margin-top: 12px; margin-bottom: 6px; font-weight: 600; color: var(--accent-red);">❌ Before Code (Original):</div>
+    <pre><code class="language-php">// In public/login.php (JS validation checkLogin())
+function checkLogin() {
+    var username = document.loginForm.username.value;
+    var password = document.loginForm.password.value;
+
+    if (username == &quot;&quot;) {
+        alert(&quot;Please enter your username.&quot;);
+        return false;
+    }
+    if (password == &quot;&quot;) {
+        alert(&quot;Please enter your password.&quot;);
+        return false;
+    }
+    return true;
+}</code></pre>
+    <div style="margin-top: 12px; margin-bottom: 6px; font-weight: 600; color: var(--accent-green);">✅ After Code (Live Modified):</div>
+    <pre><code class="language-php">// In public/login.php (Live modified checkLogin())
+function checkLogin() {
+    var username = document.loginForm.username.value;
+    var password = document.loginForm.password.value;
+
+    if (username == &quot;&quot;) {
+        alert(&quot;Please enter your username.&quot;);
+        return false;
+    }
+    // UCSC Live Challenge: Username must be &gt;= 4 chars and contain no spaces
+    if (username.length &lt; 4) {
+        alert(&quot;Username must be at least 4 characters long.&quot;);
+        return false;
+    }
+    if (username.indexOf(&quot; &quot;) !== -1) {
+        alert(&quot;Username cannot contain spaces.&quot;);
+        return false;
+    }
+    if (password == &quot;&quot;) {
+        alert(&quot;Please enter your password.&quot;);
+        return false;
+    }
+    return true;
+}</code></pre>
+    <div style="margin-top: 12px;"><strong>Technical Defense &amp; Implementation Walkthrough:</strong><br>To satisfy this challenge without using out-of-scope regular expressions:
+    <ol>
+        <li>We inspect <code>username.length &lt; 4</code> using the native JavaScript string <code>length</code> property. If violated, we alert the student and return <code>false</code>.</li>
+        <li>To forbid spaces without regex, we utilize the standard JavaScript string method <code>username.indexOf(" ") !== -1</code>. If a space character exists anywhere within the string, <code>indexOf()</code> returns an index greater than or equal to 0, triggering the alert and aborting submission.</li>
+    </ol></div>
+</div>
+<hr>
+
+<div id="file-public-signup" class="section-anchor"></div>
+<h2 class="topic-title">public/signup.php &mdash; Student Registration &amp; Identity Provisioning</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Architectural Role</span><span class="file-badge">Account Registration Lifecycle</span></div>
+    <p><code>public/signup.php</code> handles student user registration, account creation, and identity provisioning. It ensures data consistency by performing duplicate username detection through prepared SELECT queries, enforces the principle of least privilege by strictly hardcoding the <code>student</code> role, performs client-side password confirmation via DOM Level 0 traversal, and provides dual-state user feedback using JavaScript alert dialogs.</p>
+</div>
+
+<h3 class="sub-title">Chunk 1: Session Guard &amp; Configuration Loading (Lines 1&ndash;8)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/signup.php: Lines 1-8</span></div>
+    <pre><code class="language-php">&lt;?php
+session_start();
+require_once &#x27;../config/db.php&#x27;;
+
+if (isset($_SESSION[&#x27;user_id&#x27;])) {
+    header(&quot;Location: home.php&quot;);
+    exit();
+}
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 1-8</span></div>
+    <ul>
+        <li><strong>Line 1 (<code>&lt;?php</code>):</strong> Standard PHP opening directive initiating server-side parsing.</li>
+        <li><strong>Line 2 (<code>session_start();</code>):</strong> Inspects client request headers for the session cookie (<code>PHPSESSID</code>) and initializes the <code>$_SESSION</code> superglobal array. Enables the application to verify whether a visitor is already authenticated.</li>
+        <li><strong>Line 3 (<code>require_once '../config/db.php';</code>):</strong> Loads the central PDO database connection object <code>$conn</code> from the sibling configuration directory. Guarantees single inclusion to avoid PDO re-instantiation overhead.</li>
+        <li><strong>Lines 5&ndash;8 (<code>if (isset($_SESSION['user_id'])) &#123; header("Location: home.php"); exit(); &#125;</code>):</strong> 
+            Redirection guard for already-logged-in users. If a student or administrator who is already authenticated attempts to access <code>signup.php</code>, they are immediately redirected to <code>home.php</code>. <code>exit()</code> stops script parsing to prevent rendering redundant registration markup.
+        </li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 2: Server-Side Registration &amp; Duplicate Prevention (Lines 9&ndash;38)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/signup.php: Lines 9-38</span></div>
+    <pre><code class="language-php">
+$error = &#x27;&#x27;;
+$success = &#x27;&#x27;;
+
+if ($_SERVER[&#x27;REQUEST_METHOD&#x27;] === &#x27;POST&#x27;) {
+    $username = trim($_POST[&#x27;username&#x27;]);
+    $email = trim($_POST[&#x27;email&#x27;]);
+    $password = trim($_POST[&#x27;password&#x27;]);
+
+    if (empty($username) || empty($password) || empty($email)) {
+        $error = &#x27;All fields are required.&#x27;;
+    } else {
+        $stmt = $conn-&gt;prepare(&quot;SELECT id FROM users WHERE username = ?&quot;);
+        $stmt-&gt;execute([$username]);
+        if ($stmt-&gt;fetch()) {
+            $error = &#x27;Username is already taken.&#x27;;
+        } else {
+            $stmt = $conn-&gt;prepare(&quot;INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, &#x27;student&#x27;)&quot;);
+            if ($stmt-&gt;execute([$username, $password, $email])) {
+                $success = &#x27;Registration successful! You can now log in.&#x27;;
+            } else {
+                $error = &#x27;Database error occurred.&#x27;;
+            }
+        }
+    }
+}
+
+$pageTitle = &#x27;Sign Up - Scholarship Management System&#x27;;
+require_once &#x27;../includes/header.php&#x27;;
+?&gt;
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 9-38</span></div>
+    <ul>
+        <li><strong>Lines 10&ndash;11 (<code>$error = ''; $success = '';</code>):</strong> Declares dual local status buffers. <code>$error</code> tracks validation or database errors; <code>$success</code> stores registration completion messages.</li>
+        <li><strong>Line 13 (<code>if ($_SERVER['REQUEST_METHOD'] === 'POST')</code>):</strong> Verifies that the current request was initiated via an HTTP POST submission from the registration form.</li>
+        <li><strong>Lines 14&ndash;16 (Input Extraction &amp; Sanitization):</strong>
+            <ul>
+                <li><code>$username = trim($_POST['username']);</code>: Extracts and strips accidental whitespace from the chosen username.</li>
+                <li><code>$email = trim($_POST['email']);</code>: Cleans whitespace from the submitted email string.</li>
+                <li><code>$password = trim($_POST['password']);</code>: Retrieves the plain-text password for registration storage.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 18&ndash;20 (Mandatory Field Verification):</strong> <code>if (empty($username) || empty($password) || empty($email))</code> guarantees server-side presence validation. If a client bypasses client-side checks, execution halts before querying the database, populating <code>$error = 'All fields are required.';</code>.</li>
+        <li><strong>Lines 21&ndash;25 (Two-Phase Uniqueness Verification):</strong>
+            <ul>
+                <li><code>$stmt = $conn-&gt;prepare("SELECT id FROM users WHERE username = ?");</code>: Prepares a parameter-bound query to check if the desired username is already taken.</li>
+                <li><code>$stmt-&gt;execute([$username]);</code>: Safely binds <code>$username</code> to prevent SQL injection during identity verification.</li>
+                <li><code>if ($stmt-&gt;fetch())</code>: If a record is returned, the username already exists in MySQL. Sets <code>$error = 'Username is already taken.';</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 26&ndash;33 (User Insertion &amp; Role Hardcoding):</strong>
+            <ul>
+                <li><code>$stmt = $conn-&gt;prepare("INSERT INTO users (username, password, email, role) VALUES (?, ?, ?, 'student')");</code>:
+                    <strong>Crucial Security Architectural Decision:</strong> The <code>role</code> column is hardcoded to literal <code>'student'</code> in the SQL query string. This prevents <em>Mass Assignment Privilege Escalation</em>, ensuring that public registrants can never grant themselves <code>'admin'</code> or <code>'registrar'</code> privileges by injecting a custom <code>role</code> parameter into the POST payload!</li>
+                <li><code>if ($stmt-&gt;execute([$username, $password, $email]))</code>: Persists the new account in the relational database. On success, sets <code>$success = 'Registration successful! You can now log in.';</code>.</li>
+                <li><code>else &#123; $error = 'Database error occurred.'; &#125;</code>: Fallback handling for foreign key, unique constraint, or disk I/O errors.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 36&ndash;37 (<code>$pageTitle = 'Sign Up ...'; require_once '../includes/header.php';</code>):</strong> Passes page metadata and loads responsive HTML header elements.</li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 3: Registration Form Presentation &amp; Dynamic Feedback (Lines 39&ndash;68)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/signup.php: Lines 39-68</span></div>
+    <pre><code class="language-php">    &lt;div class=&quot;auth-container&quot;&gt;
+        &lt;h2&gt;Student Registration&lt;/h2&gt;
+        &lt;?php if ($error): ?&gt;
+        &lt;script type=&quot;text/javascript&quot;&gt;alert(&quot;&lt;?php echo addslashes($error); ?&gt;&quot;);&lt;/script&gt;
+        &lt;?php endif; ?&gt;
+        &lt;?php if ($success): ?&gt;
+        &lt;script type=&quot;text/javascript&quot;&gt;alert(&quot;&lt;?php echo addslashes($success); ?&gt;&quot;);&lt;/script&gt;
+        &lt;?php endif; ?&gt;
+        &lt;form name=&quot;signupForm&quot; action=&quot;signup.php&quot; method=&quot;POST&quot; onsubmit=&quot;return checkForm()&quot;&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;label for=&quot;username&quot;&gt;Username&lt;/label&gt;
+                &lt;input type=&quot;text&quot; id=&quot;username&quot; name=&quot;username&quot;&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;label for=&quot;email&quot;&gt;Email&lt;/label&gt;
+                &lt;input type=&quot;email&quot; id=&quot;email&quot; name=&quot;email&quot;&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;label for=&quot;password&quot;&gt;Password&lt;/label&gt;
+                &lt;input type=&quot;password&quot; id=&quot;password&quot; name=&quot;password&quot;&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;label for=&quot;confirm_password&quot;&gt;Confirm Password&lt;/label&gt;
+                &lt;input type=&quot;password&quot; id=&quot;confirm_password&quot; name=&quot;confirm_password&quot;&gt;
+            &lt;/div&gt;
+            &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot;&gt;Create Account&lt;/button&gt;
+            &lt;a href=&quot;login.php&quot; class=&quot;btn&quot;&gt;Back to Login&lt;/a&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 39-68</span></div>
+    <ul>
+        <li><strong>Line 39 (<code>&lt;div class="auth-container"&gt;</code>):</strong> Standard container card enclosing authentication forms.</li>
+        <li><strong>Lines 41&ndash;46 (Dynamic PHP Feedback Injection):</strong>
+            <ul>
+                <li><code>&lt;?php if ($error): ?&gt; &lt;script ...&gt;alert("&lt;?php echo addslashes($error); ?&gt;");&lt;/script&gt; &lt;?php endif; ?&gt;</code>: Renders modal error notification when validation or duplicate user checks fail.</li>
+                <li><code>&lt;?php if ($success): ?&gt; &lt;script ...&gt;alert("&lt;?php echo addslashes($success); ?&gt;");&lt;/script&gt; &lt;?php endif; ?&gt;</code>: Renders modal success notification when registration completes successfully.</li>
+                <li><code>addslashes()</code> protects against JavaScript literal termination and syntax errors.</li>
+            </ul>
+        </li>
+        <li><strong>Line 47 (<code>&lt;form name="signupForm" action="signup.php" method="POST" onsubmit="return checkForm()"&gt;</code>):</strong>
+            <ul>
+                <li><code>name="signupForm"</code>: Exposes the form to DOM Level 0 traversal via <code>document.signupForm</code>.</li>
+                <li><code>action="signup.php"</code>: Self-referential POST target.</li>
+                <li><code>onsubmit="return checkForm()"</code>: Hooks client-side validation prior to network dispatch.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 48&ndash;63 (Input Fields):</strong>
+            <ul>
+                <li>Username (<code>&lt;input type="text" id="username" name="username"&gt;</code>)</li>
+                <li>Email (<code>&lt;input type="email" id="email" name="email"&gt;</code>)</li>
+                <li>Password (<code>&lt;input type="password" id="password" name="password"&gt;</code>)</li>
+                <li>Confirm Password (<code>&lt;input type="password" id="confirm_password" name="confirm_password"&gt;</code>): Secondary confirmation input to catch typographical errors before submission.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 64&ndash;66 (Controls):</strong> Submit button (<code>Create Account</code>) and navigation hyperlink returning to <code>login.php</code>.</li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 4: DOM Level 0 Client Validation &amp; Password Confirmation (Lines 69&ndash;95)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/signup.php: Lines 69-95</span></div>
+    <pre><code class="language-php">    &lt;script type=&quot;text/javascript&quot;&gt;
+        function checkForm() {
+            var user = document.signupForm.username.value;
+            var email = document.signupForm.email.value;
+            var pass = document.signupForm.password.value;
+            var confirm = document.signupForm.confirm_password.value;
+
+            if (user == &quot;&quot;) {
+                alert(&quot;Username is required.&quot;);
+                return false;
+            }
+            if (email == &quot;&quot;) {
+                alert(&quot;Valid email is required.&quot;);
+                return false;
+            }
+            if (pass.length &lt; 6) {
+                alert(&quot;Password must be at least 6 characters.&quot;);
+                return false;
+            }
+            if (pass != confirm || confirm == &quot;&quot;) {
+                alert(&quot;Passwords do not match.&quot;);
+                return false;
+            }
+            return true;
+        }
+    &lt;/script&gt;
+&lt;?php require_once &#x27;../includes/footer.php&#x27;; ?&gt;
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 69-95</span></div>
+    <ul>
+        <li><strong>Line 70 (<code>function checkForm()</code>):</strong> Client-side validation function called by the form's <code>onsubmit</code> event.</li>
+        <li><strong>Lines 71&ndash;74 (DOM Level 0 Form Navigation):</strong>
+            <ul>
+                <li><code>var user = document.signupForm.username.value;</code></li>
+                <li><code>var email = document.signupForm.email.value;</code></li>
+                <li><code>var pass = document.signupForm.password.value;</code></li>
+                <li><code>var confirm = document.signupForm.confirm_password.value;</code></li>
+                <li>Extracts string values from form elements via the traditional DOM Level 0 object tree without requiring element IDs.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 76&ndash;83 (Field Presence Validation):</strong>
+            <ul>
+                <li>Checks <code>user == ""</code> and <code>email == ""</code>.</li>
+                <li>Displays specific alerts (<code>"Username is required."</code>, <code>"Valid email is required."</code>) and returns <code>false</code> to abort form dispatch.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 84&ndash;87 (Length Boundary Validation):</strong>
+            <ul>
+                <li><code>if (pass.length &lt; 6)</code>: Checks the length of the password string using the native JavaScript <code>.length</code> property.</li>
+                <li>Enforces a baseline password policy of at least 6 characters. If violated, alerts user and returns <code>false</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 88&ndash;91 (Password Confirmation Matching):</strong>
+            <ul>
+                <li><code>if (pass != confirm || confirm == "")</code>:
+                    <strong>Critical UCSC Past Paper Expression:</strong> Compares the two password strings. The compound condition <code>|| confirm == ""</code> ensures that if both fields are empty strings, the check does not falsely pass (since <code>"" != ""</code> would evaluate to <code>false</code>!).</li>
+                <li>If mismatched or confirm is blank, displays <code>"Passwords do not match."</code> and returns <code>false</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Line 92 (<code>return true;</code>):</strong> Authorizes form submission when all rules pass.</li>
+        <li><strong>Line 95 (<code>&lt;?php require_once '../includes/footer.php'; ?&gt;</code>):</strong> Closes the HTML layout.</li>
+    </ul>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Theoretical Syllabus Principles &amp; Scope Compliance</span><span class="file-badge">UCSC IS1207 Syllabus Core</span></div>
+    
+<p><strong>1. User Registration &amp; Relational Identity Management:</strong></p>
+<p>User registration represents the provisioning phase of the identity lifecycle. In relational database architecture, the <code>users</code> table enforces entity integrity via a surrogate primary key (<code>id INT AUTO_INCREMENT</code>) and candidate key uniqueness (<code>username VARCHAR(50) UNIQUE</code>). The signup script safeguards relational integrity by performing a preliminary query before executing the <code>INSERT</code> statement, preventing unhandled MySQL constraint violation exceptions.</p>
+
+<p><strong>2. Role-Based Access Control (RBAC) Hardcoding vs Privilege Escalation:</strong></p>
+<p>In web security architecture, user roles dictate authorization boundaries. If registration forms allow clients to submit a <code>role</code> field (e.g. <code>&lt;input type="hidden" name="role" value="student"&gt;</code>), an attacker can tamper with the HTTP POST payload and set <code>role=admin</code>. In <code>signup.php</code> line 26, the query explicitly hardcodes <code>'student'</code> directly into the SQL string: <code>VALUES (?, ?, ?, 'student')</code>. This architectural pattern guarantees that privilege escalation is impossible via the public signup endpoint.</p>
+
+<p><strong>3. Strict In-Scope Non-Regex Validation:</strong></p>
+<p>In accordance with the UCSC IS1207 examination syllabus, string validation is performed using core algorithmic primitives (string length comparison, equality operators, index searching) rather than regular expressions (<code>RegExp</code>). Regular expressions are outside the standard IS1207 syllabus; hence, evaluating passwords with <code>pass.length &lt; 6</code> and <code>pass != confirm</code> complies strictly with syllabus expectations.</p>
+
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC IS1207 Past Paper Traps &amp; Exam Alerts</span><span class="file-badge">High-Frequency Exam Pitfalls</span></div>
+    
+<ul>
+    <li><strong>Trap 1: The Dual Empty Password Trap (<code>pass != confirm</code>):</strong>
+        <br>If a developer writes only <code>if (pass != confirm)</code>, and the student submits both password fields completely blank, JavaScript evaluates <code>"" != ""</code> as <code>false</code>! The validation would pass! <code>signup.php</code> eliminates this trap with <code>if (pass != confirm || confirm == "")</code> combined with the preceding <code>pass.length &lt; 6</code> check.
+    </li>
+    <li><strong>Trap 2: JavaScript <code>.length</code> vs PHP <code>strlen()</code>:</strong>
+        <br>In JavaScript, <code>length</code> is a <strong>property</strong> of the string object (syntax: <code>pass.length</code>). Writing <code>pass.length()</code> causes an unhandled <code>TypeError: pass.length is not a function</code>, breaking validation! In PHP, string length is calculated via the built-in function <code>strlen($pass)</code>. Past paper questions frequently test this exact distinction between JS properties and PHP functions.
+    </li>
+    <li><strong>Trap 3: Using <code>onclick</code> on Submit Button vs <code>onsubmit</code> on Form:</strong>
+        <br>Attaching validation to <code>&lt;button onclick="return checkForm()"&gt;</code> only intercepts mouse clicks. If a user submits the form by pressing the <kbd>Enter</kbd> key inside an input field, the button's <code>onclick</code> event is completely bypassed, and unvalidated data is sent to the server! Form-level validation must always be bound to <code>&lt;form onsubmit="return checkForm()"&gt;</code>.
+    </li>
+</ul>
+
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 1</span><span class="file-badge">public/signup.php: Line 26</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why is the role value hardcoded as 'student' in your SQL INSERT statement rather than retrieved from $_POST['role']?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>Hardcoding the role as 'student' in the INSERT query prevents Privilege Escalation vulnerabilities. If the role were read from <code>$_POST['role']</code>, an attacker using browser developer tools, cURL, or Postman could alter the POST request body to send <code>role=admin</code> or <code>role=registrar</code>, granting themselves unauthorized administrative privileges. Hardcoding 'student' guarantees that any account created through the public registration portal has the lowest privilege level by default.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 2</span><span class="file-badge">public/signup.php: Line 84</span></div>
+    <p><strong>Examiner:</strong> &ldquo;What is the syntactic difference between getting the length of a string in JavaScript versus PHP?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>In JavaScript, strings are primitive objects with properties, so length is accessed as a property without parentheses: <code>pass.length</code>. In PHP, strings are primitive scalar data types, and length is measured using the built-in standard library function: <code>strlen($pass)</code>. Calling <code>pass.length()</code> in JavaScript produces a fatal TypeError.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 3</span><span class="file-badge">public/signup.php: Line 21-25</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why do you run a SELECT query before the INSERT query instead of relying solely on MySQL to throw a duplicate key error?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>Running a preliminary <code>SELECT id FROM users WHERE username = ?</code> allows the application to gracefully detect username collisions and display a friendly, controlled error message ('Username is already taken.') to the user. Relying solely on MySQL's unique constraint would trigger a PDOException (SQLSTATE 23000 Integrity constraint violation), which, if unhandled, would crash the script or expose raw database error diagnostics to the end-user.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 4</span><span class="file-badge">public/signup.php: Line 47</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why is <code>onsubmit=&quot;return checkForm()&quot;</code> attached to the &lt;form&gt; tag rather than using an <code>onclick</code> handler on the submit button?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>Attaching validation to the <code>&lt;form&gt;</code>'s <code>onsubmit</code> event intercepts all submission pathways, including mouse clicks on the submit button, keyboard submission via the <kbd>Enter</kbd> key inside text inputs, and programmatic submission. An <code>onclick</code> handler on the button would fail to trigger if the user simply pressed Enter while typing their password.</p>
+</div>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Live Coding Challenge</span><span class="file-badge">public/signup.php</span></div>
+    <h3 class="sub-title" style="margin-top: 0;">UCSC Live Coding Defense: Algorithmic Email Validation (No Regex)</h3>
+    <p><strong>Examiner Scenario:</strong> The examiner asks: 'Add email validation inside checkForm() to verify that the email contains an &quot;@&quot; symbol, a &quot;.&quot; symbol, that &quot;@&quot; is not the first character, and that the &quot;.&quot; appears after the &quot;@&quot; symbol. You are strictly forbidden from using regular expressions.'</p>
+    <div style="margin-top: 12px; margin-bottom: 6px; font-weight: 600; color: var(--accent-red);">❌ Before Code (Original):</div>
+    <pre><code class="language-php">// In public/signup.php (JS validation checkForm())
+function checkForm() {
+    var user = document.signupForm.username.value;
+    var email = document.signupForm.email.value;
+    var pass = document.signupForm.password.value;
+    var confirm = document.signupForm.confirm_password.value;
+
+    if (user == &quot;&quot;) {
+        alert(&quot;Username is required.&quot;);
+        return false;
+    }
+    if (email == &quot;&quot;) {
+        alert(&quot;Valid email is required.&quot;);
+        return false;
+    }
+    if (pass.length &lt; 6) {
+        alert(&quot;Password must be at least 6 characters.&quot;);
+        return false;
+    }
+    if (pass != confirm || confirm == &quot;&quot;) {
+        alert(&quot;Passwords do not match.&quot;);
+        return false;
+    }
+    return true;
+}</code></pre>
+    <div style="margin-top: 12px; margin-bottom: 6px; font-weight: 600; color: var(--accent-green);">✅ After Code (Live Modified):</div>
+    <pre><code class="language-php">// In public/signup.php (Live modified checkForm())
+function checkForm() {
+    var user = document.signupForm.username.value;
+    var email = document.signupForm.email.value;
+    var pass = document.signupForm.password.value;
+    var confirm = document.signupForm.confirm_password.value;
+
+    if (user == &quot;&quot;) {
+        alert(&quot;Username is required.&quot;);
+        return false;
+    }
+    // UCSC Live Challenge: Algorithmic Email Validation without Regex
+    var atPos = email.indexOf(&quot;@&quot;);
+    var dotPos = email.lastIndexOf(&quot;.&quot;);
+    if (email == &quot;&quot; || atPos &lt; 1 || dotPos &lt;= atPos + 1 || dotPos === email.length - 1) {
+        alert(&quot;Please enter a valid email address (e.g. user@domain.com).&quot;);
+        return false;
+    }
+    if (pass.length &lt; 6) {
+        alert(&quot;Password must be at least 6 characters.&quot;);
+        return false;
+    }
+    if (pass != confirm || confirm == &quot;&quot;) {
+        alert(&quot;Passwords do not match.&quot;);
+        return false;
+    }
+    return true;
+}</code></pre>
+    <div style="margin-top: 12px;"><strong>Technical Defense &amp; Implementation Walkthrough:</strong><br>We implement this algorithmic check using standard JavaScript string methods:
+    <ol>
+        <li>We obtain the index of the '@' symbol using <code>var atPos = email.indexOf("@");</code>.</li>
+        <li>We obtain the index of the last '.' character using <code>var dotPos = email.lastIndexOf(".");</code>.</li>
+        <li>We check three structural rules:
+            <ul>
+                <li><code>atPos &lt; 1</code>: The '@' symbol must exist and cannot be at index 0 (there must be at least one character before '@').</li>
+                <li><code>dotPos &lt;= atPos + 1</code>: The dot must appear after the '@' symbol with at least one character in between (e.g. not <code>user@.com</code>).</li>
+                <li><code>dotPos === email.length - 1</code>: The dot cannot be the final character of the string.</li>
+            </ul>
+        </li>
+        <li>If any rule fails, we trigger an alert and return <code>false</code>. This completely satisfies the UCSC IS1207 non-regex algorithmic validation requirement.</li>
+    </ol></div>
+</div>
+<hr>
+
+<div id="file-public-applications" class="section-anchor"></div>
+<h2 class="topic-title">public/applications.php &mdash; Registrar Panel &amp; Relational Application Tracking</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Architectural Role</span><span class="file-badge">Registrar Workflow Engine</span></div>
+    <p><code>public/applications.php</code> is the operational control center for the academic Registrar. It implements strict Role-Based Access Control (RBAC), multi-action HTTP request routing, composite primary key record mutations (approvals and rejections), 4-table relational database queries, detailed student bio-data rendering, and client-side temporal date math validating application deadlines.</p>
+</div>
+
+<h3 class="sub-title">Chunk 1: RBAC Access Guard &amp; Multi-Action Request Multiplexer (Lines 1&ndash;37)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/applications.php: Lines 1-37</span></div>
+    <pre><code class="language-php">&lt;?php
+session_start();
+require_once &#x27;../config/db.php&#x27;;
+
+if (!isset($_SESSION[&#x27;user_id&#x27;]) || $_SESSION[&#x27;role&#x27;] !== &#x27;registrar&#x27;) {
+    header(&quot;Location: home.php&quot;);
+    exit();
+}
+
+$message = &#x27;&#x27;;
+
+if ($_SERVER[&#x27;REQUEST_METHOD&#x27;] === &#x27;POST&#x27;) {
+    $action = $_POST[&#x27;action&#x27;];
+
+    if ($action === &#x27;add_scholarship&#x27;) {
+        $name = trim($_POST[&#x27;name&#x27;]);
+        $description = trim($_POST[&#x27;description&#x27;]);
+        $deadline = $_POST[&#x27;deadline&#x27;];
+        if ($name !== &#x27;&#x27;) {
+            $stmt = $conn-&gt;prepare(&quot;INSERT INTO scholarships (name, description, deadline) VALUES (?, ?, ?)&quot;);
+            $stmt-&gt;execute([$name, $description, $deadline]);
+            $message = &#x27;Scholarship added successfully.&#x27;;
+        }
+    } elseif ($action === &#x27;remove_scholarship&#x27;) {
+        $schId = $_POST[&#x27;scholarship_id&#x27;];
+        $stmt = $conn-&gt;prepare(&quot;DELETE FROM scholarships WHERE id = ?&quot;);
+        $stmt-&gt;execute([$schId]);
+        $message = &#x27;Scholarship removed.&#x27;;
+    } elseif ($action === &#x27;approve&#x27; || $action === &#x27;reject&#x27;) {
+        $studentId = $_POST[&#x27;student_id&#x27;];
+        $scholarshipId = $_POST[&#x27;scholarship_id&#x27;];
+        $status = ($action === &#x27;approve&#x27;) ? &#x27;approved&#x27; : &#x27;rejected&#x27;;
+        $stmt = $conn-&gt;prepare(&quot;UPDATE student_scholarships SET status = ? WHERE student_id = ? AND scholarship_id = ?&quot;);
+        $stmt-&gt;execute([$status, $studentId, $scholarshipId]);
+        $message = &#x27;Application &#x27; . $status . &#x27;.&#x27;;
+    }
+}
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 1-37</span></div>
+    <ul>
+        <li><strong>Lines 1&ndash;3 (Bootstrap):</strong> <code>session_start()</code> loads the existing session; <code>require_once '../config/db.php'</code> injects the database PDO instance.</li>
+        <li><strong>Lines 5&ndash;8 (Strict Registrar RBAC Guard):</strong>
+            <ul>
+                <li><code>if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'registrar')</code>: Dual-check authentication and authorization guard.
+                    Verifies that the client is logged in AND possesses the exact role string <code>'registrar'</code>.</li>
+                <li>If a guest or a student user attempts to load this administrative URL directly, <code>header("Location: home.php"); exit();</code> immediately intercepts the request, redirects them, and terminates execution.</li>
+            </ul>
+        </li>
+        <li><strong>Line 10 (<code>$message = '';</code>):</strong> Local status string buffer storing feedback messages for action results.</li>
+        <li><strong>Lines 12&ndash;14 (Action Multiplexer):</strong>
+            <ul>
+                <li><code>if ($_SERVER['REQUEST_METHOD'] === 'POST') &#123; $action = $_POST['action'];</code>: Multiplexing architectural pattern. Rather than creating separate PHP scripts for each button, a single controller inspects the hidden <code>action</code> field to dispatch workflow branches.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 15&ndash;23 (Action: <code>add_scholarship</code>):</strong>
+            <ul>
+                <li>Extracts <code>$name</code>, <code>$description</code>, and <code>$deadline</code>.</li>
+                <li>Guards against empty names: <code>if ($name !== '')</code>.</li>
+                <li><code>$stmt = $conn-&gt;prepare("INSERT INTO scholarships (name, description, deadline) VALUES (?, ?, ?)");</code>: Prepares parameterized insertion.</li>
+                <li><code>$stmt-&gt;execute([$name, $description, $deadline]);</code>: Inserts the new scholarship and sets <code>$message = 'Scholarship added successfully.';</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 24&ndash;28 (Action: <code>remove_scholarship</code>):</strong>
+            <ul>
+                <li>Extracts <code>$schId = $_POST['scholarship_id'];</code>.</li>
+                <li><code>$stmt = $conn-&gt;prepare("DELETE FROM scholarships WHERE id = ?"); $stmt-&gt;execute([$schId]);</code>:
+                    <strong>Relational Cascade Effect:</strong> Deleting a scholarship record from <code>scholarships</code> triggers MySQL Foreign Key constraints configured with <code>ON DELETE CASCADE</code> in <code>schema.sql</code>, automatically cleaning up all associated records in <code>student_scholarships</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 29&ndash;36 (Action: <code>approve</code> / <code>reject</code>):</strong>
+            <ul>
+                <li>Extracts composite foreign keys: <code>$studentId = $_POST['student_id']; $scholarshipId = $_POST['scholarship_id'];</code>.</li>
+                <li>Ternary status determination: <code>$status = ($action === 'approve') ? 'approved' : 'rejected';</code>.</li>
+                <li><code>$stmt = $conn-&gt;prepare("UPDATE student_scholarships SET status = ? WHERE student_id = ? AND scholarship_id = ?");</code>:
+                    <strong>Composite Primary Key Mutation:</strong> Updates the junction table record by targeting both parts of the composite primary key (<code>student_id</code> and <code>scholarship_id</code>).</li>
+                <li><code>$stmt-&gt;execute([$status, $studentId, $scholarshipId]);</code>: Executes status change and sets <code>$message = 'Application ' . $status . '.';</code>.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 2: Relational Queries &amp; Application Detail Resolution (Lines 38&ndash;65)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/applications.php: Lines 38-65</span></div>
+    <pre><code class="language-php">
+$scholarships = $conn-&gt;query(&quot;SELECT * FROM scholarships ORDER BY id DESC&quot;)-&gt;fetchAll();
+
+$stmt = $conn-&gt;query(&quot;SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, st.dob, st.gender, st.parents_income, st.parents_occupation, st.gpa, st.permanent_address, st.nic, st.contact_numbers, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id LEFT JOIN students st ON u.id = st.user_id INNER JOIN scholarships s ON ss.scholarship_id = s.id ORDER BY ss.applied_at DESC&quot;);
+$applications = $stmt-&gt;fetchAll();
+
+$viewApp = null;
+if (isset($_GET[&#x27;view_sid&#x27;]) &amp;&amp; isset($_GET[&#x27;view_sch&#x27;])) {
+    foreach ($applications as $app) {
+        if ($app[&#x27;student_id&#x27;] == $_GET[&#x27;view_sid&#x27;] &amp;&amp; $app[&#x27;scholarship_id&#x27;] == $_GET[&#x27;view_sch&#x27;]) {
+            $viewApp = $app;
+            break;
+        }
+    }
+}
+
+$pageTitle = &#x27;Manage Applications - Scholarship Management System&#x27;;
+require_once &#x27;../includes/header.php&#x27;;
+?&gt;
+    &lt;?php if ($message): ?&gt;
+    &lt;script type=&quot;text/javascript&quot;&gt;alert(&quot;&lt;?php echo addslashes($message); ?&gt;&quot;);&lt;/script&gt;
+    &lt;?php endif; ?&gt;
+
+    &lt;div class=&quot;container&quot;&gt;
+        &lt;div class=&quot;dashboard-header&quot;&gt;
+            &lt;h1&gt;Registrar Panel&lt;/h1&gt;
+        &lt;/div&gt;
+
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 38-65</span></div>
+    <ul>
+        <li><strong>Line 39 (Fetch Scholarships):</strong> <code>$scholarships = $conn-&gt;query("SELECT * FROM scholarships ORDER BY id DESC")-&gt;fetchAll();</code> fetches all active scholarship offerings ordered newest first.</li>
+        <li><strong>Lines 41&ndash;42 (The 4-Table Relational JOIN Query):</strong>
+            <ul>
+                <li><code>SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, st.dob, st.gender, st.parents_income, st.parents_occupation, st.gpa, st.permanent_address, st.nic, st.contact_numbers, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN users u ON ss.student_id = u.id LEFT JOIN students st ON u.id = st.user_id INNER JOIN scholarships s ON ss.scholarship_id = s.id ORDER BY ss.applied_at DESC</code></li>
+                <li><strong>Relational Semantics:</strong>
+                    <ul>
+                        <li><code>INNER JOIN users u ON ss.student_id = u.id</code>: Resolves the student account credentials.</li>
+                        <li><code>LEFT JOIN students st ON u.id = st.user_id</code>: <strong>Vital Architectural Choice:</strong> A <code>LEFT JOIN</code> is used because a student user might exist in <code>users</code> and have applied, but their bio-data record in <code>students</code> might not yet have all columns filled. An <code>INNER JOIN</code> would omit the entire application if the profile row was incomplete!</li>
+                        <li><code>INNER JOIN scholarships s ON ss.scholarship_id = s.id</code>: Retrieves the official title of the applied scholarship.</li>
+                        <li><code>ORDER BY ss.applied_at DESC</code>: Displays applications chronologically with the newest submissions at the top.</li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li><strong>Lines 44&ndash;52 (Application Detail Resolver via GET):</strong>
+            <ul>
+                <li><code>$viewApp = null;</code>: Defaults to null (list view).</li>
+                <li><code>if (isset($_GET['view_sid']) &amp;&amp; isset($_GET['view_sch']))</code>: Inspects query parameters for the composite key pair.</li>
+                <li>Iterates through <code>$applications</code> to find the matching row where <code>$app['student_id'] == $_GET['view_sid'] &amp;&amp; $app['scholarship_id'] == $_GET['view_sch']</code>, setting <code>$viewApp</code> to render the detail view.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 54&ndash;55:</strong> Sets page title and includes universal HTML header.</li>
+        <li><strong>Lines 57&ndash;59:</strong> Injects dynamic JavaScript alert popup if <code>$message</code> is populated.</li>
+        <li><strong>Lines 61&ndash;64:</strong> Begins container markup with page heading.</li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 3: Detailed Application Dossier &amp; Decision Actions (Lines 66&ndash;109)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/applications.php: Lines 66-109</span></div>
+    <pre><code class="language-php">        &lt;?php if ($viewApp): ?&gt;
+            &lt;div class=&quot;content-page&quot;&gt;
+                &lt;h2&gt;Application Details&lt;/h2&gt;
+                &lt;p&gt;&lt;strong&gt;Applicant:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;username&#x27;]); ?&gt; (&lt;?php echo htmlspecialchars($viewApp[&#x27;full_name&#x27;]); ?&gt;)&lt;/p&gt;
+                &lt;p&gt;&lt;strong&gt;Scholarship:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;scholarship_name&#x27;]); ?&gt;&lt;/p&gt;
+                &lt;p&gt;&lt;strong&gt;Status:&lt;/strong&gt; &lt;?php echo ucfirst($viewApp[&#x27;status&#x27;]); ?&gt;&lt;/p&gt;
+                &lt;hr&gt;
+                &lt;h3&gt;Personal Information&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;DOB:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;dob&#x27;]); ?&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Gender:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;gender&#x27;]); ?&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;NIC:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;nic&#x27;]); ?&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Email:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;email&#x27;]); ?&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Phone:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;contact_numbers&#x27;]); ?&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Address:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;permanent_address&#x27;]); ?&gt;&lt;/li&gt;
+                &lt;/ul&gt;
+                &lt;hr&gt;
+                &lt;h3&gt;Academic &amp; Financial Information&lt;/h3&gt;
+                &lt;ul&gt;
+                    &lt;li&gt;&lt;strong&gt;GPA:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;gpa&#x27;]); ?&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Parents&#x27; Income:&lt;/strong&gt; Rs.&lt;?php echo htmlspecialchars($viewApp[&#x27;parents_income&#x27;]); ?&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Parents&#x27; Occupation:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;parents_occupation&#x27;]); ?&gt;&lt;/li&gt;
+                    &lt;li&gt;&lt;strong&gt;Purpose:&lt;/strong&gt; &lt;?php echo htmlspecialchars($viewApp[&#x27;purpose&#x27;]); ?&gt;&lt;/li&gt;
+                &lt;/ul&gt;
+                
+                &lt;div style=&quot;margin-top: 20px;&quot;&gt;
+                    &lt;?php if ($viewApp[&#x27;status&#x27;] === &#x27;pending&#x27;): ?&gt;
+                        &lt;form action=&quot;applications.php&quot; method=&quot;POST&quot; style=&quot;display:inline;&quot;&gt;
+                            &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;approve&quot;&gt;
+                            &lt;input type=&quot;hidden&quot; name=&quot;student_id&quot; value=&quot;&lt;?php echo $viewApp[&#x27;student_id&#x27;]; ?&gt;&quot;&gt;
+                            &lt;input type=&quot;hidden&quot; name=&quot;scholarship_id&quot; value=&quot;&lt;?php echo $viewApp[&#x27;scholarship_id&#x27;]; ?&gt;&quot;&gt;
+                            &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot; onclick=&quot;return confirm(&#x27;Approve this application?&#x27;)&quot;&gt;Approve&lt;/button&gt;
+                        &lt;/form&gt;
+                        &lt;form action=&quot;applications.php&quot; method=&quot;POST&quot; style=&quot;display:inline;&quot;&gt;
+                            &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;reject&quot;&gt;
+                            &lt;input type=&quot;hidden&quot; name=&quot;student_id&quot; value=&quot;&lt;?php echo $viewApp[&#x27;student_id&#x27;]; ?&gt;&quot;&gt;
+                            &lt;input type=&quot;hidden&quot; name=&quot;scholarship_id&quot; value=&quot;&lt;?php echo $viewApp[&#x27;scholarship_id&#x27;]; ?&gt;&quot;&gt;
+                            &lt;button type=&quot;submit&quot; class=&quot;btn btn-danger&quot; onclick=&quot;return confirm(&#x27;Reject this application?&#x27;)&quot;&gt;Reject&lt;/button&gt;
+                        &lt;/form&gt;
+                    &lt;?php endif; ?&gt;
+                    &lt;a href=&quot;applications.php&quot; class=&quot;btn&quot;&gt;Back to List&lt;/a&gt;
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;?php else: ?&gt;
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 66-109</span></div>
+    <ul>
+        <li><strong>Line 66 (<code>&lt;?php if ($viewApp): ?&gt;</code>):</strong> Conditional view branch rendering the in-depth dossier for a single selected application.</li>
+        <li><strong>Lines 67&ndash;72 (Header &amp; Status):</strong>
+            <ul>
+                <li>Displays applicant username and full name with strict XSS sanitization via <code>htmlspecialchars()</code>.</li>
+                <li>Displays scholarship name and capitalized status via <code>ucfirst($viewApp['status'])</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 73&ndash;81 (Personal Information Dossier):</strong> Unordered list displaying Date of Birth, Gender, National Identity Card (NIC), Email, Phone, and Permanent Address. Every database string is passed through <code>htmlspecialchars()</code>.</li>
+        <li><strong>Lines 83&ndash;89 (Academic &amp; Financial Information):</strong> Lists student GPA, Parents' Income (prefixed with <code>Rs.</code>), Parents' Occupation, and Statement of Purpose.</li>
+        <li><strong>Lines 91&ndash;107 (Decision Actions):</strong>
+            <ul>
+                <li><code>if ($viewApp['status'] === 'pending'):</code>: Approval and Rejection buttons appear <strong>only</strong> when the application is in the <code>'pending'</code> state. Once approved or rejected, decision controls are hidden to prevent accidental re-submission.</li>
+                <li><strong>Inline Decision Forms:</strong> Submit to <code>applications.php</code> via <code>POST</code> with hidden inputs:
+                    <ul>
+                        <li><code>&lt;input type="hidden" name="action" value="approve"&gt;</code> (or <code>value="reject"</code>)</li>
+                        <li><code>&lt;input type="hidden" name="student_id" value="&lt;?php echo $viewApp['student_id']; ?&gt;"&gt;</code></li>
+                        <li><code>&lt;input type="hidden" name="scholarship_id" value="&lt;?php echo $viewApp['scholarship_id']; ?&gt;"&gt;</code></li>
+                    </ul>
+                </li>
+                <li><code>onclick="return confirm('Approve this application?')"</code>: Browser-native modal confirmation dialog. If the registrar clicks "Cancel", JavaScript returns <code>false</code>, aborting form submission.</li>
+                <li><code>&lt;a href="applications.php" class="btn"&gt;Back to List&lt;/a&gt;</code>: Resets query parameters to return to the registrar dashboard table.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 4: Scholarship Creation Form &amp; Offerings Table (Lines 110&ndash;166)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/applications.php: Lines 110-166</span></div>
+    <pre><code class="language-php">
+            &lt;div class=&quot;content-page&quot;&gt;
+                &lt;h2&gt;Add New Scholarship&lt;/h2&gt;
+                &lt;form name=&quot;addScholarshipForm&quot; action=&quot;applications.php&quot; method=&quot;POST&quot; onsubmit=&quot;return validateDeadline()&quot;&gt;
+                    &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;add_scholarship&quot;&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;schName&quot;&gt;Scholarship Name&lt;/label&gt;
+                        &lt;input type=&quot;text&quot; id=&quot;schName&quot; name=&quot;name&quot; required&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;schDesc&quot;&gt;Description&lt;/label&gt;
+                        &lt;textarea id=&quot;schDesc&quot; name=&quot;description&quot; rows=&quot;3&quot;&gt;&lt;/textarea&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&quot;form-group&quot;&gt;
+                        &lt;label for=&quot;schDeadline&quot;&gt;Application Deadline&lt;/label&gt;
+                        &lt;input type=&quot;date&quot; id=&quot;schDeadline&quot; name=&quot;deadline&quot;&gt;
+                    &lt;/div&gt;
+                    &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot;&gt;Add Scholarship&lt;/button&gt;
+                &lt;/form&gt;
+            &lt;/div&gt;
+
+            &lt;div class=&quot;table-container&quot;&gt;
+                &lt;h2&gt;Current Scholarships&lt;/h2&gt;
+                &lt;table&gt;
+                    &lt;caption&gt;Scholarships available in the system&lt;/caption&gt;
+                    &lt;thead&gt;
+                        &lt;tr&gt;
+                            &lt;th&gt;ID&lt;/th&gt;
+                            &lt;th&gt;Name&lt;/th&gt;
+                            &lt;th&gt;Description&lt;/th&gt;
+                            &lt;th&gt;Deadline&lt;/th&gt;
+                            &lt;th&gt;Action&lt;/th&gt;
+                        &lt;/tr&gt;
+                    &lt;/thead&gt;
+                    &lt;tbody&gt;
+                        &lt;?php foreach ($scholarships as $sch): ?&gt;
+                        &lt;tr&gt;
+                            &lt;td&gt;&lt;?php echo $sch[&#x27;id&#x27;]; ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo htmlspecialchars($sch[&#x27;name&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo htmlspecialchars($sch[&#x27;description&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo htmlspecialchars($sch[&#x27;deadline&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;td&gt;
+                                &lt;form action=&quot;applications.php&quot; method=&quot;POST&quot; style=&quot;display:inline;&quot;&gt;
+                                    &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;remove_scholarship&quot;&gt;
+                                    &lt;input type=&quot;hidden&quot; name=&quot;scholarship_id&quot; value=&quot;&lt;?php echo $sch[&#x27;id&#x27;]; ?&gt;&quot;&gt;
+                                    &lt;button type=&quot;submit&quot; class=&quot;btn btn-danger&quot; onclick=&quot;return confirm(&#x27;Remove this scholarship? All related applications will also be deleted.&#x27;)&quot;&gt;Remove&lt;/button&gt;
+                                &lt;/form&gt;
+                            &lt;/td&gt;
+                        &lt;/tr&gt;
+                        &lt;?php endforeach; ?&gt;
+                        &lt;?php if (empty($scholarships)): ?&gt;
+                        &lt;tr&gt;&lt;td colspan=&quot;5&quot;&gt;No scholarships added yet.&lt;/td&gt;&lt;/tr&gt;
+                        &lt;?php endif; ?&gt;
+                    &lt;/tbody&gt;
+                &lt;/table&gt;
+            &lt;/div&gt;
+
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 110-166</span></div>
+    <ul>
+        <li><strong>Line 110 (<code>&lt;?php else: ?&gt;</code>):</strong> Default registrar dashboard branch rendered when no specific application is being reviewed.</li>
+        <li><strong>Lines 111&ndash;129 (Add New Scholarship Form):</strong>
+            <ul>
+                <li><code>&lt;form name="addScholarshipForm" action="applications.php" method="POST" onsubmit="return validateDeadline()"&gt;</code>: Form definition using DOM Level 0 naming conventions and client-side date validation hook.</li>
+                <li><code>&lt;input type="hidden" name="action" value="add_scholarship"&gt;</code>: Injects action identifier.</li>
+                <li><code>schName</code> text input with <code>required</code> attribute.</li>
+                <li><code>schDesc</code> multiline textarea.</li>
+                <li><code>schDeadline</code> date input (<code>type="date"</code>) inspected by JavaScript before submission.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 131&ndash;165 (Current Scholarships Table):</strong>
+            <ul>
+                <li>Full HTML semantic table markup: <code>&lt;table&gt;</code>, <code>&lt;caption&gt;</code>, <code>&lt;thead&gt;</code>, <code>&lt;tbody&gt;</code>.</li>
+                <li>5 table header columns: <code>ID</code>, <code>Name</code>, <code>Description</code>, <code>Deadline</code>, <code>Action</code>.</li>
+                <li><code>foreach ($scholarships as $sch):</code>: Iterates through array of scholarship records.</li>
+                <li><strong>Destructive Action Control:</strong> An inline form with <code>action="remove_scholarship"</code> and a button triggering <code>onclick="return confirm('Remove this scholarship? All related applications will also be deleted.')"</code>.</li>
+                <li><strong>Table Column Span Fallback:</strong> <code>&lt;td colspan="5"&gt;No scholarships added yet.&lt;/td&gt;</code>. Spans all 5 columns when the record set is empty.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 5: Relational Applications Table &amp; Composite URLs (Lines 167&ndash;202)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/applications.php: Lines 167-202</span></div>
+    <pre><code class="language-php">            &lt;div class=&quot;table-container&quot;&gt;
+                &lt;h2&gt;Student Applications&lt;/h2&gt;
+                &lt;table&gt;
+                    &lt;caption&gt;Click &#x27;View&#x27; to see full details and approve/reject&lt;/caption&gt;
+                    &lt;thead&gt;
+                        &lt;tr&gt;
+                            &lt;th&gt;SID (Username)&lt;/th&gt;
+                            &lt;th&gt;Full Name&lt;/th&gt;
+                            &lt;th&gt;Scholarship&lt;/th&gt;
+                            &lt;th&gt;Applied On&lt;/th&gt;
+                            &lt;th&gt;Status&lt;/th&gt;
+                            &lt;th&gt;Action&lt;/th&gt;
+                        &lt;/tr&gt;
+                    &lt;/thead&gt;
+                    &lt;tbody&gt;
+                        &lt;?php foreach ($applications as $app): ?&gt;
+                        &lt;tr&gt;
+                            &lt;td&gt;&lt;strong&gt;&lt;?php echo htmlspecialchars($app[&#x27;username&#x27;]); ?&gt;&lt;/strong&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo htmlspecialchars($app[&#x27;full_name&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo htmlspecialchars($app[&#x27;scholarship_name&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;?php echo htmlspecialchars($app[&#x27;applied_at&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;td&gt;&lt;strong&gt;&lt;?php echo ucfirst($app[&#x27;status&#x27;]); ?&gt;&lt;/strong&gt;&lt;/td&gt;
+                            &lt;td&gt;
+                                &lt;a href=&quot;applications.php?view_sid=&lt;?php echo $app[&#x27;student_id&#x27;]; ?&gt;&amp;view_sch=&lt;?php echo $app[&#x27;scholarship_id&#x27;]; ?&gt;&quot; class=&quot;btn btn-primary&quot;&gt;View&lt;/a&gt;
+                            &lt;/td&gt;
+                        &lt;/tr&gt;
+                        &lt;?php endforeach; ?&gt;
+                        &lt;?php if (empty($applications)): ?&gt;
+                            &lt;tr&gt;&lt;td colspan=&quot;6&quot;&gt;No applications submitted yet.&lt;/td&gt;&lt;/tr&gt;
+                        &lt;?php endif; ?&gt;
+                    &lt;/tbody&gt;
+                &lt;/table&gt;
+            &lt;/div&gt;
+            
+        &lt;?php endif; ?&gt;
+    &lt;/div&gt;
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 167-202</span></div>
+    <ul>
+        <li><strong>Lines 167&ndash;180 (Student Applications Table Semantics):</strong>
+            <ul>
+                <li>Table with descriptive caption: <code>Click 'View' to see full details and approve/reject</code>.</li>
+                <li>6 header columns: <code>SID (Username)</code>, <code>Full Name</code>, <code>Scholarship</code>, <code>Applied On</code>, <code>Status</code>, <code>Action</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 181&ndash;193 (Data Row Iteration):</strong>
+            <ul>
+                <li><code>foreach ($applications as $app):</code> renders each application record.</li>
+                <li>Sanitizes fields using <code>htmlspecialchars()</code> and capitalizes status with <code>ucfirst($app['status'])</code>.</li>
+                <li><strong>Composite Query String Link:</strong> <code>&lt;a href="applications.php?view_sid=&lt;?php echo $app['student_id']; ?&gt;&amp;view_sch=&lt;?php echo $app['scholarship_id']; ?&gt;" class="btn btn-primary"&gt;View&lt;/a&gt;</code>.
+                    Encodes both keys of the composite primary key into the URL query parameters so the server can unambiguously identify the specific student application.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 194&ndash;197 (Empty State Colspan):</strong> <code>&lt;td colspan="6"&gt;No applications submitted yet.&lt;/td&gt;</code>. Correctly spans 6 columns matching the 6 header definitions.</li>
+        <li><strong>Lines 201&ndash;202:</strong> Closes conditional branch and container.</li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 6: Client-Side Date Math Validation &amp; Termination (Lines 203&ndash;220)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/applications.php: Lines 203-220</span></div>
+    <pre><code class="language-php">
+    &lt;script type=&quot;text/javascript&quot;&gt;
+        function validateDeadline() {
+            var deadlineStr = document.addScholarshipForm.deadline.value;
+            if (deadlineStr != &quot;&quot;) {
+                var parts = deadlineStr.split(&quot;-&quot;);
+                var selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (selectedDate &lt; today) {
+                    alert(&quot;The deadline cannot be set in the past.&quot;);
+                    return false;
+                }
+            }
+            return true;
+        }
+    &lt;/script&gt;
+&lt;?php require_once &#x27;../includes/footer.php&#x27;; ?&gt;
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 203-220</span></div>
+    <ul>
+        <li><strong>Line 204 (<code>function validateDeadline()</code>):</strong> Client-side validation function hooked to the scholarship creation form.</li>
+        <li><strong>Line 205 (<code>var deadlineStr = document.addScholarshipForm.deadline.value;</code>):</strong> Extracts the deadline date string using DOM Level 0 property traversal. Standard HTML5 date inputs format their value as <code>YYYY-MM-DD</code>.</li>
+        <li><strong>Line 206 (<code>if (deadlineStr != "")</code>):</strong> Ensures non-empty before processing.</li>
+        <li><strong>Line 207 (<code>var parts = deadlineStr.split("-");</code>):</strong> Splits the date string into an array of string tokens: <code>parts[0]</code> is Year, <code>parts[1]</code> is Month, <code>parts[2]</code> is Day.</li>
+        <li><strong>Line 208 (<code>var selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);</code>):</strong>
+            <strong>The Core UCSC IS1207 Date Math Rule:</strong> In the JavaScript <code>Date</code> constructor, <strong>months are 0-indexed</strong> (January = 0, December = 11). Therefore, the month token parsed from the HTML input must be decremented by 1 (<code>parts[1] - 1</code>); otherwise, selecting May (05) would instantiate a date in June!</li>
+        <li><strong>Lines 209&ndash;210 (Midnight Normalization):</strong>
+            <ul>
+                <li><code>var today = new Date();</code>: Instantiates the current date and time.</li>
+                <li><code>today.setHours(0, 0, 0, 0);</code>: <strong>Critical Normalization Step:</strong> Resets hours, minutes, seconds, and milliseconds to midnight. Without this, selecting today's date would evaluate as <code>selectedDate &lt; today</code> (because <code>today</code> has the current clock time), falsely rejecting today's date!</li>
+            </ul>
+        </li>
+        <li><strong>Lines 211&ndash;214 (Past Date Boundary Check):</strong>
+            <ul>
+                <li><code>if (selectedDate &lt; today)</code>: Compares timestamps in milliseconds since Unix Epoch.</li>
+                <li>If the chosen deadline is in the past, alerts <code>"The deadline cannot be set in the past."</code> and returns <code>false</code> to cancel submission.</li>
+            </ul>
+        </li>
+        <li><strong>Line 216 (<code>return true;</code>):</strong> Approves submission when the date is today or in the future.</li>
+        <li><strong>Line 220:</strong> Includes universal footer.</li>
+    </ul>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Theoretical Syllabus Principles &amp; Scope Compliance</span><span class="file-badge">UCSC IS1207 Syllabus Core</span></div>
+    
+<p><strong>1. Relational Database Modeling: Composite Primary Keys in Junction Tables:</strong></p>
+<p>In relational database design, a Many-to-Many ($M:N$) relationship between <code>students</code> and <code>scholarships</code> is resolved via a junction table: <code>student_scholarships</code>. Rather than introducing an artificial surrogate key, the relation uses a <strong>composite primary key</strong>: <code>PRIMARY KEY (student_id, scholarship_id)</code>. This design enforces two critical business and relational rules:</p>
+<ul>
+    <li>A student cannot submit more than one application for the same scholarship.</li>
+    <li>Identifying an application for approval or rejection requires both foreign key values (demonstrated in lines 33&ndash;34 and lines 95&ndash;96).</li>
+</ul>
+
+<p><strong>2. Multi-Table Relational Queries: <code>INNER JOIN</code> vs <code>LEFT JOIN</code>:</strong></p>
+<p>Line 41 demonstrates an advanced 4-table join. The theoretical distinction between join types is a cornerstone of the UCSC IS1207 syllabus:</p>
+<table class="study-table">
+    <thead>
+        <tr><th>Table Joined</th><th>Join Type</th><th>Theoretical Rationale</th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>users u</code></td><td><code>INNER JOIN</code></td><td>Every application strictly belongs to an authenticated user account.</td></tr>
+        <tr><td><code>students st</code></td><td><code>LEFT JOIN</code></td><td>Guarantees that an application is displayed even if the student's optional bio-profile row has not yet been populated. An <code>INNER JOIN</code> would drop applications of unprofiled students!</td></tr>
+        <tr><td><code>scholarships s</code></td><td><code>INNER JOIN</code></td><td>Every application is linked to a valid, existing scholarship definition.</td></tr>
+    </tbody>
+</table>
+
+<p><strong>3. JavaScript Temporal Validation &amp; Date Object Mechanics:</strong></p>
+<p>Validation of dates without external libraries (e.g. Moment.js) is a direct syllabus requirement. JavaScript evaluates dates by converting year, month, and day into milliseconds since January 1, 1970 (Unix Epoch). Correctly managing month 0-indexing (<code>parts[1] - 1</code>) and time clearing (<code>setHours(0,0,0,0)</code>) demonstrates deep mastery of client-side runtime behavior.</p>
+
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC IS1207 Past Paper Traps &amp; Exam Alerts</span><span class="file-badge">High-Frequency Exam Pitfalls</span></div>
+    
+<ul>
+    <li><strong>Trap 1: The JavaScript Date Month 0-Indexing Trap (AY2021, AY2022 Q4):</strong>
+        <br>In JavaScript <code>new Date(year, month, day)</code>, months range from <code>0</code> (January) to <code>11</code> (December). When an HTML5 date input submits <code>2026-08-15</code>, <code>parts[1]</code> is <code>"08"</code>. If written as <code>new Date(parts[0], parts[1], parts[2])</code>, JavaScript interprets month 8 as <strong>September</strong>! Decrementing by 1 (<code>parts[1] - 1</code>) is essential.
+    </li>
+    <li><strong>Trap 2: Table <code>colspan</code> Calculation Mismatch:</strong>
+        <br>In the Scholarships table, there are 5 columns (<code>ID</code>, <code>Name</code>, <code>Description</code>, <code>Deadline</code>, <code>Action</code>). The empty fallback cell must use <code>&lt;td colspan="5"&gt;</code>. In the Applications table, there are 6 columns (<code>SID</code>, <code>Full Name</code>, <code>Scholarship</code>, <code>Applied On</code>, <code>Status</code>, <code>Action</code>), requiring <code>&lt;td colspan="6"&gt;</code>. Setting an incorrect <code>colspan</code> disrupts table grid alignment, a frequent deduction in past paper marking schemes.
+    </li>
+    <li><strong>Trap 3: Omitting Midnight Normalization (<code>setHours(0,0,0,0)</code>):</strong>
+        <br><code>new Date()</code> captures the current system timestamp with hours, minutes, and seconds (e.g., 14:30:15). An input date has hours set to 00:00:00. Comparing them without <code>today.setHours(0,0,0,0)</code> causes today's date to be treated as earlier than <code>today</code>, erroneously rejecting valid same-day deadlines!
+    </li>
+</ul>
+
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 1</span><span class="file-badge">public/applications.php: Line 41</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why did you use a LEFT JOIN for the students table but INNER JOINs for users and scholarships in your applications query?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>Because foreign key integrity guarantees that every application in <code>student_scholarships</code> has a corresponding record in <code>users</code> and in <code>scholarships</code>, so an <code>INNER JOIN</code> safely matches those tables. However, the student bio-data profile in <code>students</code> is populated incrementally; if a student submitted an application before finalizing their profile, an <code>INNER JOIN</code> would completely exclude that application from the registrar's view! A <code>LEFT JOIN</code> guarantees that the application is displayed even if <code>students</code> columns return <code>NULL</code>.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 2</span><span class="file-badge">public/applications.php: Line 208</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why is parts[1] - 1 used when creating the Date object in validateDeadline()?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>The JavaScript <code>Date(year, monthIndex, day)</code> constructor uses a zero-based index for months, where January is 0 and December is 11. Since HTML date inputs submit dates in ISO format <code>YYYY-MM-DD</code> where month is 1-based (01 to 12), failing to subtract 1 shifts the date forward by an entire month. Subtracting 1 aligns the parsed string with JavaScript's internal calendar index.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 3</span><span class="file-badge">public/applications.php: Lines 33-34</span></div>
+    <p><strong>Examiner:</strong> &ldquo;How does the database uniquely identify which application to update when there is no single primary key id column?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>The <code>student_scholarships</code> table is an associative junction table using a <strong>composite primary key</strong> made of two columns: <code>(student_id, scholarship_id)</code>. Because both keys together uniquely identify an application instance, our SQL query specifies both in the <code>WHERE</code> clause: <code>WHERE student_id = ? AND scholarship_id = ?</code>.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 4</span><span class="file-badge">public/applications.php: Line 26</span></div>
+    <p><strong>Examiner:</strong> &ldquo;What happens to existing student applications in the database if the registrar deletes a scholarship?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>In our relational schema (<code>schema.sql</code>), the foreign key in <code>student_scholarships</code> is defined with <code>ON DELETE CASCADE</code>: <code>FOREIGN KEY (scholarship_id) REFERENCES scholarships(id) ON DELETE CASCADE</code>. When MySQL executes the <code>DELETE FROM scholarships WHERE id = ?</code> query, the database engine automatically deletes all corresponding application rows in <code>student_scholarships</code>, preventing orphan records and preserving referential integrity.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 5</span><span class="file-badge">public/applications.php: Line 210</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why is today.setHours(0, 0, 0, 0) strictly required before comparing dates?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>Calling <code>new Date()</code> creates a timestamp containing the current time down to the millisecond. By contrast, a date created from <code>YYYY-MM-DD</code> has its time initialized to 00:00:00. If the registrar selects today's date as the deadline, comparing without <code>setHours(0,0,0,0)</code> would evaluate today's midnight as less than the current time, falsely flagging today's date as in the past.</p>
+</div>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Live Coding Challenge</span><span class="file-badge">public/applications.php</span></div>
+    <h3 class="sub-title" style="margin-top: 0;">UCSC Live Coding Defense: Dynamic Status Filter for Applications</h3>
+    <p><strong>Examiner Scenario:</strong> The examiner asks: 'The registrar needs to filter applications by status. Add a GET-based filter dropdown above the applications table allowing filtering by &quot;all&quot;, &quot;pending&quot;, &quot;approved&quot;, or &quot;rejected&quot;, and modify the PDO query accordingly.'</p>
+    <div style="margin-top: 12px; margin-bottom: 6px; font-weight: 600; color: var(--accent-red);">❌ Before Code (Original):</div>
+    <pre><code class="language-php">// In public/applications.php line 41 (Original Applications Query)
+$stmt = $conn-&gt;query(&quot;SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, 
+st.dob, st.gender, st.parents_income, st.parents_occupation, st.gpa, st.permanent_address, 
+st.nic, st.contact_numbers, s.name AS scholarship_name 
+FROM student_scholarships ss 
+INNER JOIN users u ON ss.student_id = u.id 
+LEFT JOIN students st ON u.id = st.user_id 
+INNER JOIN scholarships s ON ss.scholarship_id = s.id 
+ORDER BY ss.applied_at DESC&quot;);
+$applications = $stmt-&gt;fetchAll();</code></pre>
+    <div style="margin-top: 12px; margin-bottom: 6px; font-weight: 600; color: var(--accent-green);">✅ After Code (Live Modified):</div>
+    <pre><code class="language-php">// In public/applications.php (Live modified with Status Filter via GET)
+$filterStatus = isset($_GET[&#x27;filter_status&#x27;]) ? trim($_GET[&#x27;filter_status&#x27;]) : &#x27;all&#x27;;
+
+$sql = &quot;SELECT ss.*, u.username, u.email, st.full_name, st.name_with_initials, 
+st.dob, st.gender, st.parents_income, st.parents_occupation, st.gpa, st.permanent_address, 
+st.nic, st.contact_numbers, s.name AS scholarship_name 
+FROM student_scholarships ss 
+INNER JOIN users u ON ss.student_id = u.id 
+LEFT JOIN students st ON u.id = st.user_id 
+INNER JOIN scholarships s ON ss.scholarship_id = s.id&quot;;
+
+$params = [];
+if ($filterStatus !== &#x27;all&#x27; &amp;&amp; in_array($filterStatus, [&#x27;pending&#x27;, &#x27;approved&#x27;, &#x27;rejected&#x27;])) {
+    $sql .= &quot; WHERE ss.status = ?&quot;;
+    $params[] = $filterStatus;
+}
+$sql .= &quot; ORDER BY ss.applied_at DESC&quot;;
+
+$stmt = $conn-&gt;prepare($sql);
+$stmt-&gt;execute($params);
+$applications = $stmt-&gt;fetchAll();</code></pre>
+    <div style="margin-top: 12px;"><strong>Technical Defense &amp; Implementation Walkthrough:</strong><br>To implement this live modification cleanly:
+    <ol>
+        <li>We read <code>$_GET['filter_status']</code> with a safe fallback of <code>'all'</code>.</li>
+        <li>We maintain a whitelist array (<code>['pending', 'approved', 'rejected']</code>) to prevent SQL injection or invalid status queries.</li>
+        <li>If a specific status is requested, we dynamically append <code>WHERE ss.status = ?</code> to our SQL query and bind the parameter using PDO.</li>
+        <li>This preserves prepared statement security while providing dynamic query filtering.</li>
+    </ol></div>
+</div>
+<hr>
+
+<div id="file-public-home" class="section-anchor"></div>
+<h2 class="topic-title">public/home.php &mdash; Application Portal, Student Dashboard &amp; Multi-Role Router</h2>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Architectural Role</span><span class="file-badge">System Core &amp; Flagship Engine</span></div>
+    <p><code>public/home.php</code> is the central operational portal of the Scholarship Management System. Spanning 360 lines of structured PHP, HTML5, and JavaScript, it functions as a polymorphic hub: an open public catalog for unauthenticated visitors, a multi-role router for administrators and registrars, and a comprehensive application portal for students. It coordinates multi-field form data handling (14 inputs), profile &ldquo;Upsert&rdquo; relational logic, pre-populated form state retention, and strict non-regex algorithmic client-side validation.</p>
+</div>
+
+<h3 class="sub-title">Chunk 1: Session Bootstrap &amp; Multi-Role Authentication Routing (Lines 1&ndash;19)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/home.php: Lines 1-19</span></div>
+    <pre><code class="language-php">&lt;?php
+session_start();
+require_once &#x27;../config/db.php&#x27;;
+
+$isLoggedIn = isset($_SESSION[&#x27;user_id&#x27;]);
+$username = $isLoggedIn ? $_SESSION[&#x27;username&#x27;] : &#x27;Guest&#x27;;
+$isAdmin = $isLoggedIn &amp;&amp; $_SESSION[&#x27;role&#x27;] === &#x27;admin&#x27;;
+$isRegistrar = $isLoggedIn &amp;&amp; $_SESSION[&#x27;role&#x27;] === &#x27;registrar&#x27;;
+$isStudent = $isLoggedIn &amp;&amp; $_SESSION[&#x27;role&#x27;] === &#x27;student&#x27;;
+
+$message = &#x27;&#x27;;
+$selectedScholarship = null;
+
+if ($isStudent &amp;&amp; isset($_GET[&#x27;sid&#x27;])) {
+    $stmt = $conn-&gt;prepare(&quot;SELECT * FROM scholarships WHERE id = ?&quot;);
+    $stmt-&gt;execute([$_GET[&#x27;sid&#x27;]]);
+    $selectedScholarship = $stmt-&gt;fetch();
+}
+
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 1-19</span></div>
+    <ul>
+        <li><strong>Lines 1&ndash;3:</strong> Invokes <code>session_start()</code> to retrieve session state and requires <code>../config/db.php</code> to initialize the PDO database connection.</li>
+        <li><strong>Lines 5&ndash;9 (Role Flags Initialization):</strong>
+            <ul>
+                <li><code>$isLoggedIn = isset($_SESSION['user_id']);</code>: Boolean expression evaluating whether an authenticated session exists.</li>
+                <li><code>$username = $isLoggedIn ? $_SESSION['username'] : 'Guest';</code>: Ternary operator assigning the authenticated username or defaulting to <code>'Guest'</code>.</li>
+                <li><code>$isAdmin = $isLoggedIn &amp;&amp; $_SESSION['role'] === 'admin';</code>: Evaluates administrator privilege.</li>
+                <li><code>$isRegistrar = $isLoggedIn &amp;&amp; $_SESSION['role'] === 'registrar';</code>: Evaluates registrar privilege.</li>
+                <li><code>$isStudent = $isLoggedIn &amp;&amp; $_SESSION['role'] === 'student';</code>: Evaluates student applicant privilege.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 11&ndash;12:</strong> Initializes local feedback string <code>$message</code> and selected scholarship buffer <code>$selectedScholarship</code>.</li>
+        <li><strong>Lines 14&ndash;18 (Selected Scholarship Resolution):</strong>
+            <ul>
+                <li><code>if ($isStudent &amp;&amp; isset($_GET['sid']))</code>: Checks if a logged-in student has clicked "Apply" for a specific scholarship ID passed in the query string.</li>
+                <li><code>$stmt = $conn-&gt;prepare("SELECT * FROM scholarships WHERE id = ?"); $stmt-&gt;execute([$_GET['sid']]); $selectedScholarship = $stmt-&gt;fetch();</code>: Fetches the target scholarship's metadata to populate the application form header.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 2: Application Submission Processing &amp; Profile Upsert Logic (Lines 20&ndash;63)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/home.php: Lines 20-63</span></div>
+    <pre><code class="language-php">if ($isStudent &amp;&amp; $_SERVER[&#x27;REQUEST_METHOD&#x27;] === &#x27;POST&#x27; &amp;&amp; isset($_POST[&#x27;apply&#x27;])) {
+    $scholarshipId = $_POST[&#x27;scholarship_id&#x27;];
+    $parentsIncome = $_POST[&#x27;parents_income&#x27;];
+    $parentsOccupation = trim($_POST[&#x27;parents_occupation&#x27;]);
+    $purpose = trim($_POST[&#x27;purpose&#x27;]);
+    $gpa = $_POST[&#x27;gpa&#x27;];
+    $permanentAddress = trim($_POST[&#x27;permanent_address&#x27;]);
+    $nic = trim($_POST[&#x27;nic&#x27;]);
+    $contactNumbers = trim($_POST[&#x27;contact_numbers&#x27;]);
+    $description = trim($_POST[&#x27;description&#x27;]);
+    $testimonialChecked = isset($_POST[&#x27;testimonial_checked&#x27;]) ? 1 : 0;
+    $fullName = trim($_POST[&#x27;full_name&#x27;]);
+    $nameInitials = trim($_POST[&#x27;name_with_initials&#x27;]);
+    $dob = $_POST[&#x27;dob&#x27;];
+    $gender = $_POST[&#x27;gender&#x27;];
+
+    $check = $conn-&gt;prepare(&quot;SELECT COUNT(*) FROM student_scholarships WHERE student_id = ? AND scholarship_id = ?&quot;);
+    $check-&gt;execute([$_SESSION[&#x27;user_id&#x27;], $scholarshipId]);
+    $alreadyApplied = $check-&gt;fetchColumn();
+
+    if ($alreadyApplied &gt; 0) {
+        $message = &#x27;You have already applied for this scholarship.&#x27;;
+    } else {
+        $profCheck = $conn-&gt;prepare(&quot;SELECT COUNT(*) FROM students WHERE user_id = ?&quot;);
+        $profCheck-&gt;execute([$_SESSION[&#x27;user_id&#x27;]]);
+        $profExists = $profCheck-&gt;fetchColumn();
+
+        if ($profExists &gt; 0) {
+            $stmtStudent = $conn-&gt;prepare(&quot;UPDATE students SET full_name=?, name_with_initials=?, dob=?, gender=?, parents_income=?, parents_occupation=?, gpa=?, permanent_address=?, nic=?, contact_numbers=? WHERE user_id=?&quot;);
+            $stmtStudent-&gt;execute([$fullName, $nameInitials, $dob, $gender, $parentsIncome, $parentsOccupation, $gpa, $permanentAddress, $nic, $contactNumbers, $_SESSION[&#x27;user_id&#x27;]]);
+        } else {
+            $stmtStudent = $conn-&gt;prepare(&quot;INSERT INTO students (user_id, full_name, name_with_initials, dob, gender, parents_income, parents_occupation, gpa, permanent_address, nic, contact_numbers) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)&quot;);
+            $stmtStudent-&gt;execute([$_SESSION[&#x27;user_id&#x27;], $fullName, $nameInitials, $dob, $gender, $parentsIncome, $parentsOccupation, $gpa, $permanentAddress, $nic, $contactNumbers]);
+        }
+
+        $stmt = $conn-&gt;prepare(&quot;INSERT INTO student_scholarships (student_id, scholarship_id, purpose, description, testimonial_checked) VALUES (?, ?, ?, ?, ?)&quot;);
+        if ($stmt-&gt;execute([$_SESSION[&#x27;user_id&#x27;], $scholarshipId, $purpose, $description, $testimonialChecked])) {
+            $message = &#x27;Application submitted successfully.&#x27;;
+        } else {
+            $message = &#x27;Failed to submit application.&#x27;;
+        }
+    }
+}
+
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 20-63</span></div>
+    <ul>
+        <li><strong>Line 20 (<code>if ($isStudent &amp;&amp; $_SERVER['REQUEST_METHOD'] === 'POST' &amp;&amp; isset($_POST['apply']))</code>):</strong> Gatekeeper condition verifying that the submitter is an authenticated student dispatching a POST request with the hidden <code>apply</code> flag.</li>
+        <li><strong>Lines 21&ndash;34 (14-Field Form Data Extraction &amp; Sanitization):</strong>
+            <ul>
+                <li>Trims text inputs: <code>$parentsOccupation</code>, <code>$purpose</code>, <code>$permanentAddress</code>, <code>$nic</code>, <code>$contactNumbers</code>, <code>$description</code>, <code>$fullName</code>, <code>$nameInitials</code>.</li>
+                <li>Reads scalar and numeric inputs: <code>$scholarshipId</code>, <code>$parentsIncome</code>, <code>$gpa</code>, <code>$dob</code>, <code>$gender</code>.</li>
+                <li><strong>Checkbox State Handling:</strong> <code>$testimonialChecked = isset($_POST['testimonial_checked']) ? 1 : 0;</code>
+                    <br><em>Crucial HTTP Specification Rule:</em> In HTTP form submissions, unchecked checkboxes are <strong>completely omitted</strong> from the POST payload. Attempting direct access via <code>$_POST['testimonial_checked']</code> would trigger an <code>Undefined array key</code> warning. The <code>isset()</code> ternary safely normalizes the state to integer <code>1</code> or <code>0</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 36&ndash;41 (Duplicate Application Prevention):</strong>
+            <ul>
+                <li><code>$check = $conn-&gt;prepare("SELECT COUNT(*) FROM student_scholarships WHERE student_id = ? AND scholarship_id = ?");</code></li>
+                <li><code>$check-&gt;execute([$_SESSION['user_id'], $scholarshipId]);</code></li>
+                <li><code>if ($alreadyApplied &gt; 0) &#123; $message = 'You have already applied for this scholarship.'; &#125;</code>: Enforces the business rule that each student can only apply once per scholarship offering.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 43&ndash;54 (The Student Profile &ldquo;Upsert&rdquo; Architecture):</strong>
+            <ul>
+                <li><code>$profCheck = $conn-&gt;prepare("SELECT COUNT(*) FROM students WHERE user_id = ?");</code>: Checks if a profile row already exists for this student in the <code>students</code> table.</li>
+                <li><strong>The UPDATE Branch (Line 48):</strong> If <code>$profExists &gt; 0</code>, runs <code>UPDATE students SET full_name=?, name_with_initials=?, dob=?, gender=?, parents_income=?, parents_occupation=?, gpa=?, permanent_address=?, nic=?, contact_numbers=? WHERE user_id=?</code>.</li>
+                <li><strong>The INSERT Branch (Line 51):</strong> If <code>$profExists == 0</code>, executes <code>INSERT INTO students (user_id, full_name, ...) VALUES (?, ?, ...)</code>.</li>
+                <li><em>Architectural Significance:</em> This ensures that a student's permanent profile is maintained independently in the normalized <code>students</code> table without duplicating bio-data across every scholarship application.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 55&ndash;61 (Application Record Persistence):</strong>
+            <ul>
+                <li><code>INSERT INTO student_scholarships (student_id, scholarship_id, purpose, description, testimonial_checked) VALUES (?, ?, ?, ?, ?)</code></li>
+                <li>Status defaults automatically to <code>'pending'</code> in MySQL schema. Sets feedback <code>$message = 'Application submitted successfully.';</code>.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 3: Dashboard Data Preparation &amp; Profile Pre-Population (Lines 64&ndash;87)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/home.php: Lines 64-87</span></div>
+    <pre><code class="language-php">$allScholarships = $conn-&gt;query(&quot;SELECT * FROM scholarships ORDER BY id ASC&quot;)-&gt;fetchAll();
+
+$applications = [];
+$userProfile = [];
+if ($isStudent) {
+    $stmt = $conn-&gt;prepare(&quot;SELECT ss.*, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN scholarships s ON ss.scholarship_id = s.id WHERE ss.student_id = ? ORDER BY ss.applied_at DESC&quot;);
+    $stmt-&gt;execute([$_SESSION[&#x27;user_id&#x27;]]);
+    $applications = $stmt-&gt;fetchAll();
+
+    $profStmt = $conn-&gt;prepare(&quot;SELECT full_name, name_with_initials, dob, gender, parents_income, parents_occupation, gpa, permanent_address, nic, contact_numbers FROM students WHERE user_id = ?&quot;);
+    $profStmt-&gt;execute([$_SESSION[&#x27;user_id&#x27;]]);
+    $userProfile = $profStmt-&gt;fetch();
+    if (!$userProfile) {
+        $userProfile = [
+            &#x27;full_name&#x27; =&gt; &#x27;&#x27;, &#x27;name_with_initials&#x27; =&gt; &#x27;&#x27;, &#x27;dob&#x27; =&gt; &#x27;&#x27;, &#x27;gender&#x27; =&gt; &#x27;&#x27;,
+            &#x27;parents_income&#x27; =&gt; &#x27;&#x27;, &#x27;parents_occupation&#x27; =&gt; &#x27;&#x27;, &#x27;gpa&#x27; =&gt; &#x27;&#x27;, &#x27;permanent_address&#x27; =&gt; &#x27;&#x27;,
+            &#x27;nic&#x27; =&gt; &#x27;&#x27;, &#x27;contact_numbers&#x27; =&gt; &#x27;&#x27;
+        ];
+    }
+}
+
+$pageTitle = &#x27;Home - Scholarship Management System&#x27;;
+require_once &#x27;../includes/header.php&#x27;;
+?&gt;
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 64-87</span></div>
+    <ul>
+        <li><strong>Line 64 (Catalog Query):</strong> <code>$allScholarships = $conn-&gt;query("SELECT * FROM scholarships ORDER BY id ASC")-&gt;fetchAll();</code> retrieves all scholarship offerings for catalog display.</li>
+        <li><strong>Lines 66&ndash;83 (Student Relational Data Loading):</strong>
+            <ul>
+                <li><code>SELECT ss.*, s.name AS scholarship_name FROM student_scholarships ss INNER JOIN scholarships s ON ss.scholarship_id = s.id WHERE ss.student_id = ? ORDER BY ss.applied_at DESC</code>: Fetches all prior applications submitted by this logged-in student.</li>
+                <li><strong>Profile Pre-Fetching:</strong> <code>SELECT full_name, name_with_initials, dob, gender, parents_income, parents_occupation, gpa, permanent_address, nic, contact_numbers FROM students WHERE user_id = ?</code> retrieves the student's saved bio-data.</li>
+                <li><strong>Fallback Array Initialization:</strong> Lines 76&ndash;82 ensure that if the student has no profile row yet (first-time applicant), <code>$userProfile</code> is initialized with empty strings across all 10 keys, preventing PHP <code>Undefined array key</code> notices when rendering the form inputs!</li>
+            </ul>
+        </li>
+        <li><strong>Lines 85&ndash;86:</strong> Defines page title and includes universal header.</li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 4: Dashboard Hero &amp; Application Form Setup (Lines 88&ndash;121)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/home.php: Lines 88-121</span></div>
+    <pre><code class="language-php">    &lt;div class=&quot;container&quot;&gt;
+        &lt;div class=&quot;dashboard-header&quot;&gt;
+            &lt;?php if ($isLoggedIn): ?&gt;
+                &lt;h1&gt;Welcome, &lt;?php echo htmlspecialchars($username); ?&gt;!&lt;/h1&gt;
+                &lt;p&gt;Role: &lt;?php echo ucfirst($_SESSION[&#x27;role&#x27;]); ?&gt;&lt;/p&gt;
+            &lt;?php else: ?&gt;
+                &lt;h1&gt;Welcome to the Scholarship Management System&lt;/h1&gt;
+                &lt;p&gt;Please login or register to apply for scholarships.&lt;/p&gt;
+            &lt;?php endif; ?&gt;
+            &lt;div style=&quot;margin-top: 15px;&quot;&gt;
+                &lt;a href=&quot;../GUIDE/&quot; target=&quot;_blank&quot; class=&quot;btn-guide&quot; style=&quot;display: inline-block; width: auto; padding: 10px 22px; font-size: 0.95em;&quot;&gt;
+                    📖 Open Syllabus &amp;amp; Viva Study Guide &amp;rarr;
+                &lt;/a&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;?php if ($isLoggedIn): ?&gt;
+            &lt;?php if ($message): ?&gt;
+            &lt;script type=&quot;text/javascript&quot;&gt;alert(&quot;&lt;?php echo addslashes($message); ?&gt;&quot;);&lt;/script&gt;
+            &lt;?php endif; ?&gt;
+
+            &lt;?php if ($isStudent): ?&gt;
+                &lt;?php if ($selectedScholarship): ?&gt;
+                    &lt;div class=&quot;content-page&quot;&gt;
+                        &lt;h2&gt;Apply for: &lt;?php echo htmlspecialchars($selectedScholarship[&#x27;name&#x27;]); ?&gt;&lt;/h2&gt;
+                        &lt;p&gt;&lt;?php echo htmlspecialchars($selectedScholarship[&#x27;description&#x27;]); ?&gt;&lt;/p&gt;
+                        &lt;?php if ($selectedScholarship[&#x27;deadline&#x27;]): ?&gt;
+                            &lt;p&gt;&lt;strong&gt;Deadline:&lt;/strong&gt; &lt;?php echo htmlspecialchars($selectedScholarship[&#x27;deadline&#x27;]); ?&gt;&lt;/p&gt;
+                        &lt;?php endif; ?&gt;
+                        &lt;hr&gt;
+                        &lt;form name=&quot;appForm&quot; action=&quot;home.php&quot; method=&quot;POST&quot; onsubmit=&quot;return checkApplication()&quot;&gt;
+                            &lt;input type=&quot;hidden&quot; name=&quot;apply&quot; value=&quot;1&quot;&gt;
+                            &lt;input type=&quot;hidden&quot; name=&quot;scholarship_id&quot; value=&quot;&lt;?php echo $selectedScholarship[&#x27;id&#x27;]; ?&gt;&quot;&gt;
+
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 88-121</span></div>
+    <ul>
+        <li><strong>Lines 88&ndash;102 (Dynamic Greeting Banner):</strong>
+            <ul>
+                <li>If logged in: renders <code>Welcome, &lt;?php echo htmlspecialchars($username); ?&gt;!</code> and displays capitalized role.</li>
+                <li>If guest: displays generic public welcome and call-to-action to login/register.</li>
+                <li>Provides persistent navigation link to the study guide.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 105&ndash;107:</strong> Injects JavaScript modal <code>alert()</code> with <code>addslashes($message)</code> if feedback exists.</li>
+        <li><strong>Lines 110&ndash;121 (Application View Initialization):</strong>
+            <ul>
+                <li>Renders targeted scholarship title, description, and deadline.</li>
+                <li><code>&lt;form name="appForm" action="home.php" method="POST" onsubmit="return checkApplication()"&gt;</code>: Hooks DOM Level 0 form validation.</li>
+                <li>Hidden input <code>&lt;input type="hidden" name="apply" value="1"&gt;</code>: Flags the POST submission.</li>
+                <li>Hidden input <code>&lt;input type="hidden" name="scholarship_id" value="&lt;?php echo $selectedScholarship['id']; ?&gt;"&gt;</code>: Binds the application to the selected scholarship.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 5: Personal Information Fieldset &amp; Readonly State (Lines 122&ndash;170)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/home.php: Lines 122-170</span></div>
+    <pre><code class="language-php">                            &lt;fieldset&gt;
+                                &lt;legend&gt;Personal Information&lt;/legend&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Username&lt;/label&gt;
+                                    &lt;input type=&quot;text&quot; name=&quot;username_display&quot; value=&quot;&lt;?php echo htmlspecialchars($username); ?&gt;&quot; class=&quot;input-readonly&quot; readonly&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Full Name&lt;/label&gt;
+                                    &lt;input type=&quot;text&quot; name=&quot;full_name&quot; value=&quot;&lt;?php echo htmlspecialchars($userProfile[&#x27;full_name&#x27;]); ?&gt;&quot; required&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Name with Initials&lt;/label&gt;
+                                    &lt;input type=&quot;text&quot; name=&quot;name_with_initials&quot; value=&quot;&lt;?php echo htmlspecialchars($userProfile[&#x27;name_with_initials&#x27;]); ?&gt;&quot; required&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Date of Birth&lt;/label&gt;
+                                    &lt;input type=&quot;date&quot; name=&quot;dob&quot; value=&quot;&lt;?php echo htmlspecialchars($userProfile[&#x27;dob&#x27;]); ?&gt;&quot; required&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Gender&lt;/label&gt;
+                                    &lt;select name=&quot;gender&quot; required&gt;
+                                        &lt;option value=&quot;&quot;&gt;-- Select --&lt;/option&gt;
+                                        &lt;option value=&quot;Male&quot; &lt;?php if ($userProfile[&#x27;gender&#x27;] === &#x27;Male&#x27;) echo &#x27;selected&#x27;; ?&gt;&gt;Male&lt;/option&gt;
+                                        &lt;option value=&quot;Female&quot; &lt;?php if ($userProfile[&#x27;gender&#x27;] === &#x27;Female&#x27;) echo &#x27;selected&#x27;; ?&gt;&gt;Female&lt;/option&gt;
+                                        &lt;option value=&quot;Other&quot; &lt;?php if ($userProfile[&#x27;gender&#x27;] === &#x27;Other&#x27;) echo &#x27;selected&#x27;; ?&gt;&gt;Other&lt;/option&gt;
+                                    &lt;/select&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Permanent Address&lt;/label&gt;
+                                    &lt;textarea name=&quot;permanent_address&quot; rows=&quot;2&quot;&gt;&lt;?php echo htmlspecialchars($userProfile[&#x27;permanent_address&#x27;]); ?&gt;&lt;/textarea&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;&lt;abbr title=&quot;National Identity Card&quot;&gt;NIC&lt;/abbr&gt; Number&lt;/label&gt;
+                                    &lt;input type=&quot;text&quot; name=&quot;nic&quot; value=&quot;&lt;?php echo htmlspecialchars($userProfile[&#x27;nic&#x27;]); ?&gt;&quot;&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Contact Number&lt;/label&gt;
+                                    &lt;input type=&quot;text&quot; name=&quot;contact_numbers&quot; value=&quot;&lt;?php echo htmlspecialchars($userProfile[&#x27;contact_numbers&#x27;]); ?&gt;&quot;&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Parents&#x27; Annual Income (Rs.)&lt;/label&gt;
+                                    &lt;input type=&quot;number&quot; step=&quot;0.01&quot; name=&quot;parents_income&quot; value=&quot;&lt;?php echo htmlspecialchars($userProfile[&#x27;parents_income&#x27;]); ?&gt;&quot;&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Parents&#x27; Occupation&lt;/label&gt;
+                                    &lt;input type=&quot;text&quot; name=&quot;parents_occupation&quot; value=&quot;&lt;?php echo htmlspecialchars($userProfile[&#x27;parents_occupation&#x27;]); ?&gt;&quot;&gt;
+                                &lt;/div&gt;
+                            &lt;/fieldset&gt;
+
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 122-170</span></div>
+    <ul>
+        <li><strong>Lines 122&ndash;123 (<code>&lt;fieldset&gt;&lt;legend&gt;Personal Information&lt;/legend&gt;</code>):</strong> Semantic grouping for related form controls.</li>
+        <li><strong>Lines 124&ndash;127 (Read-Only Username Field):</strong>
+            <ul>
+                <li><code>&lt;input type="text" name="username_display" value="&lt;?php echo htmlspecialchars($username); ?&gt;" class="input-readonly" readonly&gt;</code></li>
+                <li><strong>Crucial Technical Distinction (<code>readonly</code> vs <code>disabled</code>):</strong>
+                    The <code>readonly</code> attribute prevents user editing while guaranteeing that the input is still included in the HTTP form submission payload. If <code>disabled</code> were used, the browser would completely omit the field from the HTTP request!</li>
+            </ul>
+        </li>
+        <li><strong>Lines 128&ndash;139 (Pre-Populated Bio Inputs):</strong> Full Name, Name with Initials, and Date of Birth (<code>&lt;input type="date"&gt;</code>) pre-populated from <code>$userProfile</code> using <code>htmlspecialchars()</code>.</li>
+        <li><strong>Lines 140&ndash;148 (Dropdown State Retention):</strong>
+            <ul>
+                <li><code>&lt;option value="Male" &lt;?php if ($userProfile['gender'] === 'Male') echo 'selected'; ?&gt;&gt;Male&lt;/option&gt;</code></li>
+                <li>Preserves selected dropdown state across form loads using inline PHP conditional evaluation.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 149&ndash;169 (Detailed Demographics):</strong>
+            <ul>
+                <li>Permanent Address inside <code>&lt;textarea&gt;</code>.</li>
+                <li>National Identity Card with semantic <code>&lt;abbr title="National Identity Card"&gt;NIC&lt;/abbr&gt;</code> tag.</li>
+                <li>Contact numbers, Parents' Annual Income with floating point precision (<code>step="0.01"</code>), and Parents' Occupation.</li>
+            </ul>
+        </li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 6: Academic &amp; Additional Information Fieldsets (Lines 171&ndash;200)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/home.php: Lines 171-200</span></div>
+    <pre><code class="language-php">                            &lt;fieldset&gt;
+                                &lt;legend&gt;Academic Information&lt;/legend&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Current &lt;abbr title=&quot;Grade Point Average&quot;&gt;GPA&lt;/abbr&gt; (0.00 - 4.00)&lt;/label&gt;
+                                    &lt;input type=&quot;number&quot; step=&quot;0.01&quot; min=&quot;0&quot; max=&quot;4.0&quot; name=&quot;gpa&quot; value=&quot;&lt;?php echo htmlspecialchars($userProfile[&#x27;gpa&#x27;]); ?&gt;&quot;&gt;
+                                &lt;/div&gt;
+                            &lt;/fieldset&gt;
+
+                            &lt;fieldset&gt;
+                                &lt;legend&gt;Additional Information&lt;/legend&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Purpose of Request&lt;/label&gt;
+                                    &lt;input type=&quot;text&quot; name=&quot;purpose&quot;&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;Additional Description&lt;/label&gt;
+                                    &lt;textarea name=&quot;description&quot; rows=&quot;3&quot;&gt;&lt;/textarea&gt;
+                                &lt;/div&gt;
+                                &lt;div class=&quot;form-group&quot;&gt;
+                                    &lt;label&gt;
+                                        &lt;input type=&quot;checkbox&quot; name=&quot;testimonial_checked&quot;&gt;
+                                        I confirm that I have a testimonial from a Grama Niladhari or authorized personnel.
+                                    &lt;/label&gt;
+                                &lt;/div&gt;
+                            &lt;/fieldset&gt;
+                            &lt;button type=&quot;submit&quot; class=&quot;btn btn-primary&quot;&gt;Submit Application&lt;/button&gt;
+                            &lt;a href=&quot;home.php&quot; class=&quot;btn&quot;&gt;Cancel&lt;/a&gt;
+                        &lt;/form&gt;
+                    &lt;/div&gt;
+                &lt;?php else: ?&gt;
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 171-200</span></div>
+    <ul>
+        <li><strong>Lines 171&ndash;178 (Academic Information Fieldset):</strong>
+            <ul>
+                <li>GPA input: <code>&lt;input type="number" step="0.01" min="0" max="4.0" name="gpa" value="&lt;?php echo htmlspecialchars($userProfile['gpa']); ?&gt;"&gt;</code>.</li>
+                <li>Enforces 2-decimal floating point precision via <code>step="0.01"</code> and bounds checking between 0.00 and 4.00.</li>
+                <li>Uses semantic <code>&lt;abbr title="Grade Point Average"&gt;GPA&lt;/abbr&gt;</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 179&ndash;195 (Additional Information Fieldset):</strong>
+            <ul>
+                <li>Purpose of Request text input and multiline Description textarea.</li>
+                <li><strong>Testimonial Checkbox:</strong> <code>&lt;input type="checkbox" name="testimonial_checked"&gt;</code>. Used to confirm legal documentation from Grama Niladhari or authorized personnel.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 196&ndash;198:</strong> Submit button (<code>Submit Application</code>) and Cancel anchor returning to <code>home.php</code>.</li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 7: Student Dashboard &amp; Application History (Lines 201&ndash;262)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/home.php: Lines 201-262</span></div>
+    <pre><code class="language-php">                    &lt;div class=&quot;content-page&quot;&gt;
+                        &lt;h2&gt;Available Scholarships&lt;/h2&gt;
+                        &lt;?php if (empty($allScholarships)): ?&gt;
+                            &lt;p&gt;No scholarships are currently available.&lt;/p&gt;
+                        &lt;?php else: ?&gt;
+                            &lt;table&gt;
+                                &lt;thead&gt;
+                                    &lt;tr&gt;
+                                        &lt;th&gt;Scholarship&lt;/th&gt;
+                                        &lt;th&gt;Description&lt;/th&gt;
+                                        &lt;th&gt;Deadline&lt;/th&gt;
+                                        &lt;th&gt;Action&lt;/th&gt;
+                                    &lt;/tr&gt;
+                                &lt;/thead&gt;
+                                &lt;tbody&gt;
+                                    &lt;?php foreach ($allScholarships as $sch): ?&gt;
+                                    &lt;tr&gt;
+                                        &lt;td&gt;&lt;strong&gt;&lt;?php echo htmlspecialchars($sch[&#x27;name&#x27;]); ?&gt;&lt;/strong&gt;&lt;/td&gt;
+                                        &lt;td&gt;&lt;?php echo htmlspecialchars($sch[&#x27;description&#x27;]); ?&gt;&lt;/td&gt;
+                                        &lt;td&gt;&lt;?php echo htmlspecialchars($sch[&#x27;deadline&#x27;]); ?&gt;&lt;/td&gt;
+                                        &lt;td&gt;&lt;a href=&quot;home.php?sid=&lt;?php echo $sch[&#x27;id&#x27;]; ?&gt;&quot; class=&quot;btn btn-primary&quot;&gt;Apply&lt;/a&gt;&lt;/td&gt;
+                                    &lt;/tr&gt;
+                                    &lt;?php endforeach; ?&gt;
+                                &lt;/tbody&gt;
+                            &lt;/table&gt;
+                        &lt;?php endif; ?&gt;
+                    &lt;/div&gt;
+                &lt;?php endif; ?&gt;
+
+                &lt;div class=&quot;table-container&quot;&gt;
+                    &lt;h2&gt;Your Applications&lt;/h2&gt;
+                    &lt;table&gt;
+                        &lt;caption&gt;Your submitted scholarship applications&lt;/caption&gt;
+                        &lt;thead&gt;
+                            &lt;tr&gt;
+                                &lt;th&gt;Scholarship&lt;/th&gt;
+                                &lt;th&gt;Status&lt;/th&gt;
+                                &lt;th&gt;Applied On&lt;/th&gt;
+                            &lt;/tr&gt;
+                        &lt;/thead&gt;
+                        &lt;tbody&gt;
+                            &lt;?php foreach ($applications as $app): ?&gt;
+                            &lt;tr&gt;
+                                &lt;td&gt;&lt;?php echo htmlspecialchars($app[&#x27;scholarship_name&#x27;]); ?&gt;&lt;/td&gt;
+                                &lt;td&gt;&lt;em&gt;&lt;?php echo ucfirst($app[&#x27;status&#x27;]); ?&gt;&lt;/em&gt;&lt;/td&gt;
+                                &lt;td&gt;&lt;?php echo htmlspecialchars($app[&#x27;applied_at&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;/tr&gt;
+                            &lt;?php endforeach; ?&gt;
+                            &lt;?php if (empty($applications)): ?&gt;
+                            &lt;tr&gt;&lt;td colspan=&quot;3&quot;&gt;No applications yet.&lt;/td&gt;&lt;/tr&gt;
+                            &lt;?php endif; ?&gt;
+                        &lt;/tbody&gt;
+                    &lt;/table&gt;
+                &lt;/div&gt;
+            &lt;?php endif; ?&gt;
+
+            &lt;?php if ($isAdmin || $isRegistrar): ?&gt;
+                &lt;div class=&quot;content-page&quot;&gt;
+                    &lt;p&gt;Use the navigation links above to access your panel.&lt;/p&gt;
+                &lt;/div&gt;
+            &lt;?php endif; ?&gt;
+
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 201-262</span></div>
+    <ul>
+        <li><strong>Lines 201&ndash;229 (Available Scholarships Table):</strong> Displayed when no scholarship is currently selected. Renders catalog of available scholarships with an "Apply" button linking to <code>home.php?sid=&lt;?php echo $sch['id']; ?&gt;</code>.</li>
+        <li><strong>Lines 230&ndash;255 (Your Applications Tracking Table):</strong>
+            <ul>
+                <li>Table with caption: <code>Your submitted scholarship applications</code>.</li>
+                <li>Displays Scholarship Name, Status (italicized via <code>&lt;em&gt;</code> and capitalized via <code>ucfirst()</code>), and submission timestamp.</li>
+                <li>Empty state fallback: <code>&lt;td colspan="3"&gt;No applications yet.&lt;/td&gt;</code> matching the 3 table headers.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 257&ndash;261:</strong> Navigation prompt for Admin and Registrar roles.</li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 8: Guest Public Catalog View (Lines 263&ndash;295)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/home.php: Lines 263-295</span></div>
+    <pre><code class="language-php">        &lt;?php else: ?&gt;
+            &lt;div class=&quot;content-page&quot;&gt;
+                &lt;h2&gt;Available Scholarships&lt;/h2&gt;
+                &lt;?php if (empty($allScholarships)): ?&gt;
+                    &lt;p&gt;No scholarships are currently available. Please check back later.&lt;/p&gt;
+                &lt;?php else: ?&gt;
+                    &lt;p&gt;We offer the following scholarship programmes for eligible students:&lt;/p&gt;
+                    &lt;table&gt;
+                        &lt;thead&gt;
+                            &lt;tr&gt;
+                                &lt;th&gt;Scholarship&lt;/th&gt;
+                                &lt;th&gt;Description&lt;/th&gt;
+                                &lt;th&gt;Deadline&lt;/th&gt;
+                            &lt;/tr&gt;
+                        &lt;/thead&gt;
+                        &lt;tbody&gt;
+                            &lt;?php foreach ($allScholarships as $sch): ?&gt;
+                            &lt;tr&gt;
+                                &lt;td&gt;&lt;strong&gt;&lt;?php echo htmlspecialchars($sch[&#x27;name&#x27;]); ?&gt;&lt;/strong&gt;&lt;/td&gt;
+                                &lt;td&gt;&lt;?php echo htmlspecialchars($sch[&#x27;description&#x27;]); ?&gt;&lt;/td&gt;
+                                &lt;td&gt;&lt;?php echo htmlspecialchars($sch[&#x27;deadline&#x27;]); ?&gt;&lt;/td&gt;
+                            &lt;/tr&gt;
+                            &lt;?php endforeach; ?&gt;
+                        &lt;/tbody&gt;
+                    &lt;/table&gt;
+                &lt;?php endif; ?&gt;
+                &lt;br&gt;
+                &lt;a href=&quot;login.php&quot; class=&quot;btn btn-primary&quot;&gt;Login to Apply&lt;/a&gt;
+                &lt;a href=&quot;signup.php&quot; class=&quot;btn&quot;&gt;Register Now&lt;/a&gt;
+            &lt;/div&gt;
+        &lt;?php endif; ?&gt;
+    &lt;/div&gt;
+
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 263-295</span></div>
+    <ul>
+        <li><strong>Line 263 (<code>&lt;?php else: ?&gt;</code>):</strong> Renders the public landing page for guests (unauthenticated users).</li>
+        <li><strong>Lines 265&ndash;288 (Public Scholarship Offerings):</strong> Displays all active scholarships (Name, Description, Deadline) in a read-only table without application action buttons.</li>
+        <li><strong>Lines 289&ndash;293:</strong> Primary call-to-action buttons directing guests to <code>login.php</code> and <code>signup.php</code>.</li>
+    </ul>
+</div>
+
+<h3 class="sub-title">Chunk 9: Algorithmic Non-Regex Client Validation (Lines 296&ndash;360)</h3>
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Verbatim Source Code</span><span class="file-badge">public/home.php: Lines 296-360</span></div>
+    <pre><code class="language-php">    &lt;script type=&quot;text/javascript&quot;&gt;
+        function checkApplication() {
+            var fullName = document.appForm.full_name.value;
+            var nameInitials = document.appForm.name_with_initials.value;
+            var dob = document.appForm.dob.value;
+            var gender = document.appForm.gender.value;
+            var nic = document.appForm.nic.value;
+            var gpa = document.appForm.gpa.value;
+
+            if (fullName == &quot;&quot;) {
+                alert(&quot;Full name is required.&quot;);
+                return false;
+            }
+            if (nameInitials == &quot;&quot;) {
+                alert(&quot;Name with initials is required.&quot;);
+                return false;
+            }
+            if (dob == &quot;&quot;) {
+                alert(&quot;Date of birth is required.&quot;);
+                return false;
+            } else {
+                var parts = dob.split(&quot;-&quot;);
+                var dobDate = new Date(parts[0], parts[1] - 1, parts[2]);
+                var today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (dobDate &gt; today) {
+                    alert(&quot;Date of birth cannot be in the future.&quot;);
+                    return false;
+                }
+            }
+            if (gender == &quot;&quot;) {
+                alert(&quot;Please select a gender.&quot;);
+                return false;
+            }
+            if (nic == &quot;&quot;) {
+                alert(&quot;Please enter your NIC number.&quot;);
+                return false;
+            }
+            if (nic.length != 12) {
+                alert(&quot;NIC number must be exactly 12 digits (new Sri Lanka NIC format).&quot;);
+                return false;
+            }
+            var i;
+            for (i = 0; i &lt; nic.length; i++) {
+                if (nic.charAt(i) &lt; &quot;0&quot; || nic.charAt(i) &gt; &quot;9&quot;) {
+                    alert(&quot;NIC number must contain digits only.&quot;);
+                    return false;
+                }
+            }
+            if (gpa == &quot;&quot;) {
+                alert(&quot;GPA is required.&quot;);
+                return false;
+            }
+            if (gpa &lt; 0 || gpa &gt; 4.0) {
+                alert(&quot;GPA must be between 0.00 and 4.00.&quot;);
+                return false;
+            }
+            if (document.appForm.testimonial_checked.checked == false) {
+                alert(&quot;You must confirm the testimonial.&quot;);
+                return false;
+            }
+            return true;
+        }
+    &lt;/script&gt;
+&lt;?php require_once &#x27;../includes/footer.php&#x27;; ?&gt;
+</code></pre>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Detailed Code &amp; Expression Breakdown</span><span class="file-badge">Lines 296-360</span></div>
+    <ul>
+        <li><strong>Line 297 (<code>function checkApplication()</code>):</strong> Client-side validation function hooked to the scholarship application form.</li>
+        <li><strong>Lines 298&ndash;303 (DOM Level 0 Form Navigation):</strong>
+            <ul>
+                <li><code>var fullName = document.appForm.full_name.value;</code></li>
+                <li><code>var nameInitials = document.appForm.name_with_initials.value;</code></li>
+                <li><code>var dob = document.appForm.dob.value;</code></li>
+                <li><code>var gender = document.appForm.gender.value;</code></li>
+                <li><code>var nic = document.appForm.nic.value;</code></li>
+                <li><code>var gpa = document.appForm.gpa.value;</code></li>
+            </ul>
+        </li>
+        <li><strong>Lines 305&ndash;312 (Required Text Validation):</strong> Verifies that <code>fullName</code> and <code>nameInitials</code> are non-empty strings.</li>
+        <li><strong>Lines 313&ndash;325 (Date of Birth Temporal Validation):</strong>
+            <ul>
+                <li>Splits date string: <code>var parts = dob.split("-");</code>.</li>
+                <li>Constructs date with 0-indexed month: <code>var dobDate = new Date(parts[0], parts[1] - 1, parts[2]);</code>.</li>
+                <li>Normalizes today: <code>var today = new Date(); today.setHours(0, 0, 0, 0);</code>.</li>
+                <li><strong>Future Date Guard:</strong> <code>if (dobDate &gt; today)</code> alerts <code>"Date of birth cannot be in the future."</code> and returns <code>false</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 326&ndash;329:</strong> Ensures gender is selected from dropdown.</li>
+        <li><strong>Lines 330&ndash;344 (Algorithmic Sri Lankan 12-Digit NIC Validation):</strong>
+            <ul>
+                <li><code>if (nic.length != 12)</code>: Checks exact length boundary of modern 12-digit Sri Lanka NIC.</li>
+                <li><strong>Algorithmic Character Loop (No Regex):</strong>
+                    <br><code>for (i = 0; i &lt; nic.length; i++) &#123; if (nic.charAt(i) &lt; "0" || nic.charAt(i) &gt; "9") &#123; alert("NIC number must contain digits only."); return false; &#125; &#125;</code>
+                    <br>Iterates across each character index using <code>charAt(i)</code> and verifies that character ASCII code points fall strictly between <code>"0"</code> (code 48) and <code>"9"</code> (code 57).</li>
+            </ul>
+        </li>
+        <li><strong>Lines 345&ndash;352 (GPA Numeric Boundary Validation):</strong>
+            <ul>
+                <li>Verifies presence and boundary: <code>if (gpa &lt; 0 || gpa &gt; 4.0)</code> alerts <code>"GPA must be between 0.00 and 4.00."</code>.</li>
+            </ul>
+        </li>
+        <li><strong>Lines 353&ndash;356 (Checkbox Verification):</strong>
+            <ul>
+                <li><code>if (document.appForm.testimonial_checked.checked == false)</code>:
+                    <strong>Vital DOM Property Rule:</strong> Checks the boolean <code>.checked</code> property. Reading <code>.value</code> would return <code>"on"</code> regardless of checked state! If unchecked, alerts user and halts submission.</li>
+            </ul>
+        </li>
+        <li><strong>Line 357 (<code>return true;</code>):</strong> Authorizes form submission.</li>
+        <li><strong>Line 360:</strong> Closes page layout with universal footer.</li>
+    </ul>
+</div>
+
+<div class="box box-concept">
+    <div class="box-header"><span class="box-tag">Theoretical Syllabus Principles &amp; Scope Compliance</span><span class="file-badge">UCSC IS1207 Syllabus Core</span></div>
+    
+<p><strong>1. HTML Form Architecture &amp; Semantic Accessibility:</strong></p>
+<p><code>home.php</code> demonstrates mastery of the complete HTML form element suite:</p>
+<table class="study-table">
+    <thead>
+        <tr><th>HTML Form Element</th><th>Semantic Purpose</th><th>Implementation in <code>home.php</code></th></tr>
+    </thead>
+    <tbody>
+        <tr><td><code>&lt;fieldset&gt; &amp; &lt;legend&gt;</code></td><td>Logical grouping of controls</td><td>Personal, Academic, and Additional Information sections (lines 122, 171, 179).</td></tr>
+        <tr><td><code>&lt;abbr title="..."&gt;</code></td><td>Semantic expansion of acronyms</td><td>Used for <abbr title="National Identity Card">NIC</abbr> and <abbr title="Grade Point Average">GPA</abbr> (lines 154, 174).</td></tr>
+        <tr><td><code>&lt;input readonly&gt;</code></td><td>Non-editable yet submittable control</td><td>Displays authenticated username without allowing tampering while ensuring transmission.</td></tr>
+        <tr><td><code>&lt;input type="number" step="0.01"&gt;</code></td><td>Constrained decimal numeric input</td><td>GPA and Parents' Income controls (lines 163, 175).</td></tr>
+    </tbody>
+</table>
+
+<p><strong>2. The Profile &ldquo;Upsert&rdquo; Architectural Pattern:</strong></p>
+<p>In relational database persistence, managing student bio-data across multiple scholarship submissions requires an &ldquo;Upsert&rdquo; (Update or Insert) pattern. By checking <code>SELECT COUNT(*) FROM students WHERE user_id = ?</code>, the system seamlessly inserts a new record for first-time applicants or updates existing demographic data for returning applicants, preventing duplicate rows and keeping data synchronized.</p>
+
+<p><strong>3. Algorithmic Non-Regex Input Validation:</strong></p>
+<p>In UCSC IS1207 practical programming exams, candidates are evaluated on algorithmic problem solving rather than memorizing complex regular expressions. Lines 338&ndash;344 illustrate pure algorithmic string processing: looping across character indices using <code>charAt(i)</code> and comparing character ranges lexicographically (<code>&lt; "0" || &gt; "9"</code>).</p>
+
+</div>
+
+<div class="box box-exam">
+    <div class="box-header"><span class="box-tag">UCSC IS1207 Past Paper Traps &amp; Exam Alerts</span><span class="file-badge">High-Frequency Exam Pitfalls</span></div>
+    
+<ul>
+    <li><strong>Trap 1: Checkbox HTTP POST Omission (AY2020, AY2021):</strong>
+        <br>When a user does not check a checkbox, the browser submits <em>nothing</em> for that input in the HTTP POST body. If code assumes the key exists (e.g. <code>$t = $_POST['testimonial_checked'];</code>), PHP throws an <code>Undefined array key</code> warning! Always use <code>isset($_POST['testimonial_checked']) ? 1 : 0</code>.
+    </li>
+    <li><strong>Trap 2: Checkbox Validation: <code>.checked</code> vs <code>.value</code>:</strong>
+        <br>In JavaScript DOM Level 0, <code>document.appForm.testimonial_checked.value</code> always evaluates to the string <code>"on"</code> whether the box is checked or unchecked! To evaluate whether the box is ticked, you must inspect the boolean property <code>document.appForm.testimonial_checked.checked</code>.
+    </li>
+    <li><strong>Trap 3: <code>readonly</code> vs <code>disabled</code> Form Field Behavior:</strong>
+        <br>An input marked <code>disabled</code> is excluded from the HTTP POST payload by the browser! If you mark the username field <code>disabled</code>, PHP receives <code>NULL</code>. To make a field visible and uneditable while preserving submission, you must use <code>readonly</code>.
+    </li>
+    <li><strong>Trap 4: Decimal Stepping in HTML5 Numeric Inputs:</strong>
+        <br>Standard <code>&lt;input type="number"&gt;</code> defaults to an integer step of <code>1</code>. Entering <code>3.75</code> would trigger an HTML5 constraint validation error unless <code>step="0.01"</code> is explicitly specified!
+    </li>
+</ul>
+
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 1</span><span class="file-badge">public/home.php: Line 126</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why did you use the readonly attribute instead of disabled for the username input in line 126?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>In HTML form submission semantics, inputs marked with <code>disabled</code> are omitted from the HTTP POST payload by the browser. If we used <code>disabled</code>, the server would not receive the username field in <code>$_POST</code>. Using <code>readonly</code> prevents the student from modifying the value in the browser UI while ensuring the input is submitted in the HTTP POST request.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 2</span><span class="file-badge">public/home.php: Line 30</span></div>
+    <p><strong>Examiner:</strong> &ldquo;What happens when a user submits an unchecked checkbox, and how does line 30 safely handle it?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>Under the HTTP/1.1 form specification, unchecked checkboxes are completely excluded from the serialized POST body. If we accessed <code>$_POST['testimonial_checked']</code> directly, PHP would trigger an <code>Undefined array key</code> notice. Line 30 safely uses the ternary operator with <code>isset()</code>: <code>$testimonialChecked = isset($_POST['testimonial_checked']) ? 1 : 0;</code>, cleanly converting checkbox presence into a database integer boolean.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 3</span><span class="file-badge">public/home.php: Lines 338-344</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why did you use a for loop and charAt() to validate the NIC number instead of a regular expression?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>In accordance with the UCSC IS1207 syllabus, regular expressions are considered out-of-scope, whereas fundamental string traversal and ASCII character comparison are directly examined. Using a <code>for</code> loop with <code>nic.charAt(i) &lt; '0' || nic.charAt(i) &gt; '9'</code> demonstrates algorithmic rigor and verifies that every individual character is a numeric digit without relying on regex engines.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 4</span><span class="file-badge">public/home.php: Lines 43-53</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Explain your 'Upsert' logic in lines 43-53. Why not simply insert a new record each time?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>If we inserted a new record into <code>students</code> on every scholarship application, the student's profile information would be duplicated, violating database normalization (3NF) and causing multiple rows for the same <code>user_id</code>. By first querying <code>SELECT COUNT(*) FROM students WHERE user_id = ?</code>, we perform an 'Upsert': we execute an <code>UPDATE</code> if the profile already exists, or an <code>INSERT</code> if this is the student's first application.</p>
+</div>
+
+<div class="box box-viva">
+    <div class="box-header"><span class="box-tag">Viva Question 5</span><span class="file-badge">public/home.php: Line 353</span></div>
+    <p><strong>Examiner:</strong> &ldquo;Why must you check .checked == false rather than .value == '' when validating a checkbox in JavaScript?&rdquo;</p>
+    <p><strong>Candidate Model Answer:</strong><br>In the DOM Level 0 specification, the <code>.value</code> property of a checkbox defaults to the static string <code>&quot;on&quot;</code> whether the box is checked or unchecked. It never becomes empty. To determine whether the user actually ticked the checkbox, you must inspect the boolean property <code>.checked</code>.</p>
+</div>
+
+<div class="box box-codebase">
+    <div class="box-header"><span class="box-tag">Live Coding Challenge</span><span class="file-badge">public/home.php</span></div>
+    <h3 class="sub-title" style="margin-top: 0;">UCSC Live Coding Defense: Dual Old &amp; New Sri Lankan NIC Validator</h3>
+    <p><strong>Examiner Scenario:</strong> The examiner instructs: 'Update the NIC validation in checkApplication() to support both the Old NIC format (9 digits followed by V or X) and the New NIC format (12 digits), strictly using algorithmic JavaScript without regular expressions.'</p>
+    <div style="margin-top: 12px; margin-bottom: 6px; font-weight: 600; color: var(--accent-red);">❌ Before Code (Original):</div>
+    <pre><code class="language-php">// In public/home.php lines 330-344 (New 12-Digit NIC Validation Only)
+if (nic == &quot;&quot;) {
+    alert(&quot;Please enter your NIC number.&quot;);
+    return false;
+}
+if (nic.length != 12) {
+    alert(&quot;NIC number must be exactly 12 digits (new Sri Lanka NIC format).&quot;);
+    return false;
+}
+var i;
+for (i = 0; i &lt; nic.length; i++) {
+    if (nic.charAt(i) &lt; &quot;0&quot; || nic.charAt(i) &gt; &quot;9&quot;) {
+        alert(&quot;NIC number must contain digits only.&quot;);
+        return false;
+    }
+}</code></pre>
+    <div style="margin-top: 12px; margin-bottom: 6px; font-weight: 600; color: var(--accent-green);">✅ After Code (Live Modified):</div>
+    <pre><code class="language-php">// In public/home.php (Live modified: Dual Old 10-char &amp; New 12-digit NIC Validator)
+if (nic == &quot;&quot;) {
+    alert(&quot;Please enter your NIC number.&quot;);
+    return false;
+}
+var i;
+if (nic.length == 10) {
+    // Old Sri Lanka NIC: 9 numeric digits followed by &#x27;V&#x27; or &#x27;X&#x27; (case-insensitive)
+    for (i = 0; i &lt; 9; i++) {
+        if (nic.charAt(i) &lt; &quot;0&quot; || nic.charAt(i) &gt; &quot;9&quot;) {
+            alert(&quot;Old NIC must begin with 9 digits.&quot;);
+            return false;
+        }
+    }
+    var lastChar = nic.charAt(9).toUpperCase();
+    if (lastChar !== &quot;V&quot; &amp;&amp; lastChar !== &quot;X&quot;) {
+        alert(&quot;Old NIC must end with &#x27;V&#x27; or &#x27;X&#x27;.&quot;);
+        return false;
+    }
+} else if (nic.length == 12) {
+    // New Sri Lanka NIC: exactly 12 digits
+    for (i = 0; i &lt; 12; i++) {
+        if (nic.charAt(i) &lt; &quot;0&quot; || nic.charAt(i) &gt; &quot;9&quot;) {
+            alert(&quot;New NIC must contain 12 numeric digits only.&quot;);
+            return false;
+        }
+    }
+} else {
+    alert(&quot;Invalid NIC length: Must be 10 characters (Old format) or 12 digits (New format).&quot;);
+    return false;
+}</code></pre>
+    <div style="margin-top: 12px;"><strong>Technical Defense &amp; Implementation Walkthrough:</strong><br>To support both Sri Lankan NIC formats algorithmically:
+    <ol>
+        <li>We check the string length:
+            <ul>
+                <li>If <code>nic.length == 10</code> (Old format): We loop from index 0 to 8 verifying digits with <code>charAt(i) &lt; "0" || charAt(i) &gt; "9"</code>, and check that index 9 is either <code>'V'</code> or <code>'X'</code> (using <code>.toUpperCase()</code>).</li>
+                <li>If <code>nic.length == 12</code> (New format): We loop across all 12 characters verifying digits only.</li>
+                <li>If any other length: We trigger an invalid length alert.</li>
+            </ul>
+        </li>
+        <li>This satisfies all Sri Lankan government identity verification standards purely through standard UCSC IS1207 algorithmic constructs.</li>
+    </ol></div>
+</div>

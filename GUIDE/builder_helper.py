@@ -9,6 +9,7 @@ def page_layout(title, active_id, subnav_items, content):
         ("php.html", "php", "🐘 4. PHP & Backend"),
         ("sql.html", "sql", "🗄️ 5. SQL & Relational DB"),
         ("viva.html", "viva", "🎓 6. Viva Defense & Q&A"),
+        ("codebase.html", "codebase", "💻 7. Codebase Walkthrough"),
     ]
     
     sidebar_nav_html = ""
