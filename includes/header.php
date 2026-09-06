@@ -26,6 +26,7 @@ $isStudent = $role === 'student';
             <?php if ($isAdmin): ?>
                 <li><a href="admin.php">Admin Panel</a></li>
             <?php endif; ?>
+            <li><a href="../GUIDE/" target="_blank" style="color: #ffd700; font-weight: bold;">📖 Study Guide</a></li>
             <?php if ($isLoggedIn): ?>
                 <li><a href="logout.php">Logout</a></li>
             <?php else: ?>

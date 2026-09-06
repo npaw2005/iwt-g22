@@ -53,6 +53,15 @@ require_once '../includes/header.php';
             <a href="signup.php" class="btn">Sign Up</a>
             <a href="home.php" class="btn">Guest View</a>
         </form>
+
+        <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #ecf0f1; text-align: center;">
+            <a href="../GUIDE/" target="_blank" class="btn-guide">
+                📖 Open Syllabus &amp; Viva Study Guide &rarr;
+            </a>
+            <p style="margin-top: 8px; margin-bottom: 0; font-size: 0.85em; color: #7f8c8d;">
+                Complete guide for HTML, CSS, JS, PHP, SQL &amp; Viva preparation
+            </p>
+        </div>
     </div>
 
     <script type="text/javascript">

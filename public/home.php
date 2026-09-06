@@ -94,6 +94,11 @@ require_once '../includes/header.php';
                 <h1>Welcome to the Scholarship Management System</h1>
                 <p>Please login or register to apply for scholarships.</p>
             <?php endif; ?>
+            <div style="margin-top: 15px;">
+                <a href="../GUIDE/" target="_blank" class="btn-guide" style="display: inline-block; width: auto; padding: 10px 22px; font-size: 0.95em;">
+                    📖 Open Syllabus &amp; Viva Study Guide &rarr;
+                </a>
+            </div>
         </div>
 
         <?php if ($isLoggedIn): ?>

@@ -270,3 +270,29 @@ tbody tr:hover {
     color: #7f8c8d;
     border-color: #d5d8dc;
 }
+
+.btn-guide {
+    display: block;
+    width: 100%;
+    text-align: center;
+    background-color: #161b22;
+    background-image: linear-gradient(135deg, #1f293d, #0d1117);
+    color: #58a6ff;
+    border: 2px solid #58a6ff;
+    padding: 14px 20px;
+    font-size: 1.05em;
+    font-weight: bold;
+    border-radius: 6px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(88, 166, 255, 0.25);
+    transition: all 0.2s ease;
+    box-sizing: border-box;
+}
+
+.btn-guide:hover {
+    background-color: #58a6ff;
+    background-image: none;
+    color: #0d1117;
+    box-shadow: 0 6px 18px rgba(88, 166, 255, 0.5);
+}
+
